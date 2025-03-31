@@ -11,4 +11,4 @@ cargo run
 ## AUTHORS
 
 - David Nilsson (davidn5)
-- Martin ??:) (mja8)
+- Martin Jansson (mja8)
