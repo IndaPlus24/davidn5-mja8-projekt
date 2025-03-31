@@ -38,7 +38,7 @@ The project is an attempt to recreate the popular game Tetris. Furthermore the p
 
 #### Persistence
 
-- Save high scores (top 10 in JSON)
+- Save high scores (top 10)
 - Change game settings (controlls)
 
 ### Minimum Viable Product (MVP)
@@ -75,3 +75,7 @@ All branches will be subject to a pull-request that has to be accepted by anothe
 #### Issues
 
 Issues will be identified and added throughout development. Refrencing said issues will be done in PR's when applicable.
+
+#### Technologies
+
+The project will be written in the language `Rust`. Furthermore it will use the GUI library `ggez` version `0.9.3`
