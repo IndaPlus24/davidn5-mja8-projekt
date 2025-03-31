@@ -1,9 +1,28 @@
-use ggez::{conf, event, graphics, Context, ContextBuilder, GameResult};
+use ggez::{
+    conf, event,
+    graphics::{self, Color},
+    Context, ContextBuilder, GameResult,
+};
 
-struct AppState {}
+struct AppState {
+    board: [[Block; 10]; 20], // Board is a 10 x 20 of blocks
+}
+#[derive(Copy, Clone)]
+struct Block {
+    color: Color,
+}
+
+impl Block {
+    fn new(c: Color) -> Self {
+        Self { color: c }
+    }
+}
+
 impl AppState {
     fn new(ctx: &mut Context) -> GameResult<AppState> {
-        let mut state = AppState {};
+        let mut state = AppState {
+            board: [[Block::new(Color::RED); 10]; 20],
+        };
         Ok(state)
     }
 }
@@ -27,9 +46,7 @@ pub fn main() -> GameResult {
     let context_builder = ContextBuilder::new("Tetris", "davidn5, mja8")
         .window_setup(conf::WindowSetup::default().title("Tetris"))
         .window_mode(
-            conf::WindowMode::default()
-                .dimensions(500., 500.) // Set window dimensionsatt l
-                .resizable(false), // Fixate window size
+            conf::WindowMode::default().resizable(false), // Fixate window size
         );
 
     let (mut contex, mut event_loop) = context_builder.build().expect("Failed to build context.");
