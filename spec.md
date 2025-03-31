@@ -65,10 +65,12 @@ Where LABEL is
 - doc: Addition to documentation
 - feat: Implementation of new Feature
 - fix: Fix of bug
+- gui: Code related to gui
+- func: Code related to functionality
 
 #### Branching
 
-All branches will be subject to a pull-request that has to be accepted by another team member.
+All branches will be subject to a pull-request that has to be accepted by another team member. For branching use `git switch -c <name>` and push using `git push --set-upstream origin <branch>`
 
 #### Issues
 
