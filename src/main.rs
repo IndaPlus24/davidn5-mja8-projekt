@@ -1,34 +1,24 @@
+mod piece;
+mod block;
+
+pub use crate::block::{Block,BLOCK_SIZE,EMPTY_BLOCK_COLOR};
+pub use crate::piece::{Piece,PieceType};
+
+use ggez::graphics::Color;
 use ggez::{
     conf, event,
-    graphics::{self, Color, FontData, Text},
+    graphics,
     Context, ContextBuilder, GameResult,
 };
 
-const BOARD_AMOUNT_COLUMNS: usize = 10;
+const BOARD_AMOUNT_COLUMNS: usize = 10; 
 const BOARD_AMOUNT_ROWS: usize = 20;
 const BOARD_UPPER_LEFT: (i32, i32) = (100, 50);
-const BLOCK_SIZE: i32 = 25;
-const EMPTY_BLOCK_COLOR: Color = Color {
-    g: 1.,
-    b: 1.,
-    r: 1.,
-    a: 255.,
-};
-const BLOCK_COLORS: [Color; 3] = [Color::RED, Color::BLUE, Color::GREEN];
 
 struct AppState {
     board: [[Block; BOARD_AMOUNT_COLUMNS]; BOARD_AMOUNT_ROWS], // Board is a 10 x 20 of blocks
 }
-#[derive(Copy, Clone)]
-struct Block {
-    color: Color,
-}
 
-impl Block {
-    fn new(c: Color) -> Self {
-        Self { color: c }
-    }
-}
 
 impl AppState {
     fn new(ctx: &mut Context) -> GameResult<AppState> {
@@ -66,6 +56,25 @@ impl event::EventHandler<ggez::GameError> for AppState {
 
                 canvas.draw(&rectangle, graphics::DrawParam::default());
             }
+        }
+
+        let p = Piece::new(PieceType::T);
+
+        for b in p.block_positions {
+            let rectangle = graphics::Mesh::new_rectangle(
+                ctx,
+                graphics::DrawMode::fill(),
+                graphics::Rect::new_i32(
+                    BOARD_UPPER_LEFT.0 + b.0 as i32 * BLOCK_SIZE + 1,
+                    BOARD_UPPER_LEFT.1 + b.1 as i32 * BLOCK_SIZE + 1,
+                    BLOCK_SIZE - 2,
+                    BLOCK_SIZE - 2,
+                ),
+                Color::RED,
+            )
+            .expect("COULDNT CREATE RECTANGLE FROM BLOCK");
+
+            canvas.draw(&rectangle, graphics::DrawParam::default());
         }
 
         canvas.finish(ctx)?;
