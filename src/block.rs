@@ -7,7 +7,6 @@ pub const EMPTY_BLOCK_COLOR: Color = Color {
     r: 1.,
     a: 255.,
 };
-const BLOCK_COLORS: [Color; 3] = [Color::RED, Color::BLUE, Color::GREEN];
 
 #[derive(Copy, Clone)]
 pub struct Block {
