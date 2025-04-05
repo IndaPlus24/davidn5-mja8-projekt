@@ -3,6 +3,8 @@
 ## TO RUN
 
 ```
+git clone https://github.com/IndaPlus24/davidn5-mja8-projekt.git --recursive
+cd davidn5-mja8-projekt
 cargo run
 ```
 

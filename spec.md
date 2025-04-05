@@ -6,7 +6,7 @@
 
 ### Project Outline
 
-The project is an attempt to recreate the popular game Tetris. Furthermore the project is deemed succesful if the the final product is able to played both on a normal computer as well as the "Drifararkaden" situated in the student facility "Meta".
+The project is an attempt to recreate the popular game Tetris. Furthermore the project is deemed succesful if the the final product is able to played both on a normal computer as well as the "Drifarkaden" situated in the student facility "Meta".
 
 ### Requirments
 
@@ -26,7 +26,7 @@ The project is an attempt to recreate the popular game Tetris. Furthermore the p
 #### Controls
 
 - Controls for a normal keyboard (arrow keys or asd)
-- Controls for Drifararkaden
+- Controls for Drifarkaden
 
 #### UI
 
@@ -43,7 +43,7 @@ The project is an attempt to recreate the popular game Tetris. Furthermore the p
 
 ### Minimum Viable Product (MVP)
 
-The MVP for the product is a function game of tetris containing most of the requirments listed above. (Its possible that the game is not visually appeling enough to be displayed in Drifararkaden).
+The MVP for the product is a function game of tetris containing most of the requirments listed above. (Its possible that the game is not visually appeling enough to be displayed in Drifarkaden).
 
 ### Work Process
 
@@ -79,3 +79,12 @@ Issues will be identified and added throughout development. Refrencing said issu
 #### Technologies
 
 The project will be written in the language `Rust`. Furthermore it will use the GUI library `ggez` version `0.9.3`
+
+#### Risks and Bottlenecks
+The `requirements` above and the MVP shouldn't pose any larger problems and such we see no risks with those. The `Nice to have` listed below are quite a lot more difficult that the `requirements` and such could pose risks.
+
+
+#### Nice to have
+- Bots you can play against
+- Good looking UI
+
