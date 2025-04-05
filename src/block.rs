@@ -11,10 +11,15 @@ pub const EMPTY_BLOCK_COLOR: Color = Color {
 #[derive(Copy, Clone)]
 pub struct Block {
     pub color: Color,
+    pub occupied : bool
 }
 
 impl Block {
     pub fn new(c: Color) -> Self {
-        Self { color: c }
+        Self { color: c, occupied : false }
     }
+
+    pub fn is_occupied (&self) -> bool {
+        self.occupied
+    } 
 }
