@@ -1,6 +1,8 @@
 mod piece;
 mod block;
 
+use std::io::Empty;
+
 pub use crate::block::{Block,BLOCK_SIZE,EMPTY_BLOCK_COLOR};
 pub use crate::piece::{Piece,PieceType};
 
@@ -14,10 +16,11 @@ use ggez::{
 const BOARD_AMOUNT_COLUMNS: usize = 10; 
 const BOARD_AMOUNT_ROWS: usize = 20;
 const BOARD_UPPER_LEFT: (i32, i32) = (100, 50);
-const LEVEL_ONE_TICK_COUNT_GRAVITY : u32 = 60;
+const LEVELS_TICK_COUNTS : [u32;1] = [60];
 
 struct AppState {
     tick_count : u32,
+    current_level : usize,
     board: [[Block; BOARD_AMOUNT_ROWS]; BOARD_AMOUNT_COLUMNS], // Board is a 10 x 20 of blocks
     active_piece : Piece
 }
@@ -27,6 +30,7 @@ impl AppState {
     fn new(ctx: &mut Context) -> GameResult<AppState> {
         let mut state = AppState {
             tick_count : 0,
+            current_level : 0,
             board: [[Block::new(EMPTY_BLOCK_COLOR); BOARD_AMOUNT_ROWS]; BOARD_AMOUNT_COLUMNS],
             active_piece : Piece::new(PieceType::O) // TODO GOTTA MAKE THE PIECE TYPE RANDOM
         };
@@ -42,23 +46,25 @@ impl event::EventHandler<ggez::GameError> for AppState {
     fn update(&mut self, _ctx: &mut Context) -> GameResult {
         self.tick_count += 1;
 
-        if self.tick_count % LEVEL_ONE_TICK_COUNT_GRAVITY == 0 {
-            let mut can_move_down = true;
-            for (c,r) in &self.active_piece.block_positions {
-                if r + 1 < BOARD_AMOUNT_ROWS{
-                    if self.board[*c][r + 1].is_occupied() {
-                        can_move_down = false;
-                    }
-                }else {can_move_down = false}
-            }
+        // IF THE TICK COUNT MATCHES THE CURRENT LEVELS TICK COUNT
+        if self.tick_count % LEVELS_TICK_COUNTS[self.current_level] == 0 {
+
+            //CHECK IF EVERY BLOCK IS ABLE TO MOVE DOWN ONE
+            let can_move_down = self.active_piece.block_positions.iter().all(|(c, r)| {
+                let new_r = r + 1;
+                new_r < BOARD_AMOUNT_ROWS && !self.board[*c][new_r].is_occupied()
+            });
+
 
             if can_move_down {
-                let old_positions = self.active_piece.block_positions.clone();
+                //CLEAR PREVIOUS POSITIONS
+                for (c,r ) in &mut self.active_piece.block_positions{
+                    self.board[*c][*r].color = EMPTY_BLOCK_COLOR;
+                }
 
-                for (i,( c,r )) in old_positions.iter().enumerate()  {
-                    self.board[*c][*r].color =  EMPTY_BLOCK_COLOR;
-                    self.board[*c][r+1].color = self.active_piece.piece_type.color();
-                    self.active_piece.block_positions[i] = (*c,r + 1);
+                for (c,r) in &mut self.active_piece.block_positions {
+                    *r += 1; // UPDATE POSITION 
+                    self.board[*c][*r].color = self.active_piece.piece_type.color(); // UPDATE COLOR
                 }
             }
         }
