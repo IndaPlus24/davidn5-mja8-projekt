@@ -1,46 +1,74 @@
+mod piece;
+mod block;
+
+use std::io::Empty;
+
+pub use crate::block::{Block,BLOCK_SIZE,EMPTY_BLOCK_COLOR};
+pub use crate::piece::{Piece,PieceType};
+
+use ggez::graphics::Color;
 use ggez::{
     conf, event,
-    graphics::{self, Color, FontData, Text},
+    graphics,
     Context, ContextBuilder, GameResult,
 };
 
-const BOARD_AMOUNT_COLUMNS: usize = 10;
+const BOARD_AMOUNT_COLUMNS: usize = 10; 
 const BOARD_AMOUNT_ROWS: usize = 20;
 const BOARD_UPPER_LEFT: (i32, i32) = (100, 50);
-const BLOCK_SIZE: i32 = 25;
-const EMPTY_BLOCK_COLOR: Color = Color {
-    g: 1.,
-    b: 1.,
-    r: 1.,
-    a: 255.,
-};
-const BLOCK_COLORS: [Color; 3] = [Color::RED, Color::BLUE, Color::GREEN];
+const LEVELS_TICK_COUNTS : [u32;1] = [60];
 
 struct AppState {
-    board: [[Block; BOARD_AMOUNT_COLUMNS]; BOARD_AMOUNT_ROWS], // Board is a 10 x 20 of blocks
-}
-#[derive(Copy, Clone)]
-struct Block {
-    color: Color,
+    tick_count : u32,
+    current_level : usize,
+    board: [[Block; BOARD_AMOUNT_ROWS]; BOARD_AMOUNT_COLUMNS], // Board is a 10 x 20 of blocks
+    active_piece : Piece
 }
 
-impl Block {
-    fn new(c: Color) -> Self {
-        Self { color: c }
-    }
-}
 
 impl AppState {
     fn new(ctx: &mut Context) -> GameResult<AppState> {
         let mut state = AppState {
-            board: [[Block::new(EMPTY_BLOCK_COLOR); BOARD_AMOUNT_COLUMNS]; BOARD_AMOUNT_ROWS],
+            tick_count : 0,
+            current_level : 0,
+            board: [[Block::new(EMPTY_BLOCK_COLOR); BOARD_AMOUNT_ROWS]; BOARD_AMOUNT_COLUMNS],
+            active_piece : Piece::new(PieceType::O) // TODO GOTTA MAKE THE PIECE TYPE RANDOM
         };
+
+        for (c,r) in &state.active_piece.block_positions{
+            state.board[*c][*r].color = state.active_piece.piece_type.color();
+        } 
         Ok(state)
     }
 }
 
 impl event::EventHandler<ggez::GameError> for AppState {
     fn update(&mut self, _ctx: &mut Context) -> GameResult {
+        self.tick_count += 1;
+
+        // IF THE TICK COUNT MATCHES THE CURRENT LEVELS TICK COUNT
+        if self.tick_count % LEVELS_TICK_COUNTS[self.current_level] == 0 {
+
+            //CHECK IF EVERY BLOCK IS ABLE TO MOVE DOWN ONE
+            let can_move_down = self.active_piece.block_positions.iter().all(|(c, r)| {
+                let new_r = r + 1;
+                new_r < BOARD_AMOUNT_ROWS && !self.board[*c][new_r].is_occupied()
+            });
+
+
+            if can_move_down {
+                //CLEAR PREVIOUS POSITIONS
+                for (c,r ) in &mut self.active_piece.block_positions{
+                    self.board[*c][*r].color = EMPTY_BLOCK_COLOR;
+                }
+
+                for (c,r) in &mut self.active_piece.block_positions {
+                    *r += 1; // UPDATE POSITION 
+                    self.board[*c][*r].color = self.active_piece.piece_type.color(); // UPDATE COLOR
+                }
+            }
+        }
+
         Ok(())
     }
 
@@ -60,7 +88,7 @@ impl event::EventHandler<ggez::GameError> for AppState {
                         BLOCK_SIZE - 2,
                         BLOCK_SIZE - 2,
                     ),
-                    self.board[r][c].color,
+                    self.board[c][r].color,
                 )
                 .expect("COULDNT CREATE RECTANGLE FROM BLOCK");
 
@@ -68,6 +96,8 @@ impl event::EventHandler<ggez::GameError> for AppState {
             }
         }
 
+
+    
         canvas.finish(ctx)?;
 
         Ok(())
