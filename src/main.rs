@@ -1,12 +1,13 @@
 mod piece;
 mod block;
+mod board;
 
-use std::io::Empty;
 
 pub use crate::block::{Block,BLOCK_SIZE,EMPTY_BLOCK_COLOR};
 pub use crate::piece::{Piece,PieceType};
+pub use crate::board::Board;
 
-use ggez::graphics::Color;
+use ggez::input::keyboard::KeyCode;
 use ggez::{
     conf, event,
     graphics,
@@ -18,11 +19,21 @@ const BOARD_AMOUNT_ROWS: usize = 20;
 const BOARD_UPPER_LEFT: (i32, i32) = (100, 50);
 const LEVELS_TICK_COUNTS : [u32;1] = [60];
 
+const TICKS_BETWEEN_INPUTS : usize = 3;
+const GAME_TICKES_BEFORE_NEXT_PIECE: usize = 2;
+
+const MOVE_PIECE_RIGHT : KeyCode = KeyCode::Right;
+const MOVE_PIECE_LEFT : KeyCode = KeyCode::Left;
+const MOVE_PIECE_DOWN_SOFT_DROP : KeyCode = KeyCode::Down;
+const MOVE_PIECE_DOWN_HARD_DROP : KeyCode = KeyCode::Space;
+
 struct AppState {
     tick_count : u32,
     current_level : usize,
-    board: [[Block; BOARD_AMOUNT_ROWS]; BOARD_AMOUNT_COLUMNS], // Board is a 10 x 20 of blocks
-    active_piece : Piece
+    board: Board, // Board is a 10 x 20 of blocks
+    active_piece : Piece,
+    ticks_since_last_input : usize,
+    ticks_without_moving_down : usize
 }
 
 
@@ -31,41 +42,53 @@ impl AppState {
         let mut state = AppState {
             tick_count : 0,
             current_level : 0,
-            board: [[Block::new(EMPTY_BLOCK_COLOR); BOARD_AMOUNT_ROWS]; BOARD_AMOUNT_COLUMNS],
-            active_piece : Piece::new(PieceType::O) // TODO GOTTA MAKE THE PIECE TYPE RANDOM
+            board: Board::new(),
+            active_piece : Piece::new(PieceType::O),
+            ticks_since_last_input : 0,
+            ticks_without_moving_down : 0,
         };
 
         for (c,r) in &state.active_piece.block_positions{
-            state.board[*c][*r].color = state.active_piece.piece_type.color();
+            state.board.table[*c][*r].color = state.active_piece.piece_type.color();
         } 
         Ok(state)
     }
 }
 
 impl event::EventHandler<ggez::GameError> for AppState {
-    fn update(&mut self, _ctx: &mut Context) -> GameResult {
+    fn update(&mut self, ctx: &mut Context) -> GameResult {
         self.tick_count += 1;
+        self.ticks_since_last_input += 1;
+
+        if self.ticks_without_moving_down == GAME_TICKES_BEFORE_NEXT_PIECE{
+            println!("Spawning new piece...");
+            self.active_piece = Piece::new(PieceType::L);
+            self.ticks_without_moving_down = 0;
+        }
+
+        //CONTROLS
+
+        if ctx.keyboard.is_key_pressed(MOVE_PIECE_RIGHT) && self.ticks_since_last_input > TICKS_BETWEEN_INPUTS{
+            self.board.move_piece(&mut self.active_piece, 1, 0);
+            self.ticks_since_last_input = 0;
+        }
+
+        if ctx.keyboard.is_key_pressed(MOVE_PIECE_LEFT) && self.ticks_since_last_input > TICKS_BETWEEN_INPUTS{
+            self.board.move_piece(&mut self.active_piece, -1,0);
+            self.ticks_since_last_input = 0;
+        }
+
+        if ctx.keyboard.is_key_pressed(MOVE_PIECE_DOWN_SOFT_DROP) && self.ticks_since_last_input > TICKS_BETWEEN_INPUTS{
+            self.board.move_piece(&mut self.active_piece, 0, 1);
+            self.ticks_since_last_input = 0;
+        }
 
         // IF THE TICK COUNT MATCHES THE CURRENT LEVELS TICK COUNT
         if self.tick_count % LEVELS_TICK_COUNTS[self.current_level] == 0 {
-
-            //CHECK IF EVERY BLOCK IS ABLE TO MOVE DOWN ONE
-            let can_move_down = self.active_piece.block_positions.iter().all(|(c, r)| {
-                let new_r = r + 1;
-                new_r < BOARD_AMOUNT_ROWS && !self.board[*c][new_r].is_occupied()
-            });
-
-
-            if can_move_down {
-                //CLEAR PREVIOUS POSITIONS
-                for (c,r ) in &mut self.active_piece.block_positions{
-                    self.board[*c][*r].color = EMPTY_BLOCK_COLOR;
-                }
-
-                for (c,r) in &mut self.active_piece.block_positions {
-                    *r += 1; // UPDATE POSITION 
-                    self.board[*c][*r].color = self.active_piece.piece_type.color(); // UPDATE COLOR
-                }
+            //MOVE PIECE DOWN
+            if !self.board.move_piece(&mut self.active_piece, 0, 1){
+                self.ticks_without_moving_down += 1;
+                println!("Piece at bottom...")
             }
         }
 
@@ -88,7 +111,7 @@ impl event::EventHandler<ggez::GameError> for AppState {
                         BLOCK_SIZE - 2,
                         BLOCK_SIZE - 2,
                     ),
-                    self.board[c][r].color,
+                    self.board.table[c][r].color,
                 )
                 .expect("COULDNT CREATE RECTANGLE FROM BLOCK");
 
@@ -96,8 +119,6 @@ impl event::EventHandler<ggez::GameError> for AppState {
             }
         }
 
-
-    
         canvas.finish(ctx)?;
 
         Ok(())
