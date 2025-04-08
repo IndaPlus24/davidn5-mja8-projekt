@@ -1,5 +1,5 @@
 use crate::{block::Block, BOARD_AMOUNT_COLUMNS, BOARD_AMOUNT_ROWS, EMPTY_BLOCK_COLOR};
-use crate::Piece;
+use crate::{piece, Piece};
 
 
 pub struct Board{
@@ -31,13 +31,13 @@ impl Board {
             return false;
         }
     
-        // Clear current positions
+        // CLEAR CURRENT POS
         for &(c, r) in &piece.block_positions {
             self.table[c][r].color = EMPTY_BLOCK_COLOR;
             self.table[c][r].occupied = false;
         }
     
-        // Move and redraw
+        // MOVE PIECES
         for (c, r) in &mut piece.block_positions {
             *c = (*c as isize + dx) as usize;
             *r = (*r as isize + dy) as usize;
@@ -46,6 +46,11 @@ impl Board {
             self.table[*c][*r].occupied = true;
         }
     
+        true
+    }
+
+    pub fn hard_drop(&mut self, piece : &mut Piece) -> bool{
+        while self.move_piece(piece, 0, 1){}
         true
     }
     

@@ -83,6 +83,13 @@ impl event::EventHandler<ggez::GameError> for AppState {
             self.ticks_since_last_input = 0;
         }
 
+        if ctx.keyboard.is_key_just_pressed(MOVE_PIECE_DOWN_HARD_DROP){
+            self.board.hard_drop(&mut self.active_piece);
+            self.ticks_since_last_input = 0;
+            //SPAWN A NEW PIECE IMMEDIETLY
+            self.ticks_without_moving_down = 2;
+        }
+
         // IF THE TICK COUNT MATCHES THE CURRENT LEVELS TICK COUNT
         if self.tick_count % LEVELS_TICK_COUNTS[self.current_level] == 0 {
             //MOVE PIECE DOWN
