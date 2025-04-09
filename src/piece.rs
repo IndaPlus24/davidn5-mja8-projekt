@@ -36,7 +36,7 @@ impl Piece {
     // ALL PIECE TYPE POSITIONS ARE WRITTEN WITH "LOWEST" BLOCK FIRST
     fn get_block_positions(piece_type: PieceType) -> Vec<(usize, usize)> {
         match piece_type {
-            PieceType::I => vec![(0, 3), (0, 4), (0, 5), (0, 6)], // WRITTEN (C, R)
+            PieceType::I => vec![(0, 3), (0, 4), (0, 5), (0, 6)], // WRITTEN (R, C)
             PieceType::J => vec![(1, 3), (1, 4), (1, 5), (0, 3)],
             PieceType::L => vec![(1, 3), (0, 3), (0, 4), (0, 5)],
             PieceType::O => vec![(1, 4), (1, 5), (0, 4), (0, 5)],
