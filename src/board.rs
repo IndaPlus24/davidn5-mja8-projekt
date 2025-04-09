@@ -1,7 +1,7 @@
 use std::collections::HashSet;
 
+use crate::{block, piece, Piece};
 use crate::{block::Block, BOARD_AMOUNT_COLUMNS, BOARD_AMOUNT_ROWS, EMPTY_BLOCK_COLOR};
-use crate::{piece, Piece};
 
 pub struct Board {
     pub table: [[Block; BOARD_AMOUNT_COLUMNS]; BOARD_AMOUNT_ROWS],
@@ -9,9 +9,15 @@ pub struct Board {
 
 impl Board {
     pub fn new() -> Self {
-        Self {
-            table: [[Block::new(EMPTY_BLOCK_COLOR); BOARD_AMOUNT_COLUMNS]; BOARD_AMOUNT_ROWS],
+        let mut table: [[Block; BOARD_AMOUNT_COLUMNS]; BOARD_AMOUNT_ROWS] = Default::default();
+
+        for row in table.iter_mut() {
+            for item in row.iter_mut() {
+                *item = Block::new();
+            }
         }
+
+        Self { table }
     }
 
     pub fn can_move_direction(&mut self, piece: &mut Piece, dx: isize, dy: isize) -> bool {
@@ -41,7 +47,7 @@ impl Board {
 
         // CLEAR CURRENT POS
         for &(r, c) in &piece.block_positions {
-            self.table[r][c].color = EMPTY_BLOCK_COLOR;
+            self.table[r][c].path = "empty".to_string();
             self.table[r][c].occupied = false;
         }
 
@@ -50,7 +56,7 @@ impl Board {
             *c = (*c as isize + dx) as usize;
             *r = (*r as isize + dy) as usize;
 
-            self.table[*r][*c].color = piece.piece_type.color();
+            self.table[*r][*c].path = piece.piece_type.get_path();
             self.table[*r][*c].occupied = true;
         }
 
@@ -84,6 +90,8 @@ impl Board {
         }
 
         //CLEAR TOP ROW
-        self.table[0] = [Block::new(EMPTY_BLOCK_COLOR); BOARD_AMOUNT_COLUMNS];
+        for i in 0..BOARD_AMOUNT_COLUMNS {
+            self.table[0][i] = Block::new();
+        }
     }
 }

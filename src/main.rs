@@ -2,12 +2,14 @@ mod block;
 mod board;
 mod piece;
 
+use std::path;
+
 pub use crate::block::{Block, BLOCK_SIZE, EMPTY_BLOCK_COLOR};
 pub use crate::board::Board;
 pub use crate::piece::{Piece, PieceType};
 
 use ggez::input::keyboard::KeyCode;
-use ggez::{conf, event, graphics, Context, ContextBuilder, GameResult};
+use ggez::{conf, event, glam, graphics, Context, ContextBuilder, GameResult};
 
 const BOARD_AMOUNT_COLUMNS: usize = 10;
 const BOARD_AMOUNT_ROWS: usize = 20;
@@ -43,7 +45,7 @@ impl AppState {
         };
 
         for (r, c) in &state.active_piece.block_positions {
-            state.board.table[*r][*c].color = state.active_piece.piece_type.color();
+            state.board.table[*r][*c].path = state.active_piece.piece_type.get_path();
         }
         Ok(state)
     }
@@ -112,20 +114,31 @@ impl event::EventHandler<ggez::GameError> for AppState {
 
         for r in 0..BOARD_AMOUNT_ROWS {
             for c in 0..BOARD_AMOUNT_COLUMNS {
-                let rectangle = graphics::Mesh::new_rectangle(
-                    ctx,
-                    graphics::DrawMode::fill(),
-                    graphics::Rect::new_i32(
-                        BOARD_UPPER_LEFT.0 + c as i32 * BLOCK_SIZE + 1,
-                        BOARD_UPPER_LEFT.1 + r as i32 * BLOCK_SIZE + 1,
-                        BLOCK_SIZE - 2,
-                        BLOCK_SIZE - 2,
-                    ),
-                    self.board.table[r][c].color,
-                )
-                .expect("COULDNT CREATE RECTANGLE FROM BLOCK");
+                if self.board.table[r][c].is_occupied() {
+                    let image = graphics::Image::from_path(ctx, &self.board.table[r][c].path)?;
+                    canvas.draw(
+                        &image,
+                        graphics::DrawParam::new().dest(glam::Vec2::new(
+                            (BOARD_UPPER_LEFT.0 + c as i32 * BLOCK_SIZE + 1) as f32,
+                            (BOARD_UPPER_LEFT.1 + r as i32 * BLOCK_SIZE + 1) as f32,
+                        )),
+                    );
+                } else {
+                    let rectangle = graphics::Mesh::new_rectangle(
+                        ctx,
+                        graphics::DrawMode::fill(),
+                        graphics::Rect::new_i32(
+                            BOARD_UPPER_LEFT.0 + c as i32 * BLOCK_SIZE + 1,
+                            BOARD_UPPER_LEFT.1 + r as i32 * BLOCK_SIZE + 1,
+                            BLOCK_SIZE - 2,
+                            BLOCK_SIZE - 2,
+                        ),
+                        EMPTY_BLOCK_COLOR,
+                    )
+                    .expect("COULDNT CREATE RECTANGLE FROM BLOCK");
 
-                canvas.draw(&rectangle, graphics::DrawParam::default());
+                    canvas.draw(&rectangle, graphics::DrawParam::default());
+                }
             }
         }
 
@@ -136,7 +149,10 @@ impl event::EventHandler<ggez::GameError> for AppState {
 }
 
 pub fn main() -> GameResult {
+    let resource_dir = path::PathBuf::from("./res");
+
     let context_builder = ContextBuilder::new("Tetris", "davidn5, mja8")
+        .add_resource_path(resource_dir)
         .window_setup(conf::WindowSetup::default().title("Tetris"))
         .window_mode(
             conf::WindowMode::default().resizable(false), // Fixate window size
