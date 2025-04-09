@@ -1,3 +1,5 @@
+use std::collections::HashSet;
+
 use crate::{block::Block, BOARD_AMOUNT_COLUMNS, BOARD_AMOUNT_ROWS, EMPTY_BLOCK_COLOR};
 use crate::{piece, Piece};
 
@@ -60,5 +62,28 @@ impl Board {
         true
     }
 
-    pub fn check_full_line(&self, piece: &Piece) {}
+    pub fn check_full_line(&mut self, piece: &Piece) {
+        let rows_to_check: HashSet<usize> = piece.block_positions.iter().map(|&(r, _)| r).collect();
+
+        let mut rows_to_remove: Vec<usize> = Vec::new();
+        for row in rows_to_check {
+            if self.table[row].iter().all(|b| b.is_occupied()) {
+                println!("ROW: {} IS FULL", row);
+                rows_to_remove.push(row);
+            }
+        }
+
+        // SORT ROWS IN ASCENDING ORDER SO WE START CLEARING FROM BOTTOM
+        rows_to_remove.sort();
+
+        //MOVE DOWN THE ROWS ABOVE
+        for &row in &rows_to_remove {
+            for r in (1..=row).rev() {
+                self.table[r] = self.table[r - 1].clone()
+            }
+        }
+
+        //CLEAR TOP ROW
+        self.table[0] = [Block::new(EMPTY_BLOCK_COLOR); BOARD_AMOUNT_COLUMNS];
+    }
 }

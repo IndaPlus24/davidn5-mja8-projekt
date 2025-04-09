@@ -56,7 +56,7 @@ impl event::EventHandler<ggez::GameError> for AppState {
 
         if self.ticks_without_moving_down == GAME_TICKES_BEFORE_NEXT_PIECE {
             println!("Spawning new piece...");
-            self.active_piece = Piece::new(PieceType::L);
+            self.active_piece = Piece::new(PieceType::O);
             self.ticks_without_moving_down = 0;
         }
 
@@ -87,7 +87,8 @@ impl event::EventHandler<ggez::GameError> for AppState {
             self.board.hard_drop(&mut self.active_piece);
             self.ticks_since_last_input = 0;
             //SPAWN A NEW PIECE IMMEDIETLY
-            self.ticks_without_moving_down = 2;
+            self.ticks_without_moving_down = GAME_TICKES_BEFORE_NEXT_PIECE;
+            self.board.check_full_line(&self.active_piece);
         }
 
         // IF THE TICK COUNT MATCHES THE CURRENT LEVELS TICK COUNT
@@ -95,7 +96,9 @@ impl event::EventHandler<ggez::GameError> for AppState {
             //MOVE PIECE DOWN
             if !self.board.move_piece(&mut self.active_piece, 0, 1) {
                 self.ticks_without_moving_down += 1;
-                println!("Piece at bottom...")
+                println!("Piece at bottom...");
+                //println!("Checking Lines...");
+                self.board.check_full_line(&self.active_piece);
             }
         }
 
