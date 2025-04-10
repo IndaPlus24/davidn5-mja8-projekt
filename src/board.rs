@@ -78,20 +78,21 @@ impl Board {
                 rows_to_remove.push(row);
             }
         }
+        if !rows_to_remove.is_empty() {
+            // SORT ROWS IN ASCENDING ORDER SO WE START CLEARING FROM BOTTOM
+            rows_to_remove.sort();
 
-        // SORT ROWS IN ASCENDING ORDER SO WE START CLEARING FROM BOTTOM
-        rows_to_remove.sort();
-
-        //MOVE DOWN THE ROWS ABOVE
-        for &row in &rows_to_remove {
-            for r in (1..=row).rev() {
-                self.table[r] = self.table[r - 1].clone()
+            //MOVE DOWN THE ROWS ABOVE
+            for &row in &rows_to_remove {
+                for r in (1..=row).rev() {
+                    self.table[r] = self.table[r - 1].clone()
+                }
             }
-        }
 
-        //CLEAR TOP ROW
-        for i in 0..BOARD_AMOUNT_COLUMNS {
-            self.table[0][i] = Block::new();
+            //CLEAR TOP ROW
+            for i in 0..BOARD_AMOUNT_COLUMNS {
+                self.table[0][i] = Block::new();
+            }
         }
     }
 }
