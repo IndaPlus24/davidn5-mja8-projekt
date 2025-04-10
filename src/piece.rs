@@ -1,6 +1,5 @@
+use rand::{seq::SliceRandom, Rng};
 use std::vec;
-
-use ggez::graphics::Color;
 
 #[derive(Clone, Copy, Debug)]
 pub enum PieceType {
@@ -23,6 +22,37 @@ impl PieceType {
             PieceType::J => String::from("/blue.png"),
             PieceType::L => String::from("/orange.png"),
         }
+    }
+
+    pub fn get_random() -> PieceType {
+        let mut rng = rand::rng();
+        let piece_num = rng.random_range(0..7);
+        PieceType::get_piecetype_from_num(piece_num)
+    }
+
+    pub fn get_piecetype_from_num(n: i32) -> PieceType {
+        match n {
+            0 => PieceType::I,
+            1 => PieceType::O,
+            2 => PieceType::T,
+            3 => PieceType::S,
+            4 => PieceType::Z,
+            5 => PieceType::J,
+            6 => PieceType::L,
+            _ => PieceType::O,
+        }
+    }
+
+    pub fn get_random_as_list() -> Vec<PieceType> {
+        let mut rng = rand::rng();
+        let mut nums: Vec<i32> = vec![0, 1, 2, 3, 4, 5, 6];
+        nums.shuffle(&mut rng);
+
+        let mut out: Vec<PieceType> = Vec::new();
+        for n in nums {
+            out.push(PieceType::get_piecetype_from_num(n));
+        }
+        out
     }
 }
 

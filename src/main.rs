@@ -2,6 +2,7 @@ mod block;
 mod board;
 mod piece;
 
+use std::collections::VecDeque;
 use std::path;
 
 pub use crate::block::{Block, BLOCK_SIZE, EMPTY_BLOCK_COLOR};
@@ -16,7 +17,7 @@ const BOARD_AMOUNT_ROWS: usize = 20;
 const BOARD_UPPER_LEFT: (i32, i32) = (100, 50);
 const LEVELS_TICK_COUNTS: [u32; 1] = [60];
 
-const TICKS_BETWEEN_INPUTS: usize = 5;
+const TICKS_BETWEEN_INPUTS: usize = 2;
 const GAME_TICKES_BEFORE_NEXT_PIECE: usize = 2;
 
 const MOVE_PIECE_RIGHT: KeyCode = KeyCode::Right;
@@ -29,17 +30,27 @@ struct AppState {
     current_level: usize,
     board: Board, // Board is a 20x10 of blocks
     active_piece: Piece,
+    piece_queue: VecDeque<Piece>,
     ticks_since_last_input: usize,
     ticks_without_moving_down: usize,
 }
 
 impl AppState {
     fn new(ctx: &mut Context) -> GameResult<AppState> {
+        let mut piece_queue: VecDeque<Piece> = VecDeque::new();
+        let l = PieceType::get_random_as_list();
+        for p in l {
+            piece_queue.push_back(Piece::new(p));
+        }
+
+        let active_piece = piece_queue.pop_front().unwrap();
+
         let mut state = AppState {
             tick_count: 0,
             current_level: 0,
             board: Board::new(),
-            active_piece: Piece::new(PieceType::O),
+            active_piece: active_piece,
+            piece_queue: piece_queue,
             ticks_since_last_input: 0,
             ticks_without_moving_down: 0,
         };
@@ -56,9 +67,19 @@ impl event::EventHandler<ggez::GameError> for AppState {
         self.tick_count += 1;
         self.ticks_since_last_input += 1;
 
+        //Spawn new Piece
         if self.ticks_without_moving_down == GAME_TICKES_BEFORE_NEXT_PIECE {
+            // Piece queue should have a set amount by default since it shows some of them to user
+            if self.piece_queue.len() < 5 {
+                //7-bag
+                let l = PieceType::get_random_as_list();
+                for p in l {
+                    self.piece_queue.push_back(Piece::new(p));
+                }
+            }
+
             println!("Spawning new piece...");
-            self.active_piece = Piece::new(PieceType::O);
+            self.active_piece = self.piece_queue.pop_front().unwrap();
             self.ticks_without_moving_down = 0;
         }
 
