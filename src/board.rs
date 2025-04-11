@@ -20,46 +20,30 @@ impl Board {
         Self { table }
     }
 
-    pub fn can_move_direction(&mut self, piece: &mut Piece, dx: isize, dy: isize) -> bool {
-        piece.block_positions.iter().all(|&(r, c)| {
-            let new_c = c as isize + dx;
-            let new_r = r as isize + dy;
+    pub fn is_valid_position(&mut self, piece: &mut Piece, dx: isize, dy: isize) -> bool {
+        let (mr, mc) = piece.midpoint;
+        piece.block_positions.iter().all(|(dr, dc)| {
+            let r = mr + dr + dy;
+            let c = mc + dc + dx;
 
-            if new_c < 0
-                || new_c >= BOARD_AMOUNT_COLUMNS as isize
-                || new_r < 0
-                || new_r >= BOARD_AMOUNT_ROWS as isize
+            if c < 0
+                || c >= BOARD_AMOUNT_COLUMNS as isize
+                || r >= BOARD_AMOUNT_ROWS as isize
             {
                 return false;
             }
+            if r < 0 {return true;}
 
-            let new_pos = (new_r as usize, new_c as usize);
-
-            !self.table[new_pos.0][new_pos.1].is_occupied()
-                || piece.block_positions.contains(&new_pos)
+            !self.table[r as usize][c as usize].is_occupied()
         })
     }
 
     pub fn move_piece(&mut self, piece: &mut Piece, dx: isize, dy: isize) -> bool {
-        if !self.can_move_direction(piece, dx, dy) {
+        if !self.is_valid_position(piece, dx, dy) {
             return false;
         }
-
-        // CLEAR CURRENT POS
-        for &(r, c) in &piece.block_positions {
-            self.table[r][c].path = "empty".to_string();
-            self.table[r][c].occupied = false;
-        }
-
-        // MOVE PIECES
-        for (r, c) in &mut piece.block_positions {
-            *c = (*c as isize + dx) as usize;
-            *r = (*r as isize + dy) as usize;
-
-            self.table[*r][*c].path = piece.piece_type.get_path();
-            self.table[*r][*c].occupied = true;
-        }
-
+        piece.midpoint.0 += dy;
+        piece.midpoint.1 += dx;
         true
     }
 
@@ -69,13 +53,13 @@ impl Board {
     }
 
     pub fn check_full_line(&mut self, piece: &Piece) {
-        let rows_to_check: HashSet<usize> = piece.block_positions.iter().map(|&(r, _)| r).collect();
+        let rows_to_check: HashSet<isize> = piece.block_positions.iter().map(|&(r, _)| r).collect();
 
         let mut rows_to_remove: Vec<usize> = Vec::new();
         for row in rows_to_check {
-            if self.table[row].iter().all(|b| b.is_occupied()) {
+            if self.table[row as usize].iter().all(|b| b.is_occupied()) {
                 println!("ROW: {} IS FULL", row);
-                rows_to_remove.push(row);
+                rows_to_remove.push(row as usize);
             }
         }
         if !rows_to_remove.is_empty() {

@@ -58,29 +58,31 @@ impl PieceType {
 
 pub struct Piece {
     pub piece_type: PieceType,
-    pub block_positions: Vec<(usize, usize)>, // An array of tuples with the position of the pieces blocks
+    pub midpoint: (isize, isize), // Tuple with the piece midpoint in the board (R, C)
+    pub block_positions: Vec<(isize, isize)>, // An array of tuples with the mino positions relative to the tetromino's midpoint
     pub is_active: bool,                      // active piece is the piece that can be moved.
 }
 
 impl Piece {
-    // ALL PIECE TYPE POSITIONS ARE WRITTEN WITH "LOWEST" BLOCK FIRST
-    fn get_block_positions(piece_type: PieceType) -> Vec<(usize, usize)> {
+    // ALL PIECE TYPE POSITIONS ARE RELATIVE TO THE MIDPOINT
+    fn get_block_positions(piece_type: PieceType) -> Vec<(isize, isize)> {
         match piece_type {
-            PieceType::I => vec![(0, 3), (0, 4), (0, 5), (0, 6)], // WRITTEN (R, C)
-            PieceType::J => vec![(1, 3), (1, 4), (1, 5), (0, 3)],
-            PieceType::L => vec![(1, 3), (0, 3), (0, 4), (0, 5)],
-            PieceType::O => vec![(1, 4), (1, 5), (0, 4), (0, 5)],
-            PieceType::S => vec![(1, 3), (1, 4), (0, 4), (0, 5)],
-            PieceType::Z => vec![(1, 4), (1, 5), (0, 3), (0, 4)],
-            PieceType::T => vec![(1, 4), (0, 3), (0, 4), (0, 5)],
+            PieceType::I => vec![( 0, -1), ( 0,  0), (0,  1), (0, 2)], // WRITTEN (DR, DC)
+            PieceType::J => vec![(-1, -1), ( 0, -1), (0,  0), (0, 1)],
+            PieceType::L => vec![(-1,  1), ( 0, -1), (0,  0), (0, 1)],
+            PieceType::O => vec![(-1,  0), (-1,  1), (0,  0), (0, 1)],
+            PieceType::S => vec![(-1,  0), (-1,  1), (0, -1), (0, 0)],
+            PieceType::Z => vec![(-1, -1), (-1,  0), (0,  0), (0, 1)],
+            PieceType::T => vec![(-1,  0), ( 0, -1), (0,  0), (0, 1)],
         }
     }
 
     pub fn new(piece_type: PieceType) -> Self {
-        let blocks: Vec<(usize, usize)> = Piece::get_block_positions(piece_type);
+        let blocks: Vec<(isize, isize)> = Piece::get_block_positions(piece_type);
 
         Self {
             piece_type: piece_type,
+            midpoint: (-1, 4),
             block_positions: blocks,
             is_active: true,
         }
