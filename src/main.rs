@@ -1,6 +1,7 @@
 mod block;
 mod board;
 mod piece;
+mod rotation;
 
 use std::collections::VecDeque;
 use std::path;
