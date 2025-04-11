@@ -1,6 +1,8 @@
 use rand::{seq::SliceRandom, Rng};
 use std::vec;
 
+use crate::rotation::*;
+
 #[derive(Clone, Copy, Debug)]
 pub enum PieceType {
     I,
@@ -58,31 +60,33 @@ impl PieceType {
 
 pub struct Piece {
     pub piece_type: PieceType,
-    pub block_positions: Vec<(usize, usize)>, // An array of tuples with the position of the pieces blocks
-    pub is_active: bool,                      // active piece is the piece that can be moved.
+    pub midpoint: (isize, isize), // Tuple with the piece midpoint in the board (R, C)
+    pub block_positions: Vec<(isize, isize)>, // An array of tuples with the mino positions relative to the tetromino's midpoint
+    pub rotation: usize,
 }
 
 impl Piece {
-    // ALL PIECE TYPE POSITIONS ARE WRITTEN WITH "LOWEST" BLOCK FIRST
-    fn get_block_positions(piece_type: PieceType) -> Vec<(usize, usize)> {
+    // ALL PIECE TYPE POSITIONS ARE RELATIVE TO THE MIDPOINT
+    pub fn get_block_positions(piece_type: PieceType, rotation: usize) -> Vec<(isize, isize)> {
         match piece_type {
-            PieceType::I => vec![(0, 3), (0, 4), (0, 5), (0, 6)], // WRITTEN (R, C)
-            PieceType::J => vec![(1, 3), (1, 4), (1, 5), (0, 3)],
-            PieceType::L => vec![(1, 3), (0, 3), (0, 4), (0, 5)],
-            PieceType::O => vec![(1, 4), (1, 5), (0, 4), (0, 5)],
-            PieceType::S => vec![(1, 3), (1, 4), (0, 4), (0, 5)],
-            PieceType::Z => vec![(1, 4), (1, 5), (0, 3), (0, 4)],
-            PieceType::T => vec![(1, 4), (0, 3), (0, 4), (0, 5)],
+            PieceType::I => RELATIVE_MINOS_I[rotation].to_vec(),
+            PieceType::J => RELATIVE_MINOS_J[rotation].to_vec(),
+            PieceType::L => RELATIVE_MINOS_L[rotation].to_vec(),
+            PieceType::O => RELATIVE_MINOS_O[rotation].to_vec(),
+            PieceType::S => RELATIVE_MINOS_S[rotation].to_vec(),
+            PieceType::Z => RELATIVE_MINOS_Z[rotation].to_vec(),
+            PieceType::T => RELATIVE_MINOS_T[rotation].to_vec(),
         }
     }
 
-    pub fn new(piece_type: PieceType) -> Self {
-        let blocks: Vec<(usize, usize)> = Piece::get_block_positions(piece_type);
+    pub fn new(piece_type: PieceType, rotation: usize) -> Self {
+        let blocks: Vec<(isize, isize)> = Piece::get_block_positions(piece_type, rotation);
 
         Self {
             piece_type: piece_type,
+            midpoint: (-1, 4),
             block_positions: blocks,
-            is_active: true,
+            rotation: 0,
         }
     }
 }

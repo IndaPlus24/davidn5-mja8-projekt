@@ -1,6 +1,7 @@
 mod block;
 mod board;
 mod piece;
+mod rotation;
 
 use std::collections::VecDeque;
 use std::path;
@@ -9,6 +10,7 @@ pub use crate::block::{Block, BLOCK_SIZE, EMPTY_BLOCK_COLOR};
 pub use crate::board::Board;
 pub use crate::piece::{Piece, PieceType};
 
+use ggez::graphics::Image;
 use ggez::input::keyboard::KeyCode;
 use ggez::{conf, event, glam, graphics, Context, ContextBuilder, GameResult};
 
@@ -24,6 +26,8 @@ const MOVE_PIECE_RIGHT: KeyCode = KeyCode::Right;
 const MOVE_PIECE_LEFT: KeyCode = KeyCode::Left;
 const MOVE_PIECE_DOWN_SOFT_DROP: KeyCode = KeyCode::Down;
 const MOVE_PIECE_DOWN_HARD_DROP: KeyCode = KeyCode::Space;
+const ROTATE_PIECE_CW:  KeyCode = KeyCode::X;
+const ROTATE_PIECE_CCW: KeyCode = KeyCode::Z;
 
 struct AppState {
     tick_count: u32,
@@ -40,7 +44,7 @@ impl AppState {
         let mut piece_queue: VecDeque<Piece> = VecDeque::new();
         let l = PieceType::get_random_as_list();
         for p in l {
-            piece_queue.push_back(Piece::new(p));
+            piece_queue.push_back(Piece::new(p, 0));
         }
 
         let active_piece = piece_queue.pop_front().unwrap();
@@ -55,9 +59,11 @@ impl AppState {
             ticks_without_moving_down: 0,
         };
 
+        /*
         for (r, c) in &state.active_piece.block_positions {
             state.board.table[*r][*c].path = state.active_piece.piece_type.get_path();
         }
+        */
         Ok(state)
     }
 }
@@ -74,7 +80,7 @@ impl event::EventHandler<ggez::GameError> for AppState {
                 //7-bag
                 let l = PieceType::get_random_as_list();
                 for p in l {
-                    self.piece_queue.push_back(Piece::new(p));
+                    self.piece_queue.push_back(Piece::new(p, 0));
                 }
             }
 
@@ -111,7 +117,23 @@ impl event::EventHandler<ggez::GameError> for AppState {
             self.ticks_since_last_input = 0;
             //SPAWN A NEW PIECE IMMEDIETLY
             self.ticks_without_moving_down = GAME_TICKES_BEFORE_NEXT_PIECE;
-            self.board.check_full_line(&self.active_piece);
+            //self.board.check_full_line(&self.active_piece);
+        }
+
+        if ctx.keyboard.is_key_just_pressed(ROTATE_PIECE_CW)
+            && self.ticks_since_last_input > TICKS_BETWEEN_INPUTS
+        {
+            println!("Rotating CW...");
+            self.board.rotate_cw(&mut self.active_piece);
+            self.ticks_since_last_input = 0;
+        }
+
+        if ctx.keyboard.is_key_just_pressed(ROTATE_PIECE_CCW)
+            && self.ticks_since_last_input > TICKS_BETWEEN_INPUTS
+        {
+            println!("Rotating CCW...");
+            self.board.rotate_ccw(&mut self.active_piece);
+            self.ticks_since_last_input = 0;
         }
 
         // IF THE TICK COUNT MATCHES THE CURRENT LEVELS TICK COUNT
@@ -119,9 +141,10 @@ impl event::EventHandler<ggez::GameError> for AppState {
             //MOVE PIECE DOWN
             if !self.board.move_piece(&mut self.active_piece, 0, 1) {
                 self.ticks_without_moving_down += 1;
+                self.board.place_piece(&mut self.active_piece);
                 println!("Piece at bottom...");
                 //println!("Checking Lines...");
-                self.board.check_full_line(&self.active_piece);
+                //self.board.check_full_line(&self.active_piece);
             }
         }
 
@@ -130,9 +153,9 @@ impl event::EventHandler<ggez::GameError> for AppState {
 
     fn draw(&mut self, ctx: &mut Context) -> GameResult {
         //CREATE CANVAS
-        let mut canvas =
-            graphics::Canvas::from_frame(ctx, graphics::Color::from([0.1, 0.2, 0.3, 1.0]));
+        let mut canvas = graphics::Canvas::from_frame(ctx, graphics::Color::from([0.1, 0.2, 0.3, 1.0]));
 
+        //Render board
         for r in 0..BOARD_AMOUNT_ROWS {
             for c in 0..BOARD_AMOUNT_COLUMNS {
                 if self.board.table[r][c].is_occupied() {
@@ -162,6 +185,18 @@ impl event::EventHandler<ggez::GameError> for AppState {
                 }
             }
         }
+        //Render active piece
+        let image = graphics::Image::from_path(ctx, self.active_piece.piece_type.get_path())?;
+        let (mr, mc) = self.active_piece.midpoint;
+        self.active_piece.block_positions.iter().for_each(|(dr, dc)| {
+            canvas.draw(
+                &image,
+                graphics::DrawParam::new().dest(glam::Vec2::new(
+                    (BOARD_UPPER_LEFT.0 + (mc + dc) as i32 * BLOCK_SIZE + 1) as f32,
+                    (BOARD_UPPER_LEFT.1 + (mr + dr) as i32 * BLOCK_SIZE + 1) as f32,
+                )),
+            );
+        });
 
         canvas.finish(ctx)?;
 
