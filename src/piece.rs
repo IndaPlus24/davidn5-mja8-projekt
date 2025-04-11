@@ -62,11 +62,12 @@ pub struct Piece {
     pub piece_type: PieceType,
     pub midpoint: (isize, isize), // Tuple with the piece midpoint in the board (R, C)
     pub block_positions: Vec<(isize, isize)>, // An array of tuples with the mino positions relative to the tetromino's midpoint
+    pub rotation: usize,
 }
 
 impl Piece {
     // ALL PIECE TYPE POSITIONS ARE RELATIVE TO THE MIDPOINT
-    fn get_block_positions(piece_type: PieceType, rotation: usize) -> Vec<(isize, isize)> {
+    pub fn get_block_positions(piece_type: PieceType, rotation: usize) -> Vec<(isize, isize)> {
         match piece_type {
             PieceType::I => RELATIVE_MINOS_I[rotation].to_vec(),
             PieceType::J => RELATIVE_MINOS_J[rotation].to_vec(),
@@ -78,13 +79,14 @@ impl Piece {
         }
     }
 
-    pub fn new(piece_type: PieceType) -> Self {
-        let blocks: Vec<(isize, isize)> = Piece::get_block_positions(piece_type, 0);
+    pub fn new(piece_type: PieceType, rotation: usize) -> Self {
+        let blocks: Vec<(isize, isize)> = Piece::get_block_positions(piece_type, rotation);
 
         Self {
             piece_type: piece_type,
             midpoint: (-1, 4),
             block_positions: blocks,
+            rotation: 0,
         }
     }
 }

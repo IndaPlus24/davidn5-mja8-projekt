@@ -44,7 +44,7 @@ impl AppState {
         let mut piece_queue: VecDeque<Piece> = VecDeque::new();
         let l = PieceType::get_random_as_list();
         for p in l {
-            piece_queue.push_back(Piece::new(p));
+            piece_queue.push_back(Piece::new(p, 0));
         }
 
         let active_piece = piece_queue.pop_front().unwrap();
@@ -80,7 +80,7 @@ impl event::EventHandler<ggez::GameError> for AppState {
                 //7-bag
                 let l = PieceType::get_random_as_list();
                 for p in l {
-                    self.piece_queue.push_back(Piece::new(p));
+                    self.piece_queue.push_back(Piece::new(p, 0));
                 }
             }
 
@@ -124,6 +124,7 @@ impl event::EventHandler<ggez::GameError> for AppState {
             && self.ticks_since_last_input > TICKS_BETWEEN_INPUTS
         {
             println!("Rotating CW...");
+            self.board.rotate_cw(&mut self.active_piece);
             self.ticks_since_last_input = 0;
         }
 
