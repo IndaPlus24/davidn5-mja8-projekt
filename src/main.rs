@@ -132,6 +132,7 @@ impl event::EventHandler<ggez::GameError> for AppState {
             && self.ticks_since_last_input > TICKS_BETWEEN_INPUTS
         {
             println!("Rotating CCW...");
+            self.board.rotate_ccw(&mut self.active_piece);
             self.ticks_since_last_input = 0;
         }
 

@@ -71,6 +71,16 @@ impl Board {
         true
     }
 
+    pub fn rotate_ccw(&mut self, piece: &mut Piece) -> bool {
+        let new_rotation: usize = (piece.rotation + 3) % 4;
+        let rotated_piece = Piece::new(piece.piece_type, new_rotation);
+        
+        piece.block_positions = rotated_piece.block_positions;
+        piece.rotation = new_rotation;
+
+        true
+    }
+
     pub fn check_full_line(&mut self, piece: &Piece) {
         let rows_to_check: HashSet<isize> = piece.block_positions.iter().map(|&(r, _)| r).collect();
 
