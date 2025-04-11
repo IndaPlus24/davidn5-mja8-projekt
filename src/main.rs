@@ -26,6 +26,8 @@ const MOVE_PIECE_RIGHT: KeyCode = KeyCode::Right;
 const MOVE_PIECE_LEFT: KeyCode = KeyCode::Left;
 const MOVE_PIECE_DOWN_SOFT_DROP: KeyCode = KeyCode::Down;
 const MOVE_PIECE_DOWN_HARD_DROP: KeyCode = KeyCode::Space;
+const ROTATE_PIECE_CW:  KeyCode = KeyCode::X;
+const ROTATE_PIECE_CCW: KeyCode = KeyCode::Z;
 
 struct AppState {
     tick_count: u32,
@@ -116,6 +118,20 @@ impl event::EventHandler<ggez::GameError> for AppState {
             //SPAWN A NEW PIECE IMMEDIETLY
             self.ticks_without_moving_down = GAME_TICKES_BEFORE_NEXT_PIECE;
             //self.board.check_full_line(&self.active_piece);
+        }
+
+        if ctx.keyboard.is_key_pressed(ROTATE_PIECE_CW)
+            && self.ticks_since_last_input > TICKS_BETWEEN_INPUTS
+        {
+            println!("Rotating CW...");
+            self.ticks_since_last_input = 0;
+        }
+
+        if ctx.keyboard.is_key_pressed(ROTATE_PIECE_CCW)
+            && self.ticks_since_last_input > TICKS_BETWEEN_INPUTS
+        {
+            println!("Rotating CCW...");
+            self.ticks_since_last_input = 0;
         }
 
         // IF THE TICK COUNT MATCHES THE CURRENT LEVELS TICK COUNT
