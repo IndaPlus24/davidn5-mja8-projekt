@@ -60,7 +60,7 @@ pub struct Piece {
     pub piece_type: PieceType,
     pub midpoint: (isize, isize), // Tuple with the piece midpoint in the board (R, C)
     pub block_positions: Vec<(isize, isize)>, // An array of tuples with the mino positions relative to the tetromino's midpoint
-    pub is_active: bool,                      // active piece is the piece that can be moved.
+    //pub is_active: bool,                      // active piece is the piece that can be moved.
 }
 
 impl Piece {
@@ -84,7 +84,7 @@ impl Piece {
             piece_type: piece_type,
             midpoint: (-1, 4),
             block_positions: blocks,
-            is_active: true,
+            //is_active: true,
         }
     }
 }
