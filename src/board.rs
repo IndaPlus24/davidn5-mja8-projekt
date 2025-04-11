@@ -47,9 +47,18 @@ impl Board {
         true
     }
 
+    pub fn place_piece(&mut self, piece: &mut Piece) -> bool {
+        let (mr, mc) = piece.midpoint;
+        piece.block_positions.iter().for_each(|(dr, dc)| {
+            self.table[(mr+dr) as usize][(mc+dc) as usize].occupied = true;
+            self.table[(mr+dr) as usize][(mc+dc) as usize].path = piece.piece_type.get_path();
+        });
+        true
+    }
+
     pub fn hard_drop(&mut self, piece: &mut Piece) -> bool {
         while self.move_piece(piece, 0, 1) {}
-        true
+        self.place_piece(piece)
     }
 
     pub fn check_full_line(&mut self, piece: &Piece) {
