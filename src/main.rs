@@ -122,6 +122,7 @@ impl event::EventHandler<ggez::GameError> for AppState {
             //MOVE PIECE DOWN
             if !self.board.move_piece(&mut self.active_piece, 0, 1) {
                 self.ticks_without_moving_down += 1;
+                self.board.place_piece(&mut self.active_piece);
                 println!("Piece at bottom...");
                 //println!("Checking Lines...");
                 //self.board.check_full_line(&self.active_piece);
