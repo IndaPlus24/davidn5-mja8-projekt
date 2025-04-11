@@ -120,14 +120,14 @@ impl event::EventHandler<ggez::GameError> for AppState {
             //self.board.check_full_line(&self.active_piece);
         }
 
-        if ctx.keyboard.is_key_pressed(ROTATE_PIECE_CW)
+        if ctx.keyboard.is_key_just_pressed(ROTATE_PIECE_CW)
             && self.ticks_since_last_input > TICKS_BETWEEN_INPUTS
         {
             println!("Rotating CW...");
             self.ticks_since_last_input = 0;
         }
 
-        if ctx.keyboard.is_key_pressed(ROTATE_PIECE_CCW)
+        if ctx.keyboard.is_key_just_pressed(ROTATE_PIECE_CCW)
             && self.ticks_since_last_input > TICKS_BETWEEN_INPUTS
         {
             println!("Rotating CCW...");
