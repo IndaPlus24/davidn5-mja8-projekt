@@ -3,7 +3,7 @@ mod board;
 mod piece;
 mod rotation;
 
-use std::collections::VecDeque;
+use std::collections::{HashMap, HashSet, VecDeque};
 use std::path;
 
 pub use crate::block::{Block, BLOCK_SIZE, EMPTY_BLOCK_COLOR};
@@ -31,6 +31,7 @@ const ROTATE_PIECE_CW:  KeyCode = KeyCode::X;
 const ROTATE_PIECE_CCW: KeyCode = KeyCode::Z;
 
 struct AppState {
+    images : HashMap<String, Image>,
     tick_count: u32,
     current_level: usize,
     board: Board, // Board is a 20x10 of blocks
@@ -52,6 +53,7 @@ impl AppState {
         let active_piece = piece_queue.pop_front().unwrap();
 
         let mut state = AppState {
+            images: AppState::preload_images(&ctx),
             tick_count: 0,
             current_level: 0,
             board: Board::new(),
@@ -69,6 +71,20 @@ impl AppState {
         */
         Ok(state)
     }
+
+    pub fn preload_images(ctx : &Context) -> HashMap<String, Image>{
+        let mut image_map : HashMap<String, Image> = HashMap::new(); 
+    
+        for i in 0..7 {
+            let piece_type = PieceType::get_piecetype_from_num(i);
+            let path = piece_type.get_path();
+            let image = graphics::Image::from_path(ctx, path).unwrap();
+            image_map.insert(piece_type.get_path(), image);
+        }
+    
+        image_map
+    }
+    
 }
 
 impl event::EventHandler<ggez::GameError> for AppState {
@@ -163,9 +179,10 @@ impl event::EventHandler<ggez::GameError> for AppState {
         for r in 0..BOARD_AMOUNT_ROWS {
             for c in 0..BOARD_AMOUNT_COLUMNS {
                 if self.board.table[r][c].is_occupied() {
-                    let image = graphics::Image::from_path(ctx, &self.board.table[r][c].path)?;
+                    let path = &self.board.table[r][c].path;
+                    let image = self.images.get(path).unwrap();
                     canvas.draw(
-                        &image,
+                        image,
                         graphics::DrawParam::new().dest(glam::Vec2::new(
                             (BOARD_UPPER_LEFT.0 + c as i32 * BLOCK_SIZE + 1) as f32,
                             (BOARD_UPPER_LEFT.1 + r as i32 * BLOCK_SIZE + 1) as f32,
@@ -190,11 +207,13 @@ impl event::EventHandler<ggez::GameError> for AppState {
             }
         }
         //Render active piece
-        let image = graphics::Image::from_path(ctx, self.active_piece.piece_type.get_path())?;
+        let path = &self.active_piece.piece_type.get_path();
+        let image = self.images.get(path).unwrap();
+
         let (mr, mc) = self.active_piece.midpoint;
         self.active_piece.block_positions.iter().for_each(|(dr, dc)| {
             canvas.draw(
-                &image,
+                image,
                 graphics::DrawParam::new().dest(glam::Vec2::new(
                     (BOARD_UPPER_LEFT.0 + (mc + dc) as i32 * BLOCK_SIZE + 1) as f32,
                     (BOARD_UPPER_LEFT.1 + (mr + dr) as i32 * BLOCK_SIZE + 1) as f32,
@@ -218,8 +237,9 @@ pub fn main() -> GameResult {
             conf::WindowMode::default().resizable(false), // Fixate window size
         );
 
-    let (mut contex, mut event_loop) = context_builder.build().expect("Failed to build context.");
-    let state = AppState::new(&mut contex).expect("Failed to create state.");
+    let (mut context, mut event_loop) = context_builder.build().expect("Failed to build context.");
+    let state = AppState::new(&mut context).expect("Failed to create state.");
+
     println!("OPENED WINDOW");
-    event::run(contex, event_loop, state) // Run window event loop
+    event::run(context, event_loop, state) // Run window event loop
 }
