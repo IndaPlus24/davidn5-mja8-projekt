@@ -20,6 +20,7 @@ const BOARD_UPPER_LEFT: (i32, i32) = (100, 50);
 const LEVELS_TICK_COUNTS: [u32; 1] = [60];
 
 const TICKS_BETWEEN_INPUTS: usize = 2;
+const TICKS_BETWEEN_ROTATIONS : usize = 2;
 const GAME_TICKES_BEFORE_NEXT_PIECE: usize = 2;
 
 const MOVE_PIECE_RIGHT: KeyCode = KeyCode::Right;
@@ -36,6 +37,7 @@ struct AppState {
     active_piece: Piece,
     piece_queue: VecDeque<Piece>,
     ticks_since_last_input: usize,
+    ticks_since_last_rotation : usize, 
     ticks_without_moving_down: usize,
 }
 
@@ -56,6 +58,7 @@ impl AppState {
             active_piece: active_piece,
             piece_queue: piece_queue,
             ticks_since_last_input: 0,
+            ticks_since_last_rotation: 0,
             ticks_without_moving_down: 0,
         };
 
@@ -72,6 +75,7 @@ impl event::EventHandler<ggez::GameError> for AppState {
     fn update(&mut self, ctx: &mut Context) -> GameResult {
         self.tick_count += 1;
         self.ticks_since_last_input += 1;
+        self.ticks_since_last_rotation +=1;
 
         //Spawn new Piece
         if self.ticks_without_moving_down == GAME_TICKES_BEFORE_NEXT_PIECE {
@@ -121,19 +125,19 @@ impl event::EventHandler<ggez::GameError> for AppState {
         }
 
         if ctx.keyboard.is_key_just_pressed(ROTATE_PIECE_CW)
-            && self.ticks_since_last_input > TICKS_BETWEEN_INPUTS
+            && self.ticks_since_last_rotation > TICKS_BETWEEN_ROTATIONS
         {
             println!("Rotating CW...");
             self.board.rotate_cw(&mut self.active_piece);
-            self.ticks_since_last_input = 0;
+            self.ticks_since_last_rotation = 0;
         }
 
         if ctx.keyboard.is_key_just_pressed(ROTATE_PIECE_CCW)
-            && self.ticks_since_last_input > TICKS_BETWEEN_INPUTS
+            && self.ticks_since_last_rotation > TICKS_BETWEEN_ROTATIONS
         {
             println!("Rotating CCW...");
             self.board.rotate_ccw(&mut self.active_piece);
-            self.ticks_since_last_input = 0;
+            self.ticks_since_last_rotation = 0;
         }
 
         // IF THE TICK COUNT MATCHES THE CURRENT LEVELS TICK COUNT
