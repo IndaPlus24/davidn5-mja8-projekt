@@ -1,8 +1,12 @@
 use std::collections::HashSet;
 
-use crate::rotation::{KICK_TABLE_CCW_REGULAR, KICK_TABLE_CW_REGULAR};
 use crate::{block, piece, Piece};
 use crate::{block::Block, BOARD_AMOUNT_COLUMNS, BOARD_AMOUNT_ROWS, EMPTY_BLOCK_COLOR};
+
+use crate::rotation::{
+    KICK_TABLE_CCW_REGULAR,
+    KICK_TABLE_CW_REGULAR,
+};
 
 pub struct Board {
     pub table: [[Block; BOARD_AMOUNT_COLUMNS]; BOARD_AMOUNT_ROWS],
