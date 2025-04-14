@@ -9,6 +9,7 @@ use std::path;
 pub use crate::block::{Block, BLOCK_SIZE, EMPTY_BLOCK_COLOR};
 pub use crate::board::Board;
 pub use crate::piece::{Piece, PieceType};
+pub use crate::rotation::{ROTATION_CW, ROTATION_CCW, ROTATION_180};
 
 use ggez::graphics::{Color, Image};
 use ggez::input::keyboard::KeyCode;
@@ -159,7 +160,7 @@ impl event::EventHandler<ggez::GameError> for AppState {
             && self.ticks_since_last_rotation > TICKS_BETWEEN_ROTATIONS
         {
             println!("Rotating CW...");
-            self.board.rotate_cw(&mut self.active_piece);
+            self.board.rotate(&mut self.active_piece, ROTATION_CW);
             self.ticks_since_last_rotation = 0;
         }
 
@@ -167,7 +168,7 @@ impl event::EventHandler<ggez::GameError> for AppState {
             && self.ticks_since_last_rotation > TICKS_BETWEEN_ROTATIONS
         {
             println!("Rotating CCW...");
-            self.board.rotate_ccw(&mut self.active_piece);
+            self.board.rotate(&mut self.active_piece, ROTATION_CCW);
             self.ticks_since_last_rotation = 0;
         }
 
@@ -203,6 +204,7 @@ impl event::EventHandler<ggez::GameError> for AppState {
                 println!("Piece at bottom...");
                 //println!("Checking Lines...");
                 //self.board.check_full_line(&self.active_piece);
+                self.spawn_new_piece();
             }
         }
 

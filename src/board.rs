@@ -1,7 +1,15 @@
 use std::collections::HashSet;
 
-use crate::{block, piece, Piece};
+use crate::{block, piece, Piece, PieceType};
 use crate::{block::Block, BOARD_AMOUNT_COLUMNS, BOARD_AMOUNT_ROWS, EMPTY_BLOCK_COLOR};
+use crate::{ROTATION_CW, ROTATION_CCW, ROTATION_180};
+
+use crate::rotation::{
+    KICK_TABLE_CCW_I,
+    KICK_TABLE_CCW_REGULAR,
+    KICK_TABLE_CW_I,
+    KICK_TABLE_CW_REGULAR,
+};
 
 pub struct Board {
     pub table: [[Block; BOARD_AMOUNT_COLUMNS]; BOARD_AMOUNT_ROWS],
@@ -61,24 +69,36 @@ impl Board {
         self.place_piece(piece)
     }
 
-    pub fn rotate_cw(&mut self, piece: &mut Piece) -> bool {
-        let new_rotation: usize = (piece.rotation + 1) % 4;
-        let rotated_piece = Piece::new(piece.piece_type, new_rotation);
+    pub fn rotate(&mut self, piece: &mut Piece, rotation_type: usize) -> bool {
+        let new_rotation: usize = (piece.rotation + rotation_type) % 4;
+
+        // Set up rotated piece for kick table checks
+        let mut rotated_piece = Piece::new(piece.piece_type, new_rotation);
+        rotated_piece.midpoint = piece.midpoint;
+
+        // Fetch the suitable kick table
+        let kick_table = match rotation_type {
+            ROTATION_CW => match piece.piece_type {
+                PieceType::I => KICK_TABLE_CW_I[new_rotation],
+                _ => KICK_TABLE_CW_REGULAR[new_rotation],
+            },
+            _ => match piece.piece_type {
+                PieceType::I => KICK_TABLE_CCW_I[new_rotation],
+                _ => KICK_TABLE_CCW_REGULAR[new_rotation]
+            },
+        };
         
-        piece.block_positions = rotated_piece.block_positions;
-        piece.rotation = new_rotation;
+        // Try kick table offsets
+        for (dx, dy) in kick_table {
+            if self.move_piece(&mut rotated_piece, dx, dy) {
+                piece.block_positions = rotated_piece.block_positions;
+                piece.rotation = new_rotation;
+                piece.midpoint = rotated_piece.midpoint;
+                return true;
+            }
+        }
 
-        true
-    }
-
-    pub fn rotate_ccw(&mut self, piece: &mut Piece) -> bool {
-        let new_rotation: usize = (piece.rotation + 3) % 4;
-        let rotated_piece = Piece::new(piece.piece_type, new_rotation);
-        
-        piece.block_positions = rotated_piece.block_positions;
-        piece.rotation = new_rotation;
-
-        true
+        false
     }
 
     pub fn check_full_line(&mut self, piece: &Piece) {
