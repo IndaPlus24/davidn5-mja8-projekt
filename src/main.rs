@@ -167,7 +167,7 @@ impl event::EventHandler<ggez::GameError> for AppState {
             && self.ticks_since_last_rotation > TICKS_BETWEEN_ROTATIONS
         {
             println!("Rotating CCW...");
-            self.board.rotate_ccw(&mut self.active_piece);
+            if !self.board.rotate_ccw(&mut self.active_piece) {println!("failed")}
             self.ticks_since_last_rotation = 0;
         }
 
@@ -203,6 +203,7 @@ impl event::EventHandler<ggez::GameError> for AppState {
                 println!("Piece at bottom...");
                 //println!("Checking Lines...");
                 //self.board.check_full_line(&self.active_piece);
+                self.spawn_new_piece();
             }
         }
 
