@@ -1,11 +1,10 @@
 use std::collections::HashSet;
 
-use crate::{block, piece, Piece};
+use crate::{block, piece, Piece, PieceType};
 use crate::{block::Block, BOARD_AMOUNT_COLUMNS, BOARD_AMOUNT_ROWS, EMPTY_BLOCK_COLOR};
 
 use crate::rotation::{
-    KICK_TABLE_CCW_REGULAR,
-    KICK_TABLE_CW_REGULAR,
+    KICK_TABLE_CCW_REGULAR, KICK_TABLE_CW_I, KICK_TABLE_CW_REGULAR
 };
 
 pub struct Board {
@@ -70,8 +69,13 @@ impl Board {
         let new_rotation: usize = (piece.rotation + 1) % 4;
         let mut rotated_piece = Piece::new(piece.piece_type, new_rotation);
         rotated_piece.midpoint = piece.midpoint;
+
+        let kick_table = match piece.piece_type {
+            PieceType::I => KICK_TABLE_CW_I[new_rotation],
+            _ => KICK_TABLE_CW_REGULAR[new_rotation]
+        };
         
-        for (dx, dy) in KICK_TABLE_CW_REGULAR[new_rotation] {
+        for (dx, dy) in kick_table {
             if self.move_piece(&mut rotated_piece, dx, dy) {
                 piece.block_positions = rotated_piece.block_positions;
                 piece.rotation = new_rotation;
