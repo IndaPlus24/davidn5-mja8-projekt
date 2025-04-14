@@ -85,7 +85,7 @@ impl AppState {
     pub fn preload_images(ctx : &Context) -> HashMap<String, Image>{
         let mut image_map : HashMap<String, Image> = HashMap::new(); 
     
-        for i in 0..7 {
+        for i in 0..8 {
             let piece_type = PieceType::get_piecetype_from_num(i);
             let path = piece_type.get_path();
             let image = graphics::Image::from_path(ctx, path).unwrap();
@@ -259,7 +259,25 @@ impl event::EventHandler<ggez::GameError> for AppState {
             );
         });
 
-        //Draw the held piece (if it exists)
+        //Render Ghost Piece
+        let ghost_piece = self.board.get_ghost_piece(&self.active_piece);
+        
+        let path = &ghost_piece.piece_type.get_path();
+        let image = self.images.get(path).unwrap();
+
+        let (mr, mc) = ghost_piece.midpoint;
+        ghost_piece.block_positions.iter().for_each(|(dr, dc)| {
+            canvas.draw(
+                image,
+                graphics::DrawParam::new().dest(glam::Vec2::new(
+                    (BOARD_UPPER_LEFT.0 + (mc + dc) as i32 * BLOCK_SIZE + 1) as f32,
+                    (BOARD_UPPER_LEFT.1 + (mr + dr) as i32 * BLOCK_SIZE + 1) as f32,
+                )),
+            );
+        });
+        
+
+        //Render the held piece (if it exists)
         if let Some(held_piece) = &self.held_piece {
 
             let path = &held_piece.piece_type.get_path();

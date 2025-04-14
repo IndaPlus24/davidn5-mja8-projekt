@@ -12,6 +12,7 @@ pub enum PieceType {
     Z,
     J,
     L,
+    X,
 }
 impl PieceType {
     pub fn get_path(&self) -> String {
@@ -23,6 +24,7 @@ impl PieceType {
             PieceType::Z => String::from("/red.png"),
             PieceType::J => String::from("/blue.png"),
             PieceType::L => String::from("/orange.png"),
+            PieceType::X => String::from("/grey.png"),
         }
     }
 
@@ -41,7 +43,7 @@ impl PieceType {
             4 => PieceType::Z,
             5 => PieceType::J,
             6 => PieceType::L,
-            _ => PieceType::O,
+            _ => PieceType::X,
         }
     }
 
@@ -77,6 +79,7 @@ impl Piece {
             PieceType::S => RELATIVE_MINOS_S[rotation].to_vec(),
             PieceType::Z => RELATIVE_MINOS_Z[rotation].to_vec(),
             PieceType::T => RELATIVE_MINOS_T[rotation].to_vec(),
+            _ => Vec::new()
         }
     }
 

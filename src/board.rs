@@ -1,6 +1,6 @@
 use std::collections::HashSet;
 
-use crate::{block, piece, Piece};
+use crate::{block, piece, Piece, PieceType};
 use crate::{block::Block, BOARD_AMOUNT_COLUMNS, BOARD_AMOUNT_ROWS, EMPTY_BLOCK_COLOR};
 
 pub struct Board {
@@ -59,6 +59,16 @@ impl Board {
     pub fn hard_drop(&mut self, piece: &mut Piece) -> bool {
         while self.move_piece(piece, 0, 1) {}
         self.place_piece(piece)
+    }
+
+    pub fn get_ghost_piece(&mut self, piece: &Piece) -> Piece {
+        let mut ghost = piece.clone();
+    
+        while self.is_valid_position(&mut ghost, 0, 1) {
+            ghost.midpoint.0 += 1;
+        }
+        ghost.piece_type = PieceType::X;
+        ghost
     }
 
     pub fn rotate_cw(&mut self, piece: &mut Piece) -> bool {
