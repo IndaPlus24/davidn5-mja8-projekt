@@ -1,5 +1,6 @@
 use std::collections::HashSet;
 
+use crate::rotation::KICK_TABLE_CW_REGULAR;
 use crate::{block, piece, Piece};
 use crate::{block::Block, BOARD_AMOUNT_COLUMNS, BOARD_AMOUNT_ROWS, EMPTY_BLOCK_COLOR};
 
@@ -63,12 +64,20 @@ impl Board {
 
     pub fn rotate_cw(&mut self, piece: &mut Piece) -> bool {
         let new_rotation: usize = (piece.rotation + 1) % 4;
-        let rotated_piece = Piece::new(piece.piece_type, new_rotation);
+        let mut rotated_piece = Piece::new(piece.piece_type, new_rotation);
+        rotated_piece.midpoint = piece.midpoint;
         
-        piece.block_positions = rotated_piece.block_positions;
-        piece.rotation = new_rotation;
+        for (dx, dy) in KICK_TABLE_CW_REGULAR[new_rotation] {
+            if self.move_piece(&mut rotated_piece, dx, dy) {
+                println!("({}, {}) success!", dx, dy);
+                piece.block_positions = rotated_piece.block_positions;
+                piece.rotation = new_rotation;
+                piece.midpoint = rotated_piece.midpoint;
+                return true;
+            }
+        }
 
-        true
+        false
     }
 
     pub fn rotate_ccw(&mut self, piece: &mut Piece) -> bool {
