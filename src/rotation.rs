@@ -33,18 +33,18 @@ pub const RELATIVE_MINOS_S: [[(isize, isize); 4]; 4] = [
     [(-1, -1), ( 0, -1), (0,  0), (1, 0)],
 ];
 
-pub const RELATIVE_MINOS_Z: [[(isize, isize); 4]; 4] = [
-    [(-1, -1), (-1,  0), (0, 0), (0,  1)],
-    [(-1,  1), ( 0,  0), (0, 1), (1,  0)],
-    [( 0, -1), ( 0,  0), (1, 0), (1,  1)],
-    [(-1,  0), ( 0, -1), (0, 0), (1, -1)],
-];
-
 pub const RELATIVE_MINOS_T: [[(isize, isize); 4]; 4] = [
     [(-1,  0), ( 0, -1), (0, 0), (0, 1)],
     [(-1,  0), ( 0,  0), (0, 1), (1, 0)],
     [( 0, -1), ( 0,  0), (0, 1), (1, 0)],
     [(-1,  0), ( 0, -1), (0, 0), (1, 0)],
+];
+
+pub const RELATIVE_MINOS_Z: [[(isize, isize); 4]; 4] = [
+    [(-1, -1), (-1,  0), (0, 0), (0,  1)],
+    [(-1,  1), ( 0,  0), (0, 1), (1,  0)],
+    [( 0, -1), ( 0,  0), (1, 0), (1,  1)],
+    [(-1,  0), ( 0, -1), (0, 0), (1, -1)],
 ];
 
 pub const KICK_TABLE_CW_REGULAR: [[(isize, isize); 5]; 4] = [ // Positions to check for a clockwise rotation of J, L, S, Z or T (dx, dy)
