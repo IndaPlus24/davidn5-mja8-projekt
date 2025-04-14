@@ -1,3 +1,7 @@
+pub const ROTATION_CW:  usize = 1;
+pub const ROTATION_180: usize = 2;
+pub const ROTATION_CCW: usize = 3;
+
 pub const RELATIVE_MINOS_I: [[(isize, isize); 4]; 4] = [ // Offsets from piece midpoint (DR, DC)
     [( 0, -1), (0, 0), (0, 1), (0, 2)], // Rotation index 0: spawn orientation
     [(-1,  1), (0, 1), (1, 1), (2, 1)], //                1: 90 degrees cw
