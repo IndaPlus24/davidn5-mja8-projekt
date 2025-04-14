@@ -10,18 +10,23 @@ pub use crate::block::{Block, BLOCK_SIZE, EMPTY_BLOCK_COLOR};
 pub use crate::board::Board;
 pub use crate::piece::{Piece, PieceType};
 
-use ggez::graphics::Image;
+use ggez::graphics::{Color, Image};
 use ggez::input::keyboard::KeyCode;
 use ggez::{conf, event, glam, graphics, Context, ContextBuilder, GameResult};
 
+
+// All of these consts should probably be relative to window size 
 const BOARD_AMOUNT_COLUMNS: usize = 10;
 const BOARD_AMOUNT_ROWS: usize = 20;
-const BOARD_UPPER_LEFT: (i32, i32) = (100, 50);
-const LEVELS_TICK_COUNTS: [u32; 1] = [60];
+const BOARD_UPPER_LEFT: (i32, i32) = (200, 50);
+const HOLD_PIECE_UPPERLEFT: (isize,isize) = (BOARD_UPPER_LEFT.0 as isize - 140,BOARD_UPPER_LEFT.1 as isize + 50);
+const HOLD_PIECE_MIDDLE : (isize,isize) = (HOLD_PIECE_UPPERLEFT.0 + BLOCK_SIZE as isize * 2 - 20 ,HOLD_PIECE_UPPERLEFT.1 + BLOCK_SIZE as isize * 2);
 
+
+const LEVELS_TICK_COUNTS: [u32; 1] = [60];
 const TICKS_BETWEEN_INPUTS: usize = 2;
 const TICKS_BETWEEN_ROTATIONS : usize = 2;
-const GAME_TICKES_BEFORE_NEXT_PIECE: usize = 2;
+const TICKS_BEFORE_NEXT_PIECE: usize = 2;
 
 const MOVE_PIECE_RIGHT: KeyCode = KeyCode::Right;
 const MOVE_PIECE_LEFT: KeyCode = KeyCode::Left;
@@ -29,6 +34,7 @@ const MOVE_PIECE_DOWN_SOFT_DROP: KeyCode = KeyCode::Down;
 const MOVE_PIECE_DOWN_HARD_DROP: KeyCode = KeyCode::Space;
 const ROTATE_PIECE_CW:  KeyCode = KeyCode::X;
 const ROTATE_PIECE_CCW: KeyCode = KeyCode::Z;
+const HOLD_PIECE : KeyCode = KeyCode::C;
 
 struct AppState {
     images : HashMap<String, Image>,
@@ -36,10 +42,12 @@ struct AppState {
     current_level: usize,
     board: Board, // Board is a 20x10 of blocks
     active_piece: Piece,
+    held_piece : Option<Piece>,
     piece_queue: VecDeque<Piece>,
     ticks_since_last_input: usize,
     ticks_since_last_rotation : usize, 
     ticks_without_moving_down: usize,
+    can_hold : bool
 }
 
 impl AppState {
@@ -58,10 +66,12 @@ impl AppState {
             current_level: 0,
             board: Board::new(),
             active_piece: active_piece,
+            held_piece : None, 
             piece_queue: piece_queue,
             ticks_since_last_input: 0,
             ticks_since_last_rotation: 0,
             ticks_without_moving_down: 0,
+            can_hold : true,
         };
 
         /*
@@ -84,6 +94,21 @@ impl AppState {
     
         image_map
     }
+
+    pub fn spawn_new_piece(&mut self) {
+        if self.piece_queue.len() < 5 {
+            //7-bag
+            let l = PieceType::get_random_as_list();
+            for p in l {
+                self.piece_queue.push_back(Piece::new(p, 0));
+            }
+        }
+    
+        println!("Spawning new piece...");
+        self.active_piece = self.piece_queue.pop_front().unwrap();
+        self.ticks_without_moving_down = 0;
+        self.can_hold = true;
+    }
     
 }
 
@@ -94,19 +119,9 @@ impl event::EventHandler<ggez::GameError> for AppState {
         self.ticks_since_last_rotation +=1;
 
         //Spawn new Piece
-        if self.ticks_without_moving_down == GAME_TICKES_BEFORE_NEXT_PIECE {
+        if self.ticks_without_moving_down == TICKS_BEFORE_NEXT_PIECE {
             // Piece queue should have a set amount by default since it shows some of them to user
-            if self.piece_queue.len() < 5 {
-                //7-bag
-                let l = PieceType::get_random_as_list();
-                for p in l {
-                    self.piece_queue.push_back(Piece::new(p, 0));
-                }
-            }
-
-            println!("Spawning new piece...");
-            self.active_piece = self.piece_queue.pop_front().unwrap();
-            self.ticks_without_moving_down = 0;
+            self.spawn_new_piece();
         }
 
         //CONTROLS
@@ -136,7 +151,7 @@ impl event::EventHandler<ggez::GameError> for AppState {
             self.board.hard_drop(&mut self.active_piece);
             self.ticks_since_last_input = 0;
             //SPAWN A NEW PIECE IMMEDIETLY
-            self.ticks_without_moving_down = GAME_TICKES_BEFORE_NEXT_PIECE;
+            self.ticks_without_moving_down = TICKS_BEFORE_NEXT_PIECE;
             //self.board.check_full_line(&self.active_piece);
         }
 
@@ -155,6 +170,29 @@ impl event::EventHandler<ggez::GameError> for AppState {
             self.board.rotate_ccw(&mut self.active_piece);
             self.ticks_since_last_rotation = 0;
         }
+
+        if ctx.keyboard.is_key_just_pressed(HOLD_PIECE) && self.can_hold {
+            println!("Holding Piece"); 
+        
+            let mut held_piece = self.active_piece.clone();
+            held_piece.midpoint = HOLD_PIECE_MIDDLE;
+            
+            match self.held_piece.take() {
+                Some(mut previous_held) => {
+                    previous_held.midpoint = (-1,4);
+                    self.active_piece = previous_held;
+                }
+                None => {
+                    self.spawn_new_piece();
+                }
+            }
+        
+            self.held_piece = Some(held_piece);
+            self.can_hold = false;
+
+        }
+        
+
 
         // IF THE TICK COUNT MATCHES THE CURRENT LEVELS TICK COUNT
         if self.tick_count % LEVELS_TICK_COUNTS[self.current_level] == 0 {
@@ -220,6 +258,24 @@ impl event::EventHandler<ggez::GameError> for AppState {
                 )),
             );
         });
+
+        //Draw the held piece (if it exists)
+        if let Some(held_piece) = &self.held_piece {
+
+            let path = &held_piece.piece_type.get_path();
+            let image = self.images.get(path).unwrap();
+
+        held_piece.block_positions.iter().for_each(|(dr, dc)| {
+            canvas.draw(
+                image,
+                graphics::DrawParam::new().dest(glam::Vec2::new(
+                    (HOLD_PIECE_MIDDLE.0 + *dc * (BLOCK_SIZE as isize+ 1)) as f32,
+                    (HOLD_PIECE_MIDDLE.1 + *dr * (BLOCK_SIZE as isize + 1)) as f32,
+                )),
+            );
+
+        });
+        }
 
         canvas.finish(ctx)?;
 
