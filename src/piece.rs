@@ -58,6 +58,7 @@ impl PieceType {
     }
 }
 
+#[derive(Clone)]
 pub struct Piece {
     pub piece_type: PieceType,
     pub midpoint: (isize, isize), // Tuple with the piece midpoint in the board (R, C)
