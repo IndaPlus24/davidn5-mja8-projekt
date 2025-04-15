@@ -154,7 +154,7 @@ impl event::EventHandler<ggez::GameError> for AppState {
             self.ticks_since_last_input = 0;
             //SPAWN A NEW PIECE IMMEDIETLY
             self.ticks_without_moving_down = TICKS_BEFORE_NEXT_PIECE;
-            //self.board.check_full_line(&self.active_piece);
+            self.board.check_full_line();
         }
 
         if ctx.keyboard.is_key_just_pressed(ROTATE_PIECE_CW)
@@ -211,8 +211,8 @@ impl event::EventHandler<ggez::GameError> for AppState {
                 self.ticks_without_moving_down += 1;
                 self.board.place_piece(&mut self.active_piece);
                 println!("Piece at bottom...");
-                //println!("Checking Lines...");
-                //self.board.check_full_line(&self.active_piece);
+                println!("Checking Lines...");
+                self.board.check_full_line();
                 self.spawn_new_piece();
             }
         }
