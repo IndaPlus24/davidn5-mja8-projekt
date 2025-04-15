@@ -20,6 +20,7 @@ pub enum PieceType {
     S,
     T,
     Z,
+    X
 }
 impl PieceType {
     pub fn get_path(&self) -> String {
