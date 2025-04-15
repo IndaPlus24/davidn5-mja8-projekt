@@ -1,8 +1,7 @@
-use std::collections::HashSet;
 
-use crate::{block, piece, Piece, PieceType};
-use crate::{block::Block, BOARD_AMOUNT_COLUMNS, BOARD_AMOUNT_ROWS, EMPTY_BLOCK_COLOR};
-use crate::{ROTATION_CW, ROTATION_CCW, ROTATION_180};
+use crate::{Piece, PieceType};
+use crate::{block::Block, BOARD_AMOUNT_COLUMNS, BOARD_AMOUNT_ROWS};
+use crate::{ROTATION_CW, ROTATION_CCW};
 
 use crate::rotation::{
     KICK_TABLE_180,
@@ -113,11 +112,10 @@ impl Board {
         false
     }
 
-    pub fn check_full_line(&mut self, piece: &Piece) {
-        let rows_to_check: HashSet<isize> = piece.block_positions.iter().map(|&(r, _)| r).collect();
+    pub fn check_full_line(&mut self) {
 
         let mut rows_to_remove: Vec<usize> = Vec::new();
-        for row in rows_to_check {
+        for row in 0..20 {
             if self.table[row as usize].iter().all(|b| b.is_occupied()) {
                 println!("ROW: {} IS FULL", row);
                 rows_to_remove.push(row as usize);
