@@ -3,6 +3,7 @@ mod board;
 mod piece;
 mod rotation;
 mod inputs;
+mod config;
 
 use std::collections::{HashMap, VecDeque};
 use std::path;
@@ -11,6 +12,7 @@ pub use crate::block::{Block, BLOCK_SIZE, EMPTY_BLOCK_COLOR};
 pub use crate::board::Board;
 pub use crate::piece::{Piece, PieceType};
 pub use crate::rotation::{ROTATION_CW, ROTATION_CCW, ROTATION_180};
+pub use crate::config::input_config::*;
 
 use ggez::graphics::Image;
 use ggez::input::keyboard::KeyCode;
@@ -41,6 +43,7 @@ const HOLD_PIECE : KeyCode = KeyCode::C;
 
 struct AppState {
     images : HashMap<String, Image>,
+    controls: HashMap<GameAction, KeyCode>,
     tick_count: u32,
     current_level: usize,
     board: Board, // Board is a 20x10 of blocks
@@ -65,6 +68,7 @@ impl AppState {
 
         let state = AppState {
             images: AppState::preload_images(&ctx),
+            controls : default_keyboard_keybindings(), // WILL NEED TO BE CHANGED AND MAYBE BE A VECTOR FOR 1v1
             tick_count: 0,
             current_level: 0,
             board: Board::new(),
