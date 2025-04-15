@@ -1,8 +1,7 @@
-use std::collections::HashSet;
 
-use crate::{block, piece, Piece, PieceType};
-use crate::{block::Block, BOARD_AMOUNT_COLUMNS, BOARD_AMOUNT_ROWS, EMPTY_BLOCK_COLOR};
-use crate::{ROTATION_CW, ROTATION_CCW, ROTATION_180};
+use crate::{Piece, PieceType};
+use crate::{block::Block, BOARD_AMOUNT_COLUMNS, BOARD_AMOUNT_ROWS};
+use crate::{ROTATION_CW, ROTATION_CCW};
 
 use crate::rotation::{
     KICK_TABLE_180,

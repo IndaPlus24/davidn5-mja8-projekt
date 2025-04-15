@@ -2,8 +2,9 @@ mod block;
 mod board;
 mod piece;
 mod rotation;
+mod inputs;
 
-use std::collections::{HashMap, HashSet, VecDeque};
+use std::collections::{HashMap, VecDeque};
 use std::path;
 
 pub use crate::block::{Block, BLOCK_SIZE, EMPTY_BLOCK_COLOR};
@@ -11,7 +12,7 @@ pub use crate::board::Board;
 pub use crate::piece::{Piece, PieceType};
 pub use crate::rotation::{ROTATION_CW, ROTATION_CCW, ROTATION_180};
 
-use ggez::graphics::{Color, Image};
+use ggez::graphics::Image;
 use ggez::input::keyboard::KeyCode;
 use ggez::{conf, event, glam, graphics, Context, ContextBuilder, GameResult};
 
@@ -62,7 +63,7 @@ impl AppState {
 
         let active_piece = piece_queue.pop_front().unwrap();
 
-        let mut state = AppState {
+        let state = AppState {
             images: AppState::preload_images(&ctx),
             tick_count: 0,
             current_level: 0,
@@ -127,82 +128,8 @@ impl event::EventHandler<ggez::GameError> for AppState {
         }
 
         //CONTROLS
-
-        if ctx.keyboard.is_key_pressed(MOVE_PIECE_RIGHT)
-            && self.ticks_since_last_input > TICKS_BETWEEN_INPUTS
-        {
-            self.board.move_piece(&mut self.active_piece, 1, 0);
-            self.ticks_since_last_input = 0;
-        }
-
-        if ctx.keyboard.is_key_pressed(MOVE_PIECE_LEFT)
-            && self.ticks_since_last_input > TICKS_BETWEEN_INPUTS
-        {
-            self.board.move_piece(&mut self.active_piece, -1, 0);
-            self.ticks_since_last_input = 0;
-        }
-
-        if ctx.keyboard.is_key_pressed(MOVE_PIECE_DOWN_SOFT_DROP)
-            && self.ticks_since_last_input > TICKS_BETWEEN_INPUTS
-        {
-            self.board.move_piece(&mut self.active_piece, 0, 1);
-            self.ticks_since_last_input = 0;
-        }
-
-        if ctx.keyboard.is_key_just_pressed(MOVE_PIECE_DOWN_HARD_DROP) {
-            self.board.hard_drop(&mut self.active_piece);
-            self.ticks_since_last_input = 0;
-            //SPAWN A NEW PIECE IMMEDIETLY
-            self.ticks_without_moving_down = TICKS_BEFORE_NEXT_PIECE;
-            self.board.check_full_line();
-        }
-
-        if ctx.keyboard.is_key_just_pressed(ROTATE_PIECE_CW)
-            && self.ticks_since_last_rotation > TICKS_BETWEEN_ROTATIONS
-        {
-            println!("Rotating CW...");
-            self.board.rotate(&mut self.active_piece, ROTATION_CW);
-            self.ticks_since_last_rotation = 0;
-        }
-
-        if ctx.keyboard.is_key_just_pressed(ROTATE_PIECE_CCW)
-            && self.ticks_since_last_rotation > TICKS_BETWEEN_ROTATIONS
-        {
-            println!("Rotating CCW...");
-            self.board.rotate(&mut self.active_piece, ROTATION_CCW);
-            self.ticks_since_last_rotation = 0;
-        }
-
-        if ctx.keyboard.is_key_just_pressed(ROTATE_PIECE_180)
-            && self.ticks_since_last_rotation > TICKS_BETWEEN_ROTATIONS
-        {
-            println!("Rotating 180...");
-            self.board.rotate(&mut self.active_piece, ROTATION_180);
-            self.ticks_since_last_rotation = 0;
-        }
-
-        if ctx.keyboard.is_key_just_pressed(HOLD_PIECE) && self.can_hold {
-            println!("Holding Piece"); 
         
-            let mut held_piece = self.active_piece.clone();
-            held_piece.midpoint = HOLD_PIECE_MIDDLE;
-            
-            match self.held_piece.take() {
-                Some(mut previous_held) => {
-                    previous_held.midpoint = (-1,4);
-                    self.active_piece = previous_held;
-                }
-                None => {
-                    self.spawn_new_piece();
-                }
-            }
-        
-            self.held_piece = Some(held_piece);
-            self.can_hold = false;
-
-        }
-        
-
+        self.handle_inputs(ctx);
 
         // IF THE TICK COUNT MATCHES THE CURRENT LEVELS TICK COUNT
         if self.tick_count % LEVELS_TICK_COUNTS[self.current_level] == 0 {
@@ -304,7 +231,7 @@ pub fn main() -> GameResult {
             conf::WindowMode::default().resizable(false), // Fixate window size
         );
 
-    let (mut context, mut event_loop) = context_builder.build().expect("Failed to build context.");
+    let (mut context, event_loop) = context_builder.build().expect("Failed to build context.");
     let state = AppState::new(&mut context).expect("Failed to create state.");
 
     println!("OPENED WINDOW");
