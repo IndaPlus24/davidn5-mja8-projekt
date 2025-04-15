@@ -79,10 +79,7 @@ impl Board {
         ghost.piece_type = PieceType::X;
         ghost
     }
-
-    pub fn rotate_cw(&mut self, piece: &mut Piece) -> bool {
-        let new_rotation: usize = (piece.rotation + 1) % 4;
-        let rotated_piece = Piece::new(piece.piece_type, new_rotation);
+    
     pub fn rotate(&mut self, piece: &mut Piece, rotation_type: usize) -> bool {
         let new_rotation: usize = (piece.rotation + rotation_type) % 4;
 
