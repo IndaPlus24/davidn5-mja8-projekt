@@ -5,6 +5,7 @@ use crate::{block::Block, BOARD_AMOUNT_COLUMNS, BOARD_AMOUNT_ROWS, EMPTY_BLOCK_C
 use crate::{ROTATION_CW, ROTATION_CCW, ROTATION_180};
 
 use crate::rotation::{
+    KICK_TABLE_180,
     KICK_TABLE_CCW_I,
     KICK_TABLE_CCW_REGULAR,
     KICK_TABLE_CW_I,
@@ -82,10 +83,11 @@ impl Board {
                 PieceType::I => KICK_TABLE_CW_I[new_rotation],
                 _ => KICK_TABLE_CW_REGULAR[new_rotation],
             },
-            _ => match piece.piece_type {
+            ROTATION_CCW => match piece.piece_type {
                 PieceType::I => KICK_TABLE_CCW_I[new_rotation],
-                _ => KICK_TABLE_CCW_REGULAR[new_rotation]
+                _ => KICK_TABLE_CCW_REGULAR[new_rotation],
             },
+            _ => KICK_TABLE_180[new_rotation],
         };
         
         // Try kick table offsets
