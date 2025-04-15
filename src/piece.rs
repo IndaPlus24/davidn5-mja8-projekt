@@ -1,49 +1,58 @@
 use rand::{seq::SliceRandom, Rng};
 use std::vec;
 
-use crate::rotation::*;
+use crate::rotation::{
+    RELATIVE_MINOS_I,
+    RELATIVE_MINOS_J,
+    RELATIVE_MINOS_L,
+    RELATIVE_MINOS_O,
+    RELATIVE_MINOS_S,
+    RELATIVE_MINOS_T,
+    RELATIVE_MINOS_Z,
+};
 
 #[derive(Clone, Copy, Debug)]
 pub enum PieceType {
     I,
-    O,
-    T,
-    S,
-    Z,
     J,
     L,
-    X,
+    O,
+    S,
+    T,
+    Z,
 }
 impl PieceType {
     pub fn get_path(&self) -> String {
         match self {
             PieceType::I => String::from("/cyan.png"),
-            PieceType::O => String::from("/yellow.png"),
-            PieceType::T => String::from("/magenta.png"),
-            PieceType::S => String::from("/green.png"),
-            PieceType::Z => String::from("/red.png"),
             PieceType::J => String::from("/blue.png"),
             PieceType::L => String::from("/orange.png"),
-            PieceType::X => String::from("/grey.png"),
+            PieceType::O => String::from("/yellow.png"),
+            PieceType::S => String::from("/green.png"),
+            PieceType::T => String::from("/magenta.png"),
+            PieceType::Z => String::from("/red.png"),
+
         }
     }
 
     pub fn get_random() -> PieceType {
         let mut rng = rand::rng();
-        let piece_num = rng.random_range(0..7);
+        let piece_num = rng.random_range(0..7>>>>>>> main
+66
+);
         PieceType::get_piecetype_from_num(piece_num)
     }
 
     pub fn get_piecetype_from_num(n: i32) -> PieceType {
         match n {
             0 => PieceType::I,
-            1 => PieceType::O,
-            2 => PieceType::T,
-            3 => PieceType::S,
-            4 => PieceType::Z,
-            5 => PieceType::J,
-            6 => PieceType::L,
-            _ => PieceType::X,
+            1 => PieceType::J,
+            2 => PieceType::L,
+            3 => PieceType::O,
+            4 => PieceType::S,
+            5 => PieceType::T,
+            6 => PieceType::Z,
+             _ => PieceType::X,
         }
     }
 
@@ -77,8 +86,8 @@ impl Piece {
             PieceType::L => RELATIVE_MINOS_L[rotation].to_vec(),
             PieceType::O => RELATIVE_MINOS_O[rotation].to_vec(),
             PieceType::S => RELATIVE_MINOS_S[rotation].to_vec(),
-            PieceType::Z => RELATIVE_MINOS_Z[rotation].to_vec(),
             PieceType::T => RELATIVE_MINOS_T[rotation].to_vec(),
+            PieceType::Z => RELATIVE_MINOS_Z[rotation].to_vec(),
             _ => Vec::new()
         }
     }
