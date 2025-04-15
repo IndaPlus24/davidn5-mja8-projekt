@@ -244,24 +244,9 @@ impl event::EventHandler<ggez::GameError> for AppState {
                 }
             }
         }
-        //Render active piece
-        let path = &self.active_piece.piece_type.get_path();
-        let image = self.images.get(path).unwrap();
-
-        let (mr, mc) = self.active_piece.midpoint;
-        self.active_piece.block_positions.iter().for_each(|(dr, dc)| {
-            canvas.draw(
-                image,
-                graphics::DrawParam::new().dest(glam::Vec2::new(
-                    (BOARD_UPPER_LEFT.0 + (mc + dc) as i32 * BLOCK_SIZE + 1) as f32,
-                    (BOARD_UPPER_LEFT.1 + (mr + dr) as i32 * BLOCK_SIZE + 1) as f32,
-                )),
-            );
-        });
-
         //Render Ghost Piece
         let ghost_piece = self.board.get_ghost_piece(&self.active_piece);
-        
+                
         let path = &ghost_piece.piece_type.get_path();
         let image = self.images.get(path).unwrap();
 
@@ -275,7 +260,21 @@ impl event::EventHandler<ggez::GameError> for AppState {
                 )),
             );
         });
-        
+
+        //Render active piece
+        let path = &self.active_piece.piece_type.get_path();
+        let image = self.images.get(path).unwrap();
+
+        let (mr, mc) = self.active_piece.midpoint;
+        self.active_piece.block_positions.iter().for_each(|(dr, dc)| {
+            canvas.draw(
+                image,
+                graphics::DrawParam::new().dest(glam::Vec2::new(
+                    (BOARD_UPPER_LEFT.0 + (mc + dc) as i32 * BLOCK_SIZE + 1) as f32,
+                    (BOARD_UPPER_LEFT.1 + (mr + dr) as i32 * BLOCK_SIZE + 1) as f32,
+                )),
+            );
+        });       
 
         //Render the held piece (if it exists)
         if let Some(held_piece) = &self.held_piece {
