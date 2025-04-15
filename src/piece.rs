@@ -31,15 +31,13 @@ impl PieceType {
             PieceType::S => String::from("/green.png"),
             PieceType::T => String::from("/magenta.png"),
             PieceType::Z => String::from("/red.png"),
-
+            PieceType::X => String::from("/grey.png"),
         }
     }
 
     pub fn get_random() -> PieceType {
         let mut rng = rand::rng();
-        let piece_num = rng.random_range(0..7>>>>>>> main
-66
-);
+        let piece_num = rng.random_range(0..7);
         PieceType::get_piecetype_from_num(piece_num)
     }
 
@@ -52,7 +50,7 @@ impl PieceType {
             4 => PieceType::S,
             5 => PieceType::T,
             6 => PieceType::Z,
-             _ => PieceType::X,
+            _ => PieceType::X,
         }
     }
 
