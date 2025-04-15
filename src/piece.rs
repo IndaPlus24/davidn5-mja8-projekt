@@ -31,6 +31,7 @@ impl PieceType {
             PieceType::S => String::from("/green.png"),
             PieceType::T => String::from("/magenta.png"),
             PieceType::Z => String::from("/red.png"),
+            PieceType::X => String::from("/grey.png"),
         }
     }
 
@@ -48,7 +49,8 @@ impl PieceType {
             3 => PieceType::O,
             4 => PieceType::S,
             5 => PieceType::T,
-            _ => PieceType::Z,
+            6 => PieceType::Z,
+            _ => PieceType::X,
         }
     }
 
@@ -84,6 +86,7 @@ impl Piece {
             PieceType::S => RELATIVE_MINOS_S[rotation].to_vec(),
             PieceType::T => RELATIVE_MINOS_T[rotation].to_vec(),
             PieceType::Z => RELATIVE_MINOS_Z[rotation].to_vec(),
+            _ => Vec::new()
         }
     }
 

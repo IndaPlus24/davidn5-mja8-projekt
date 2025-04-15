@@ -70,6 +70,16 @@ impl Board {
         self.place_piece(piece)
     }
 
+    pub fn get_ghost_piece(&mut self, piece: &Piece) -> Piece {
+        let mut ghost = piece.clone();
+    
+        while self.is_valid_position(&mut ghost, 0, 1) {
+            ghost.midpoint.0 += 1;
+        }
+        ghost.piece_type = PieceType::X;
+        ghost
+    }
+    
     pub fn rotate(&mut self, piece: &mut Piece, rotation_type: usize) -> bool {
         let new_rotation: usize = (piece.rotation + rotation_type) % 4;
 
