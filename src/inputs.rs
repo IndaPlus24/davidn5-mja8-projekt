@@ -1,7 +1,4 @@
-use crate::{AppState, HOLD_PIECE, HOLD_PIECE_MIDDLE,
-    MOVE_PIECE_DOWN_HARD_DROP, MOVE_PIECE_DOWN_SOFT_DROP,
-    MOVE_PIECE_LEFT, MOVE_PIECE_RIGHT, ROTATE_PIECE_180, 
-    ROTATE_PIECE_CCW, ROTATE_PIECE_CW, ROTATION_180, ROTATION_CCW, 
+use crate::{AppState, HOLD_PIECE_MIDDLE, ROTATION_180, ROTATION_CCW, 
     ROTATION_CW, TICKS_BEFORE_NEXT_PIECE, TICKS_BETWEEN_INPUTS, TICKS_BETWEEN_ROTATIONS};
 
 use crate::config::input_config::*;
@@ -35,7 +32,7 @@ impl AppState {
         if keyboard.is_key_just_pressed(*self.controls.get(&GameAction::HardDrop).unwrap()) {
             self.board.hard_drop(&mut self.active_piece);
             self.ticks_since_last_input = 0;
-            //SPAWN A NEW PIECE IMMEDIETLY
+            //Spawn new piece immedietly
             self.ticks_without_moving_down = TICKS_BEFORE_NEXT_PIECE;
             self.board.check_full_line();
         }

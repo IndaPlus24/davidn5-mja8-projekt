@@ -32,15 +32,6 @@ const TICKS_BETWEEN_INPUTS: usize = 2;
 const TICKS_BETWEEN_ROTATIONS : usize = 2;
 const TICKS_BEFORE_NEXT_PIECE: usize = 2;
 
-const MOVE_PIECE_RIGHT: KeyCode = KeyCode::Right;
-const MOVE_PIECE_LEFT: KeyCode = KeyCode::Left;
-const MOVE_PIECE_DOWN_SOFT_DROP: KeyCode = KeyCode::Down;
-const MOVE_PIECE_DOWN_HARD_DROP: KeyCode = KeyCode::Space;
-const ROTATE_PIECE_CW:  KeyCode = KeyCode::X;
-const ROTATE_PIECE_CCW: KeyCode = KeyCode::Z;
-const ROTATE_PIECE_180: KeyCode = KeyCode::A;
-const HOLD_PIECE : KeyCode = KeyCode::C;
-
 struct AppState {
     images : HashMap<String, Image>,
     controls: HashMap<GameAction, KeyCode>,
@@ -80,12 +71,6 @@ impl AppState {
             ticks_without_moving_down: 0,
             can_hold : true,
         };
-
-        /*
-        for (r, c) in &state.active_piece.block_positions {
-            state.board.table[*r][*c].path = state.active_piece.piece_type.get_path();
-        }
-        */
         Ok(state)
     }
 
@@ -127,12 +112,10 @@ impl event::EventHandler<ggez::GameError> for AppState {
 
         //Spawn new Piece
         if self.ticks_without_moving_down == TICKS_BEFORE_NEXT_PIECE {
-            // Piece queue should have a set amount by default since it shows some of them to user
             self.spawn_new_piece();
         }
 
-        //CONTROLS
-        
+        //Handle inputs
         self.handle_inputs(ctx);
 
         // IF THE TICK COUNT MATCHES THE CURRENT LEVELS TICK COUNT
