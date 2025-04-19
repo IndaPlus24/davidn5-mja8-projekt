@@ -2,7 +2,8 @@ use std::collections::HashMap;
 
 use ggez::{glam, graphics::{self, Canvas, Image}, Context};
 
-use crate::{Game, BLOCK_SIZE, BOARD_AMOUNT_COLUMNS, BOARD_AMOUNT_ROWS, BOARD_UPPER_LEFT, EMPTY_BLOCK_COLOR, HOLD_PIECE_MIDDLE};
+use crate::Game;
+use crate::consts::{BOARD_UPPER_LEFT, BLOCK_SIZE, HOLD_PIECE_MIDDLE, BOARD_AMOUNT_COLUMNS, BOARD_AMOUNT_ROWS, EMPTY_BLOCK_COLOR};
 
 
 impl Game {

@@ -6,11 +6,12 @@ mod inputs;
 mod config;
 mod game;
 mod game_ui;
+mod consts;
 
 use std::collections::HashMap;
 use std::path;
 
-pub use crate::block::{Block, BLOCK_SIZE, EMPTY_BLOCK_COLOR};
+pub use crate::block::Block;
 pub use crate::game::Game;
 pub use crate::board::Board;
 pub use crate::piece::{Piece, PieceType};
@@ -21,19 +22,6 @@ use ggez::graphics::Image;
 use ggez::input::keyboard::KeyCode;
 use ggez::{conf, event, graphics, Context, ContextBuilder, GameResult};
 
-
-// All of these consts should probably be relative to window size 
-const BOARD_AMOUNT_COLUMNS: usize = 10;
-const BOARD_AMOUNT_ROWS: usize = 20;
-const BOARD_UPPER_LEFT: (i32, i32) = (200, 50);
-const HOLD_PIECE_UPPERLEFT: (isize,isize) = (BOARD_UPPER_LEFT.0 as isize - 140,BOARD_UPPER_LEFT.1 as isize + 50);
-const HOLD_PIECE_MIDDLE : (isize,isize) = (HOLD_PIECE_UPPERLEFT.0 + BLOCK_SIZE as isize * 2 - 20 ,HOLD_PIECE_UPPERLEFT.1 + BLOCK_SIZE as isize * 2);
-
-
-const LEVELS_TICK_COUNTS: [u32; 1] = [60];
-const TICKS_BETWEEN_INPUTS: usize = 2;
-const TICKS_BETWEEN_ROTATIONS : usize = 2;
-const TICKS_BEFORE_NEXT_PIECE: usize = 2;
 
 struct AppState {
     images : HashMap<String, Image>,

@@ -1,7 +1,8 @@
 
 use crate::{Piece, PieceType};
-use crate::{block::Block, BOARD_AMOUNT_COLUMNS, BOARD_AMOUNT_ROWS};
+use crate::block::Block;
 use crate::{ROTATION_CW, ROTATION_CCW};
+pub use crate::consts::{BOARD_AMOUNT_COLUMNS, BOARD_AMOUNT_ROWS};
 
 use crate::rotation::{
     KICK_TABLE_180,

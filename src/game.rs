@@ -3,7 +3,8 @@ use std::collections::{HashMap, VecDeque};
 
 use ggez::Context;
 
-use crate::{default_keyboard_keybindings, Board, GameAction, KeyCode, Piece, PieceType, LEVELS_TICK_COUNTS, TICKS_BEFORE_NEXT_PIECE};
+use crate::{default_keyboard_keybindings, Board, GameAction, KeyCode, Piece, PieceType};
+use crate::consts::{TICKS_BEFORE_NEXT_PIECE, LEVELS_TICK_COUNTS};
 
 pub struct Game {
     pub board : Board, 
