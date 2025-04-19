@@ -1,8 +1,8 @@
-use crate::{AppState, Piece, HOLD_PIECE_MIDDLE, ROTATION_180, ROTATION_CCW, ROTATION_CW, TICKS_BEFORE_NEXT_PIECE, TICKS_BETWEEN_INPUTS, TICKS_BETWEEN_ROTATIONS};
+use crate::{Game, Piece, HOLD_PIECE_MIDDLE, ROTATION_180, ROTATION_CCW, ROTATION_CW, TICKS_BEFORE_NEXT_PIECE, TICKS_BETWEEN_INPUTS, TICKS_BETWEEN_ROTATIONS};
 
 use crate::config::input_config::*;
 
-impl AppState {
+impl Game {
     pub fn handle_inputs(&mut self, ctx : &ggez::Context){
 
         let keyboard = &ctx.keyboard;
