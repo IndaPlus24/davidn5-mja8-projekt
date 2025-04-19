@@ -1,9 +1,9 @@
-use crate::{AppState, HOLD_PIECE_MIDDLE, ROTATION_180, ROTATION_CCW, 
-    ROTATION_CW, TICKS_BEFORE_NEXT_PIECE, TICKS_BETWEEN_INPUTS, TICKS_BETWEEN_ROTATIONS};
+use crate::{Game, Piece, ROTATION_180, ROTATION_CCW, ROTATION_CW,};
+use crate::consts::{TICKS_BEFORE_NEXT_PIECE, TICKS_BETWEEN_INPUTS, TICKS_BETWEEN_ROTATIONS,HOLD_PIECE_MIDDLE};
 
 use crate::config::input_config::*;
 
-impl AppState {
+impl Game {
     pub fn handle_inputs(&mut self, ctx : &ggez::Context){
 
         let keyboard = &ctx.keyboard;
@@ -66,6 +66,9 @@ impl AppState {
         
             let mut held_piece = self.active_piece.clone();
             held_piece.midpoint = HOLD_PIECE_MIDDLE;
+            held_piece.rotation = 0;
+            let blocks: Vec<(isize, isize)> = Piece::get_block_positions(self.active_piece.piece_type, 0    );
+            held_piece.block_positions = blocks;
             
             match self.held_piece.take() {
                 Some(mut previous_held) => {

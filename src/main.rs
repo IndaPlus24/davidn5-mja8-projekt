@@ -4,11 +4,15 @@ mod piece;
 mod rotation;
 mod inputs;
 mod config;
+mod game;
+mod game_ui;
+mod consts;
 
-use std::collections::{HashMap, VecDeque};
+use std::collections::HashMap;
 use std::path;
 
-pub use crate::block::{Block, BLOCK_SIZE, EMPTY_BLOCK_COLOR};
+pub use crate::block::Block;
+pub use crate::game::Game;
 pub use crate::board::Board;
 pub use crate::piece::{Piece, PieceType};
 pub use crate::rotation::{ROTATION_CW, ROTATION_CCW, ROTATION_180};
@@ -16,60 +20,20 @@ pub use crate::config::input_config::*;
 
 use ggez::graphics::Image;
 use ggez::input::keyboard::KeyCode;
-use ggez::{conf, event, glam, graphics, Context, ContextBuilder, GameResult};
+use ggez::{conf, event, graphics, Context, ContextBuilder, GameResult};
 
-
-// All of these consts should probably be relative to window size 
-const BOARD_AMOUNT_COLUMNS: usize = 10;
-const BOARD_AMOUNT_ROWS: usize = 20;
-const BOARD_UPPER_LEFT: (i32, i32) = (200, 50);
-const HOLD_PIECE_UPPERLEFT: (isize,isize) = (BOARD_UPPER_LEFT.0 as isize - 140,BOARD_UPPER_LEFT.1 as isize + 50);
-const HOLD_PIECE_MIDDLE : (isize,isize) = (HOLD_PIECE_UPPERLEFT.0 + BLOCK_SIZE as isize * 2 - 20 ,HOLD_PIECE_UPPERLEFT.1 + BLOCK_SIZE as isize * 2);
-
-
-const LEVELS_TICK_COUNTS: [u32; 1] = [60];
-const TICKS_BETWEEN_INPUTS: usize = 2;
-const TICKS_BETWEEN_ROTATIONS : usize = 2;
-const TICKS_BEFORE_NEXT_PIECE: usize = 2;
 
 struct AppState {
     images : HashMap<String, Image>,
-    controls: HashMap<GameAction, KeyCode>,
-    tick_count: u32,
-    current_level: usize,
-    board: Board, // Board is a 20x10 of blocks
-    active_piece: Piece,
-    held_piece : Option<Piece>,
-    piece_queue: VecDeque<Piece>,
-    ticks_since_last_input: usize,
-    ticks_since_last_rotation : usize, 
-    ticks_without_moving_down: usize,
-    can_hold : bool
+    game : Game,
 }
 
 impl AppState {
     fn new(ctx: &mut Context) -> GameResult<AppState> {
-        let mut piece_queue: VecDeque<Piece> = VecDeque::new();
-        let l = PieceType::get_random_as_list();
-        for p in l {
-            piece_queue.push_back(Piece::new(p, 0));
-        }
-
-        let active_piece = piece_queue.pop_front().unwrap();
 
         let state = AppState {
             images: AppState::preload_images(&ctx),
-            controls : default_keyboard_keybindings(), // WILL NEED TO BE CHANGED AND MAYBE BE A VECTOR FOR 1v1
-            tick_count: 0,
-            current_level: 0,
-            board: Board::new(),
-            active_piece: active_piece,
-            held_piece : None, 
-            piece_queue: piece_queue,
-            ticks_since_last_input: 0,
-            ticks_since_last_rotation: 0,
-            ticks_without_moving_down: 0,
-            can_hold : true,
+            game : Game::new(),
         };
         Ok(state)
     }
@@ -87,50 +51,13 @@ impl AppState {
         image_map
     }
 
-    pub fn spawn_new_piece(&mut self) {
-        if self.piece_queue.len() < 5 {
-            //7-bag
-            let l = PieceType::get_random_as_list();
-            for p in l {
-                self.piece_queue.push_back(Piece::new(p, 0));
-            }
-        }
-    
-        println!("Spawning new piece...");
-        self.active_piece = self.piece_queue.pop_front().unwrap();
-        self.ticks_without_moving_down = 0;
-        self.can_hold = true;
-    }
     
 }
 
 impl event::EventHandler<ggez::GameError> for AppState {
     fn update(&mut self, ctx: &mut Context) -> GameResult {
-        self.tick_count += 1;
-        self.ticks_since_last_input += 1;
-        self.ticks_since_last_rotation +=1;
 
-        //Spawn new Piece
-        if self.ticks_without_moving_down == TICKS_BEFORE_NEXT_PIECE {
-            self.spawn_new_piece();
-        }
-
-        //Handle inputs
-        self.handle_inputs(ctx);
-
-        // IF THE TICK COUNT MATCHES THE CURRENT LEVELS TICK COUNT
-        if self.tick_count % LEVELS_TICK_COUNTS[self.current_level] == 0 {
-            //MOVE PIECE DOWN
-            if !self.board.move_piece(&mut self.active_piece, 0, 1) {
-                self.ticks_without_moving_down += 1;
-                self.board.place_piece(&mut self.active_piece);
-                println!("Piece at bottom...");
-                println!("Checking Lines...");
-                self.board.check_full_line();
-                self.spawn_new_piece();
-            }
-        }
-
+        self.game.next_tick(ctx);
         Ok(())
     }
 
@@ -139,85 +66,19 @@ impl event::EventHandler<ggez::GameError> for AppState {
         let mut canvas = graphics::Canvas::from_frame(ctx, graphics::Color::from([0.1, 0.2, 0.3, 1.0]));
 
         //Render board
-        for r in 0..BOARD_AMOUNT_ROWS {
-            for c in 0..BOARD_AMOUNT_COLUMNS {
-                if self.board.table[r][c].is_occupied() {
-                    let path = &self.board.table[r][c].path;
-                    let image = self.images.get(path).unwrap();
-                    canvas.draw(
-                        image,
-                        graphics::DrawParam::new().dest(glam::Vec2::new(
-                            (BOARD_UPPER_LEFT.0 + c as i32 * BLOCK_SIZE + 1) as f32,
-                            (BOARD_UPPER_LEFT.1 + r as i32 * BLOCK_SIZE + 1) as f32,
-                        )),
-                    );
-                } else {
-                    let rectangle = graphics::Mesh::new_rectangle(
-                        ctx,
-                        graphics::DrawMode::fill(),
-                        graphics::Rect::new_i32(
-                            BOARD_UPPER_LEFT.0 + c as i32 * BLOCK_SIZE + 1,
-                            BOARD_UPPER_LEFT.1 + r as i32 * BLOCK_SIZE + 1,
-                            BLOCK_SIZE - 2,
-                            BLOCK_SIZE - 2,
-                        ),
-                        EMPTY_BLOCK_COLOR,
-                    )
-                    .expect("COULDNT CREATE RECTANGLE FROM BLOCK");
+        self.game.render_board(&self.images, &mut canvas, ctx);
 
-                    canvas.draw(&rectangle, graphics::DrawParam::default());
-                }
-            }
-        }
         //Render Ghost Piece
-        let ghost_piece = self.board.get_ghost_piece(&self.active_piece);
-                
-        let path = &ghost_piece.piece_type.get_path();
-        let image = self.images.get(path).unwrap();
-
-        let (mr, mc) = ghost_piece.midpoint;
-        ghost_piece.block_positions.iter().for_each(|(dr, dc)| {
-            canvas.draw(
-                image,
-                graphics::DrawParam::new().dest(glam::Vec2::new(
-                    (BOARD_UPPER_LEFT.0 + (mc + dc) as i32 * BLOCK_SIZE + 1) as f32,
-                    (BOARD_UPPER_LEFT.1 + (mr + dr) as i32 * BLOCK_SIZE + 1) as f32,
-                )),
-            );
-        });
+        let image = self.images.get("/grey.png").unwrap(); 
+        self.game.render_ghost_piece(image, &mut canvas);
 
         //Render active piece
-        let path = &self.active_piece.piece_type.get_path();
+        let path = &self.game.active_piece.piece_type.get_path();
         let image = self.images.get(path).unwrap();
-
-        let (mr, mc) = self.active_piece.midpoint;
-        self.active_piece.block_positions.iter().for_each(|(dr, dc)| {
-            canvas.draw(
-                image,
-                graphics::DrawParam::new().dest(glam::Vec2::new(
-                    (BOARD_UPPER_LEFT.0 + (mc + dc) as i32 * BLOCK_SIZE + 1) as f32,
-                    (BOARD_UPPER_LEFT.1 + (mr + dr) as i32 * BLOCK_SIZE + 1) as f32,
-                )),
-            );
-        });       
+        self.game.render_active_piece(image, &mut canvas);
 
         //Render the held piece (if it exists)
-        if let Some(held_piece) = &self.held_piece {
-
-            let path = &held_piece.piece_type.get_path();
-            let image = self.images.get(path).unwrap();
-
-        held_piece.block_positions.iter().for_each(|(dr, dc)| {
-            canvas.draw(
-                image,
-                graphics::DrawParam::new().dest(glam::Vec2::new(
-                    (HOLD_PIECE_MIDDLE.0 + *dc * (BLOCK_SIZE as isize+ 1)) as f32,
-                    (HOLD_PIECE_MIDDLE.1 + *dr * (BLOCK_SIZE as isize + 1)) as f32,
-                )),
-            );
-
-        });
-        }
+        self.game.render_held_piece(&self.images,&mut canvas);
 
         canvas.finish(ctx)?;
 
