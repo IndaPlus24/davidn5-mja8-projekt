@@ -25,7 +25,7 @@ impl Game {
         if keyboard.is_key_pressed(*self.controls.get(&GameAction::SoftDrop).unwrap())
             && self.ticks_since_last_input > TICKS_BETWEEN_INPUTS
         {
-            self.board.move_piece(&mut self.active_piece, 0, 1);
+            self.board.move_piece(&mut self.active_piece, 0, -1);
             self.ticks_since_last_input = 0;
         }
 
