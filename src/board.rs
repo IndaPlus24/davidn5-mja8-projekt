@@ -109,6 +109,7 @@ impl Board {
 
         let mut rows_to_remove: Vec<usize> = Vec::new();
         for row in 0..BOARD_AMOUNT_ROWS {
+            // CHECK IF ROW IS FULL
             if self.table[row as usize].iter().all(|b| {
                 match b {
                     Some(_) => true,
@@ -120,19 +121,13 @@ impl Board {
             }
         }
         if !rows_to_remove.is_empty() {
-            // SORT ROWS IN ASCENDING ORDER SO WE START CLEARING FROM BOTTOM
-            rows_to_remove.sort();
+            rows_to_remove.reverse();
 
             //MOVE DOWN THE ROWS ABOVE
             for &row in &rows_to_remove {
-                for r in (1..=row).rev() {
-                    self.table[r] = self.table[r - 1].clone()
+                for r in row..BOARD_AMOUNT_ROWS-1 {
+                    self.table[r] = self.table[r + 1].clone()
                 }
-            }
-
-            //CLEAR TOP ROW
-            for i in 0..BOARD_AMOUNT_COLUMNS {
-                self.table[0][i] = None;
             }
         }
     }
