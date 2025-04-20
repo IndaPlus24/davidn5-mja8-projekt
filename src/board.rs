@@ -1,6 +1,5 @@
 
 use crate::{Piece, PieceType};
-use crate::block::Block;
 use crate::{ROTATION_CW, ROTATION_CCW};
 pub use crate::consts::{BOARD_AMOUNT_COLUMNS, BOARD_AMOUNT_ROWS};
 
@@ -13,20 +12,12 @@ use crate::rotation::{
 };
 
 pub struct Board {
-    pub table: [[Block; BOARD_AMOUNT_COLUMNS]; BOARD_AMOUNT_ROWS],
+    pub table: [[Option<PieceType>; BOARD_AMOUNT_COLUMNS]; BOARD_AMOUNT_ROWS],
 }
 
 impl Board {
     pub fn new() -> Self {
-        let mut table: [[Block; BOARD_AMOUNT_COLUMNS]; BOARD_AMOUNT_ROWS] = Default::default();
-
-        for row in table.iter_mut() {
-            for item in row.iter_mut() {
-                *item = Block::new();
-            }
-        }
-
-        Self { table }
+        Self { table: [[None; BOARD_AMOUNT_COLUMNS]; BOARD_AMOUNT_ROWS] }
     }
 
     pub fn is_valid_position(&mut self, piece: &mut Piece, dx: isize, dy: isize) -> bool {
@@ -43,7 +34,10 @@ impl Board {
             }
             if r < 0 {return true;}
 
-            !self.table[r as usize][c as usize].is_occupied()
+            match self.table[r as usize][c as usize] {
+                Some(_) => false,
+                None => true
+            }
         })
     }
 
@@ -59,8 +53,7 @@ impl Board {
     pub fn place_piece(&mut self, piece: &mut Piece) -> bool {
         let (mr, mc) = piece.midpoint;
         piece.block_positions.iter().for_each(|(dr, dc)| {
-            self.table[(mr+dr) as usize][(mc+dc) as usize].occupied = true;
-            self.table[(mr+dr) as usize][(mc+dc) as usize].path = piece.piece_type.get_path();
+            self.table[(mr+dr) as usize][(mc+dc) as usize] = Some(piece.piece_type);
         });
         true
     }
@@ -116,8 +109,13 @@ impl Board {
     pub fn check_full_line(&mut self) {
 
         let mut rows_to_remove: Vec<usize> = Vec::new();
-        for row in 0..20 {
-            if self.table[row as usize].iter().all(|b| b.is_occupied()) {
+        for row in 0..BOARD_AMOUNT_ROWS {
+            if self.table[row as usize].iter().all(|b| {
+                match b {
+                    Some(_) => true,
+                    None => false
+                }
+            }) { // cursed lol
                 println!("ROW: {} IS FULL", row);
                 rows_to_remove.push(row as usize);
             }
@@ -135,7 +133,7 @@ impl Board {
 
             //CLEAR TOP ROW
             for i in 0..BOARD_AMOUNT_COLUMNS {
-                self.table[0][i] = Block::new();
+                self.table[0][i] = None;
             }
         }
     }

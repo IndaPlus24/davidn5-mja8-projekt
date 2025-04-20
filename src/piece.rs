@@ -11,7 +11,7 @@ use crate::rotation::{
     RELATIVE_MINOS_Z,
 };
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub enum PieceType {
     I,
     J,

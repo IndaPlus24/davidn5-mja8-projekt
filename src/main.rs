@@ -1,4 +1,3 @@
-mod block;
 mod board;
 mod piece;
 mod rotation;
@@ -11,7 +10,6 @@ mod consts;
 use std::collections::HashMap;
 use std::path;
 
-pub use crate::block::Block;
 pub use crate::game::Game;
 pub use crate::board::Board;
 pub use crate::piece::{Piece, PieceType};
@@ -24,7 +22,7 @@ use ggez::{conf, event, graphics, Context, ContextBuilder, GameResult};
 
 
 struct AppState {
-    images : HashMap<String, Image>,
+    images : HashMap<PieceType, Image>,
     game : Game,
 }
 
@@ -38,14 +36,14 @@ impl AppState {
         Ok(state)
     }
 
-    pub fn preload_images(ctx : &Context) -> HashMap<String, Image>{
-        let mut image_map : HashMap<String, Image> = HashMap::new(); 
+    pub fn preload_images(ctx : &Context) -> HashMap<PieceType, Image>{
+        let mut image_map : HashMap<PieceType, Image> = HashMap::new(); 
     
         for i in 0..8 {
             let piece_type = PieceType::get_piecetype_from_num(i);
             let path = piece_type.get_path();
             let image = graphics::Image::from_path(ctx, path).unwrap();
-            image_map.insert(piece_type.get_path(), image);
+            image_map.insert(piece_type, image);
         }
     
         image_map
@@ -69,16 +67,16 @@ impl event::EventHandler<ggez::GameError> for AppState {
         self.game.render_board(&self.images, &mut canvas, ctx);
 
         //Render Ghost Piece
-        let image = self.images.get("/grey.png").unwrap(); 
+        let image = self.images.get(&PieceType::X).unwrap(); 
         self.game.render_ghost_piece(image, &mut canvas);
 
         //Render active piece
-        let path = &self.game.active_piece.piece_type.get_path();
-        let image = self.images.get(path).unwrap();
+        let active_piece_type = self.game.active_piece.piece_type;
+        let image = self.images.get(&active_piece_type).unwrap();
         self.game.render_active_piece(image, &mut canvas);
 
         //Render the held piece (if it exists)
-        self.game.render_held_piece(&self.images,&mut canvas);
+        self.game.render_held_piece(&self.images, &mut canvas);
 
         canvas.finish(ctx)?;
 
