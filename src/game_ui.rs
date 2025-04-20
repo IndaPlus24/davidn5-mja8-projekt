@@ -68,20 +68,23 @@ impl Game {
                     },
 
                     None => {
-                        let rectangle = graphics::Mesh::new_rectangle(
-                            ctx,
-                            graphics::DrawMode::fill(),
-                            graphics::Rect::new_i32(
-                                BOARD_LOWER_LEFT.0 + c as i32 * BLOCK_SIZE + 1,
-                                BOARD_LOWER_LEFT.1 - r as i32 * BLOCK_SIZE + 1,
-                                BLOCK_SIZE - 2,
-                                BLOCK_SIZE - 2,
-                            ),
-                            EMPTY_BLOCK_COLOR,
-                        )
-                        .expect("COULDNT CREATE RECTANGLE FROM BLOCK");
-    
-                        canvas.draw(&rectangle, graphics::DrawParam::default());
+                        if r < 20 {
+                            let rectangle = graphics::Mesh::new_rectangle(
+                                ctx,
+                                graphics::DrawMode::fill(),
+                                graphics::Rect::new_i32(
+                                    BOARD_LOWER_LEFT.0 + c as i32 * BLOCK_SIZE + 1,
+                                    BOARD_LOWER_LEFT.1 - r as i32 * BLOCK_SIZE + 1,
+                                    BLOCK_SIZE - 2,
+                                    BLOCK_SIZE - 2,
+                                ),
+                                EMPTY_BLOCK_COLOR,
+                            )
+                            .expect("COULDNT CREATE RECTANGLE FROM BLOCK");
+        
+                            canvas.draw(&rectangle, graphics::DrawParam::default()); 
+                        }
+                        
                     }
                 }
             }

@@ -26,13 +26,12 @@ impl Board {
             let r = mr + dr + dy;
             let c = mc + dc + dx;
 
-            if c < 0
-                || c >= BOARD_AMOUNT_COLUMNS as isize
-                || r >= BOARD_AMOUNT_ROWS as isize
+            if c >= BOARD_AMOUNT_COLUMNS as isize
+                || c < 0
+                || r < 0
             {
                 return false;
             }
-            if r < 0 {return true;}
 
             match self.table[r as usize][c as usize] {
                 Some(_) => false,
@@ -59,15 +58,15 @@ impl Board {
     }
 
     pub fn hard_drop(&mut self, piece: &mut Piece) -> bool {
-        while self.move_piece(piece, 0, 1) {}
+        while self.move_piece(piece, 0, -1) {}
         self.place_piece(piece)
     }
 
     pub fn get_ghost_piece(&mut self, piece: &Piece) -> Piece {
         let mut ghost = piece.clone();
     
-        while self.is_valid_position(&mut ghost, 0, 1) {
-            ghost.midpoint.0 += 1;
+        while self.is_valid_position(&mut ghost, 0, -1) {
+            ghost.midpoint.0 -= 1;
         }
         ghost.piece_type = PieceType::X;
         ghost
