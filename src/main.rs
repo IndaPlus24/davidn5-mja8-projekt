@@ -63,23 +63,10 @@ impl event::EventHandler<ggez::GameError> for AppState {
         //CREATE CANVAS
         let mut canvas = graphics::Canvas::from_frame(ctx, graphics::Color::from([0.1, 0.2, 0.3, 1.0]));
 
-        //Render board
-        self.game.render_board(&self.images, &mut canvas, ctx);
-
-        //Render Ghost Piece
-        let image = self.images.get(&PieceType::X).unwrap(); 
-        self.game.render_ghost_piece(image, &mut canvas);
-
-        //Render active piece
-        let active_piece_type = self.game.active_piece.piece_type;
-        let image = self.images.get(&active_piece_type).unwrap();
-        self.game.render_active_piece(image, &mut canvas);
-
-        //Render the held piece (if it exists)
-        self.game.render_held_piece(&self.images, &mut canvas);
+        //Render game
+        self.game.render_game(&self.images, &mut canvas, ctx);
 
         canvas.finish(ctx)?;
-
         Ok(())
     }
 }

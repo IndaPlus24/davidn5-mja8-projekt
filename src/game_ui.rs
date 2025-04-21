@@ -7,7 +7,15 @@ use crate::consts::{BOARD_LOWER_LEFT, BLOCK_SIZE, HOLD_PIECE_MIDDLE, BOARD_AMOUN
 
 
 impl Game {
-    pub fn render_active_piece(&mut self, image : &Image, canvas : &mut Canvas){
+    pub fn render_game(&mut self, images: &HashMap<PieceType, Image>, canvas: &mut Canvas, ctx: &mut Context) {
+        self.render_board(images, canvas, ctx);
+        self.render_ghost_piece(images, canvas);
+        self.render_active_piece(images, canvas);
+        self.render_held_piece(images, canvas);
+    }
+
+    pub fn render_active_piece(&mut self, images: &HashMap<PieceType, Image>, canvas: &mut Canvas) {
+        let image = images.get(&self.active_piece.piece_type).unwrap();
         let (mr, mc) = self.active_piece.midpoint;
         self.active_piece.block_positions.iter().for_each(|(dr, dc)| {
             canvas.draw(
@@ -20,7 +28,7 @@ impl Game {
         });       
     }
 
-    pub fn render_held_piece(&mut self,images : &HashMap<PieceType, Image>, canvas : &mut Canvas) {
+    pub fn render_held_piece(&mut self, images: &HashMap<PieceType, Image>, canvas: &mut Canvas) {
         if let Some(held_piece) = &self.held_piece {
             let image = images.get(&held_piece.piece_type).unwrap();
 
@@ -29,7 +37,7 @@ impl Game {
                     image,
                     graphics::DrawParam::new().dest(glam::Vec2::new(
                         (HOLD_PIECE_MIDDLE.0 + *dc * (BLOCK_SIZE as isize+ 1)) as f32,
-                        (HOLD_PIECE_MIDDLE.1 + *dr * (BLOCK_SIZE as isize + 1)) as f32,
+                        (HOLD_PIECE_MIDDLE.1 - *dr * (BLOCK_SIZE as isize + 1)) as f32,
                     )),
                 );
 
@@ -37,8 +45,9 @@ impl Game {
         }
     }
 
-    pub fn render_ghost_piece(&mut self, image : &Image,canvas : &mut Canvas){
+    pub fn render_ghost_piece(&mut self, images: &HashMap<PieceType, Image>, canvas: &mut Canvas){
         let ghost_piece = self.board.get_ghost_piece(&self.active_piece);
+        let image = images.get(&PieceType::X).unwrap();
 
         let (mr, mc) = ghost_piece.midpoint;
         ghost_piece.block_positions.iter().for_each(|(dr, dc)| {
@@ -52,7 +61,7 @@ impl Game {
         });
     }
 
-    pub fn render_board(&mut self, images : &HashMap<PieceType, Image>,canvas : &mut Canvas, ctx: &mut Context){
+    pub fn render_board(&mut self, images: &HashMap<PieceType, Image>, canvas: &mut Canvas, ctx: &mut Context){
         for r in 0..BOARD_AMOUNT_ROWS {
             for c in 0..BOARD_AMOUNT_COLUMNS {
                 match self.board.table[r][c] {
