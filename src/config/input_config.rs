@@ -1,7 +1,7 @@
 use ggez::input::keyboard::KeyCode;
 use std::collections::HashMap;
 
-#[derive(Hash, Eq, PartialEq, Debug)]
+#[derive(Hash, Eq, PartialEq, Debug, Clone, Copy)]
 pub enum GameAction {
     MoveRight,
     MoveLeft,
