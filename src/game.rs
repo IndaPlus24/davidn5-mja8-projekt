@@ -8,6 +8,7 @@ use crate::{default_keyboard_keybindings, GameAction, KeyCode, Piece, PieceType}
 
 pub struct Game {
     pub board: [[Option<PieceType>; BOARD_AMOUNT_COLUMNS]; BOARD_AMOUNT_ROWS],
+    pub game_over: bool,
     pub gravity_timer: f32,
     pub current_level: usize,
     pub active_piece: Piece,
@@ -35,11 +36,12 @@ impl Game {
 
         Game {
             board: [[None; BOARD_AMOUNT_COLUMNS]; BOARD_AMOUNT_ROWS],
+            game_over: false,
             gravity_timer: 0.,
             current_level: 0,
-            active_piece: active_piece,
+            active_piece,
             held_piece: None,
-            piece_queue: piece_queue,
+            piece_queue,
             ticks_since_last_input: 0.,
             ticks_since_last_rotation: 0.,
             ticks_without_moving_down: 0.,
@@ -62,11 +64,40 @@ impl Game {
 
         println!("Spawning new piece...");
         self.active_piece = self.piece_queue.pop_front().unwrap();
+
+        if self.check_game_over() {
+            println!("Game Over!");
+            self.game_over = true;
+        }
+
         self.ticks_without_moving_down = 0.;
         self.can_hold = true;
     }
 
+    pub fn check_game_over(&mut self) -> bool {
+        let piece = &self.active_piece;
+        let (mr, mc) = self.active_piece.midpoint;
+        piece.block_positions.iter().any(|(dr, dc)| {
+            let r = mr + dr;
+            let c = mc + dc;
+
+            if r < 0
+                || r >= BOARD_AMOUNT_ROWS as isize
+                || c < 0
+                || c >= BOARD_AMOUNT_COLUMNS as isize
+            {
+                return true;
+            }
+
+            self.board[r as usize][c as usize].is_some()
+        })
+    }
+
     pub fn next_tick(&mut self, ctx: &mut Context) {
+        if self.game_over {
+            return;
+        }
+
         let dt = ctx.time.delta().as_secs_f32();
 
         self.gravity_timer += dt;
