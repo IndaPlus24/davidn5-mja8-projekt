@@ -11,7 +11,7 @@ use crate::rotation::{
     RELATIVE_MINOS_Z,
 };
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub enum PieceType {
     I,
     J,
@@ -96,7 +96,7 @@ impl Piece {
 
         Self {
             piece_type: piece_type,
-            midpoint: (-1, 4),
+            midpoint: (20, 4),
             block_positions: blocks,
             rotation: 0,
         }

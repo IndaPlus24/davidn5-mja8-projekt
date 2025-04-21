@@ -1,4 +1,3 @@
-mod block;
 mod board;
 mod piece;
 mod rotation;
@@ -11,9 +10,7 @@ mod consts;
 use std::collections::HashMap;
 use std::path;
 
-pub use crate::block::Block;
 pub use crate::game::Game;
-pub use crate::board::Board;
 pub use crate::piece::{Piece, PieceType};
 pub use crate::rotation::{ROTATION_CW, ROTATION_CCW, ROTATION_180};
 pub use crate::config::input_config::*;
@@ -24,7 +21,7 @@ use ggez::{conf, event, graphics, Context, ContextBuilder, GameResult};
 
 
 struct AppState {
-    images : HashMap<String, Image>,
+    images : HashMap<PieceType, Image>,
     game : Game,
 }
 
@@ -38,14 +35,14 @@ impl AppState {
         Ok(state)
     }
 
-    pub fn preload_images(ctx : &Context) -> HashMap<String, Image>{
-        let mut image_map : HashMap<String, Image> = HashMap::new(); 
+    pub fn preload_images(ctx : &Context) -> HashMap<PieceType, Image>{
+        let mut image_map : HashMap<PieceType, Image> = HashMap::new(); 
     
         for i in 0..8 {
             let piece_type = PieceType::get_piecetype_from_num(i);
             let path = piece_type.get_path();
             let image = graphics::Image::from_path(ctx, path).unwrap();
-            image_map.insert(piece_type.get_path(), image);
+            image_map.insert(piece_type, image);
         }
     
         image_map
@@ -56,7 +53,6 @@ impl AppState {
 
 impl event::EventHandler<ggez::GameError> for AppState {
     fn update(&mut self, ctx: &mut Context) -> GameResult {
-
         self.game.next_tick(ctx);
         Ok(())
     }
@@ -65,23 +61,10 @@ impl event::EventHandler<ggez::GameError> for AppState {
         //CREATE CANVAS
         let mut canvas = graphics::Canvas::from_frame(ctx, graphics::Color::from([0.1, 0.2, 0.3, 1.0]));
 
-        //Render board
-        self.game.render_board(&self.images, &mut canvas, ctx);
-
-        //Render Ghost Piece
-        let image = self.images.get("/grey.png").unwrap(); 
-        self.game.render_ghost_piece(image, &mut canvas);
-
-        //Render active piece
-        let path = &self.game.active_piece.piece_type.get_path();
-        let image = self.images.get(path).unwrap();
-        self.game.render_active_piece(image, &mut canvas);
-
-        //Render the held piece (if it exists)
-        self.game.render_held_piece(&self.images,&mut canvas);
+        //Render game
+        self.game.render_game(&self.images, &mut canvas, ctx);
 
         canvas.finish(ctx)?;
-
         Ok(())
     }
 }
