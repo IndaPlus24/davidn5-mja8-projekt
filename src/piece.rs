@@ -96,7 +96,7 @@ impl Piece {
 
         Self {
             piece_type: piece_type,
-            midpoint: (21, 4),
+            midpoint: (20, 4),
             block_positions: blocks,
             rotation: 0,
         }

@@ -72,7 +72,7 @@ impl Game {
             
             match self.held_piece.take() {
                 Some(mut previous_held) => {
-                    previous_held.midpoint = (21, 4);
+                    previous_held.midpoint = (20, 4);
                     self.active_piece = previous_held;
                 }
                 None => {
