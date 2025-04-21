@@ -1,4 +1,4 @@
-
+use crate::Game;
 use crate::{Piece, PieceType};
 use crate::{ROTATION_CW, ROTATION_CCW};
 pub use crate::consts::{BOARD_AMOUNT_COLUMNS, BOARD_AMOUNT_ROWS};
@@ -11,16 +11,9 @@ use crate::rotation::{
     KICK_TABLE_CW_REGULAR,
 };
 
-pub struct Board {
-    pub table: [[Option<PieceType>; BOARD_AMOUNT_COLUMNS]; BOARD_AMOUNT_ROWS],
-}
-
-impl Board {
-    pub fn new() -> Self {
-        Self { table: [[None; BOARD_AMOUNT_COLUMNS]; BOARD_AMOUNT_ROWS] }
-    }
-
-    pub fn is_valid_position(&mut self, piece: &mut Piece, dx: isize, dy: isize) -> bool {
+impl Game {
+    pub fn is_valid_position(&mut self, dx: isize, dy: isize) -> bool {
+        let piece = &self.active_piece;
         let (mr, mc) = piece.midpoint;
         piece.block_positions.iter().all(|(dr, dc)| {
             let r = mr + dr + dy;
@@ -33,51 +26,55 @@ impl Board {
                 return false;
             }
 
-            match self.table[r as usize][c as usize] {
+            match self.board[r as usize][c as usize] {
                 Some(_) => false,
                 None => true
             }
         })
     }
 
-    pub fn move_piece(&mut self, piece: &mut Piece, dx: isize, dy: isize) -> bool {
-        if !self.is_valid_position(piece, dx, dy) {
+    pub fn move_piece(&mut self, dx: isize, dy: isize) -> bool {
+        if !self.is_valid_position(dx, dy) {
             return false;
         }
-        piece.midpoint.0 += dy;
-        piece.midpoint.1 += dx;
+        self.active_piece.midpoint.0 += dy;
+        self.active_piece.midpoint.1 += dx;
         true
     }
 
-    pub fn place_piece(&mut self, piece: &mut Piece) -> bool {
+    pub fn place_piece(&mut self) -> bool {
+        let piece = &self.active_piece;
         let (mr, mc) = piece.midpoint;
         piece.block_positions.iter().for_each(|(dr, dc)| {
-            self.table[(mr+dr) as usize][(mc+dc) as usize] = Some(piece.piece_type);
+            self.board[(mr+dr) as usize][(mc+dc) as usize] = Some(piece.piece_type);
         });
         true
     }
 
-    pub fn hard_drop(&mut self, piece: &mut Piece) -> bool {
-        while self.move_piece(piece, 0, -1) {}
-        self.place_piece(piece)
+    pub fn hard_drop(&mut self) -> bool {
+        while self.move_piece(0, -1) {}
+        self.place_piece()
     }
 
-    pub fn get_ghost_piece(&mut self, piece: &Piece) -> Piece {
-        let mut ghost = piece.clone();
+    pub fn get_ghost_piece(&mut self) -> Piece {
+        let mut ghost = self.active_piece.clone();
     
-        while self.is_valid_position(&mut ghost, 0, -1) {
-            ghost.midpoint.0 -= 1;
+        let mut dy: isize = -1;
+        while self.is_valid_position(0, dy) {
+            dy -= 1;
         }
-        ghost.piece_type = PieceType::X;
+        ghost.midpoint.0 += dy+1;
         ghost
     }
     
-    pub fn rotate(&mut self, piece: &mut Piece, rotation_type: usize) -> bool {
+    pub fn rotate(&mut self, rotation_type: usize) -> bool {
+        let piece = self.active_piece.clone();
         let new_rotation: usize = (piece.rotation + rotation_type) % 4;
 
         // Set up rotated piece for kick table checks
         let mut rotated_piece = Piece::new(piece.piece_type, new_rotation);
         rotated_piece.midpoint = piece.midpoint;
+        self.active_piece = rotated_piece;
 
         // Fetch the suitable kick table
         let kick_table = match rotation_type {
@@ -94,14 +91,13 @@ impl Board {
         
         // Try kick table offsets
         for (dx, dy) in kick_table {
-            if self.move_piece(&mut rotated_piece, dx, dy) {
-                piece.block_positions = rotated_piece.block_positions;
-                piece.rotation = new_rotation;
-                piece.midpoint = rotated_piece.midpoint;
+            if self.move_piece(dx, dy) {
+                self.active_piece.rotation = new_rotation;
                 return true;
             }
         }
 
+        self.active_piece = piece;
         false
     }
 
@@ -110,7 +106,7 @@ impl Board {
         let mut rows_to_remove: Vec<usize> = Vec::new();
         for row in 0..BOARD_AMOUNT_ROWS {
             // CHECK IF ROW IS FULL
-            if self.table[row as usize].iter().all(|b| {
+            if self.board[row as usize].iter().all(|b| {
                 match b {
                     Some(_) => true,
                     None => false
@@ -126,7 +122,7 @@ impl Board {
             //MOVE DOWN THE ROWS ABOVE
             for &row in &rows_to_remove {
                 for r in row..BOARD_AMOUNT_ROWS-1 {
-                    self.table[r] = self.table[r + 1].clone()
+                    self.board[r] = self.board[r + 1].clone()
                 }
             }
         }

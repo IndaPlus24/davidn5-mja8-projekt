@@ -46,7 +46,7 @@ impl Game {
     }
 
     pub fn render_ghost_piece(&mut self, images: &HashMap<PieceType, Image>, canvas: &mut Canvas){
-        let ghost_piece = self.board.get_ghost_piece(&self.active_piece);
+        let ghost_piece = self.get_ghost_piece();
         let image = images.get(&self.active_piece.piece_type).unwrap();
 
         let (mr, mc) = ghost_piece.midpoint;
@@ -67,7 +67,7 @@ impl Game {
     pub fn render_board(&mut self, images: &HashMap<PieceType, Image>, canvas: &mut Canvas, ctx: &mut Context){
         for r in 0..BOARD_AMOUNT_ROWS {
             for c in 0..BOARD_AMOUNT_COLUMNS {
-                match self.board.table[r][c] {
+                match self.board[r][c] {
                     Some(piece_type) => {
                         let image = images.get(&piece_type).unwrap();
                         canvas.draw(

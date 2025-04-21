@@ -11,7 +11,6 @@ use std::collections::HashMap;
 use std::path;
 
 pub use crate::game::Game;
-pub use crate::board::Board;
 pub use crate::piece::{Piece, PieceType};
 pub use crate::rotation::{ROTATION_CW, ROTATION_CCW, ROTATION_180};
 pub use crate::config::input_config::*;
@@ -54,7 +53,6 @@ impl AppState {
 
 impl event::EventHandler<ggez::GameError> for AppState {
     fn update(&mut self, ctx: &mut Context) -> GameResult {
-
         self.game.next_tick(ctx);
         Ok(())
     }

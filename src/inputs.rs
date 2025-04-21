@@ -11,37 +11,37 @@ impl Game {
         if keyboard.is_key_pressed(*self.controls.get(&GameAction::MoveRight).unwrap())
             && self.ticks_since_last_input > TICKS_BETWEEN_INPUTS
         {
-            self.board.move_piece(&mut self.active_piece, 1, 0);
+            self.move_piece(1, 0);
             self.ticks_since_last_input = 0;
         }
 
         if keyboard.is_key_pressed(*self.controls.get(&GameAction::MoveLeft).unwrap())
             && self.ticks_since_last_input > TICKS_BETWEEN_INPUTS
         {
-            self.board.move_piece(&mut self.active_piece, -1, 0);
+            self.move_piece(-1, 0);
             self.ticks_since_last_input = 0;
         }
 
         if keyboard.is_key_pressed(*self.controls.get(&GameAction::SoftDrop).unwrap())
             && self.ticks_since_last_input > TICKS_BETWEEN_INPUTS
         {
-            self.board.move_piece(&mut self.active_piece, 0, -1);
+            self.move_piece(0, -1);
             self.ticks_since_last_input = 0;
         }
 
         if keyboard.is_key_just_pressed(*self.controls.get(&GameAction::HardDrop).unwrap()) {
-            self.board.hard_drop(&mut self.active_piece);
+            self.hard_drop();
             self.ticks_since_last_input = 0;
             //Spawn new piece immedietly
             self.ticks_without_moving_down = TICKS_BEFORE_NEXT_PIECE;
-            self.board.check_full_line();
+            self.check_full_line();
         }
 
         if keyboard.is_key_just_pressed(*self.controls.get(&GameAction::RotateCw).unwrap())
             && self.ticks_since_last_rotation > TICKS_BETWEEN_ROTATIONS
         {
             println!("Rotating CW...");
-            self.board.rotate(&mut self.active_piece, ROTATION_CW);
+            self.rotate(ROTATION_CW);
             self.ticks_since_last_rotation = 0;
         }
 
@@ -49,7 +49,7 @@ impl Game {
             && self.ticks_since_last_rotation > TICKS_BETWEEN_ROTATIONS
         {
             println!("Rotating CCW...");
-            self.board.rotate(&mut self.active_piece, ROTATION_CCW);
+            self.rotate(ROTATION_CCW);
             self.ticks_since_last_rotation = 0;
         }
 
@@ -57,7 +57,7 @@ impl Game {
             && self.ticks_since_last_rotation > TICKS_BETWEEN_ROTATIONS
         {
             println!("Rotating 180...");
-            self.board.rotate(&mut self.active_piece, ROTATION_180);
+            self.rotate(ROTATION_180);
             self.ticks_since_last_rotation = 0;
         }
 
