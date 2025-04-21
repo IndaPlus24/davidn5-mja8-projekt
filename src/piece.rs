@@ -2,13 +2,8 @@ use rand::{seq::SliceRandom, Rng};
 use std::vec;
 
 use crate::rotation::{
-    RELATIVE_MINOS_I,
-    RELATIVE_MINOS_J,
-    RELATIVE_MINOS_L,
-    RELATIVE_MINOS_O,
-    RELATIVE_MINOS_S,
-    RELATIVE_MINOS_T,
-    RELATIVE_MINOS_Z,
+    RELATIVE_MINOS_I, RELATIVE_MINOS_J, RELATIVE_MINOS_L, RELATIVE_MINOS_O, RELATIVE_MINOS_S,
+    RELATIVE_MINOS_T, RELATIVE_MINOS_Z,
 };
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
@@ -20,7 +15,7 @@ pub enum PieceType {
     S,
     T,
     Z,
-    X
+    X,
 }
 impl PieceType {
     pub fn get_path(&self) -> String {
@@ -87,7 +82,7 @@ impl Piece {
             PieceType::S => RELATIVE_MINOS_S[rotation].to_vec(),
             PieceType::T => RELATIVE_MINOS_T[rotation].to_vec(),
             PieceType::Z => RELATIVE_MINOS_Z[rotation].to_vec(),
-            _ => Vec::new()
+            PieceType::X => Vec::new(),
         }
     }
 
