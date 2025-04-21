@@ -59,7 +59,13 @@ impl AppState {
             let drifar_keybinds: Vec<HashMap<GameAction, KeyCode>> = default_drivarkaden_keybindings();
             self.game_one.controls  = drifar_keybinds[0].clone();
             self.game_two.controls = drifar_keybinds[1].clone();
+        } 
+        
+        //Runs the program in train ai mode. 
+        else if args.contains(&"--train".to_string()) {
+            //TODO -- train AI
         }
+        
     }
 }
 
