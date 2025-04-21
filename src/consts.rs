@@ -21,10 +21,11 @@ pub const HOLD_PIECE_MIDDLE: (isize, isize) = (
     HOLD_PIECE_UPPERLEFT.1 + BLOCK_SIZE as isize * 2,
 );
 
-pub const LEVELS_TICK_COUNTS: [u32; 1] = [60];
-pub const TICKS_BETWEEN_INPUTS: usize = 2;
-pub const TICKS_BETWEEN_ROTATIONS: usize = 2;
-pub const TICKS_BEFORE_NEXT_PIECE: usize = 2;
+//Delays (seconds)
+pub const LEVELS_GRAVITY_THRESHOLD: [f32; 1] = [0.8];
+pub const TICKS_BETWEEN_INPUTS: f32 = 0.1; // 100 ms
+pub const TICKS_BETWEEN_ROTATIONS: f32 = 0.1;
+pub const TICKS_BEFORE_NEXT_PIECE: f32 = 0.00;
 
-pub const DAS_TICKS: usize = 6; // Delayed Auto Shift - ticks between the inital input until execution
-pub const ARR_TICKS: usize = 4; // Auto Repeat Rate - ticks between piece movement when holding down
+pub const DAS_TICKS: f32 = 0.06; // Delayed Auto Shift - ticks between the inital input until execution
+pub const ARR_TICKS: f32 = 0.04; // Auto Repeat Rate - ticks between piece movement when holding down

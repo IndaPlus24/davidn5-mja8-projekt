@@ -10,6 +10,8 @@ impl Game {
     pub fn handle_inputs(&mut self, ctx: &ggez::Context) {
         let keyboard = &ctx.keyboard;
 
+        let dt = ctx.time.delta().as_secs_f32();
+
         let right_held =
             keyboard.is_key_pressed(*self.controls.get(&GameAction::MoveRight).unwrap());
         let left_held = keyboard.is_key_pressed(*self.controls.get(&GameAction::MoveLeft).unwrap());
@@ -27,15 +29,15 @@ impl Game {
                     // New direction pressed: move once and start DAS
                     self.move_piece(dir, 0);
                     self.das_direction = Some(dir);
-                    self.das_timer = 0;
-                    self.arr_timer = 0;
+                    self.das_timer = 0.;
+                    self.arr_timer = 0.;
                 } else {
-                    self.das_timer += 1;
+                    self.das_timer += dt;
                     if self.das_timer >= DAS_TICKS {
-                        self.arr_timer += 1;
+                        self.arr_timer += dt;
                         if self.arr_timer >= ARR_TICKS {
                             self.move_piece(dir, 0);
-                            self.arr_timer = 0;
+                            self.arr_timer = 0.;
                         }
                     }
                 }
@@ -43,8 +45,8 @@ impl Game {
             None => {
                 // No direction held
                 self.das_direction = None;
-                self.das_timer = 0;
-                self.arr_timer = 0;
+                self.das_timer = 0.;
+                self.arr_timer = 0.;
             }
         }
 
@@ -52,14 +54,14 @@ impl Game {
             && self.ticks_since_last_input > TICKS_BETWEEN_INPUTS
         {
             self.move_piece(0, -1);
-            self.ticks_since_last_input = 0;
+            self.ticks_since_last_input = 0.;
         }
 
         if keyboard.is_key_just_pressed(*self.controls.get(&GameAction::HardDrop).unwrap()) {
             self.hard_drop();
-            self.ticks_since_last_input = 0;
+            self.ticks_since_last_input = 0.;
             //Spawn new piece immedietly
-            self.ticks_without_moving_down = TICKS_BEFORE_NEXT_PIECE;
+            self.ticks_without_moving_down = TICKS_BEFORE_NEXT_PIECE + 1.;
             self.check_full_line();
         }
 
@@ -68,7 +70,7 @@ impl Game {
         {
             println!("Rotating CW...");
             self.rotate(ROTATION_CW);
-            self.ticks_since_last_rotation = 0;
+            self.ticks_since_last_rotation = 0.;
         }
 
         if keyboard.is_key_just_pressed(*self.controls.get(&GameAction::RotateCcw).unwrap())
@@ -76,7 +78,7 @@ impl Game {
         {
             println!("Rotating CCW...");
             self.rotate(ROTATION_CCW);
-            self.ticks_since_last_rotation = 0;
+            self.ticks_since_last_rotation = 0.;
         }
 
         if keyboard.is_key_just_pressed(*self.controls.get(&GameAction::Rotate180).unwrap())
@@ -84,7 +86,7 @@ impl Game {
         {
             println!("Rotating 180...");
             self.rotate(ROTATION_180);
-            self.ticks_since_last_rotation = 0;
+            self.ticks_since_last_rotation = 0.;
         }
 
         if keyboard.is_key_just_pressed(*self.controls.get(&GameAction::HoldPiece).unwrap())

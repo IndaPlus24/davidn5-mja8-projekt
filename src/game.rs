@@ -3,24 +3,24 @@ use std::collections::{HashMap, VecDeque};
 use ggez::Context;
 
 use crate::board::{BOARD_AMOUNT_COLUMNS, BOARD_AMOUNT_ROWS};
-use crate::consts::{LEVELS_TICK_COUNTS, TICKS_BEFORE_NEXT_PIECE};
+use crate::consts::{LEVELS_GRAVITY_THRESHOLD, TICKS_BEFORE_NEXT_PIECE};
 use crate::{default_keyboard_keybindings, GameAction, KeyCode, Piece, PieceType};
 
 pub struct Game {
     pub board: [[Option<PieceType>; BOARD_AMOUNT_COLUMNS]; BOARD_AMOUNT_ROWS],
-    pub tick_count: u32,
+    pub gravity_timer: f32,
     pub current_level: usize,
     pub active_piece: Piece,
     pub held_piece: Option<Piece>,
     pub piece_queue: VecDeque<Piece>,
-    pub ticks_since_last_input: usize,
-    pub ticks_since_last_rotation: usize,
-    pub ticks_without_moving_down: usize,
+    pub ticks_since_last_input: f32,
+    pub ticks_since_last_rotation: f32,
+    pub ticks_without_moving_down: f32,
     pub can_hold: bool,
     pub controls: HashMap<GameAction, KeyCode>,
     pub das_direction: Option<isize>,
-    pub das_timer: usize,
-    pub arr_timer: usize,
+    pub das_timer: f32,
+    pub arr_timer: f32,
 }
 
 impl Game {
@@ -35,19 +35,19 @@ impl Game {
 
         Game {
             board: [[None; BOARD_AMOUNT_COLUMNS]; BOARD_AMOUNT_ROWS],
-            tick_count: 0,
+            gravity_timer: 0.,
             current_level: 0,
             active_piece: active_piece,
             held_piece: None,
             piece_queue: piece_queue,
-            ticks_since_last_input: 0,
-            ticks_since_last_rotation: 0,
-            ticks_without_moving_down: 0,
+            ticks_since_last_input: 0.,
+            ticks_since_last_rotation: 0.,
+            ticks_without_moving_down: 0.,
             can_hold: true,
             controls: default_keyboard_keybindings(),
             das_direction: None,
-            das_timer: 0,
-            arr_timer: 0,
+            das_timer: 0.,
+            arr_timer: 0.,
         }
     }
 
@@ -62,17 +62,19 @@ impl Game {
 
         println!("Spawning new piece...");
         self.active_piece = self.piece_queue.pop_front().unwrap();
-        self.ticks_without_moving_down = 0;
+        self.ticks_without_moving_down = 0.;
         self.can_hold = true;
     }
 
     pub fn next_tick(&mut self, ctx: &mut Context) {
-        self.tick_count += 1;
-        self.ticks_since_last_input += 1;
-        self.ticks_since_last_rotation += 1;
+        let dt = ctx.time.delta().as_secs_f32();
+
+        self.gravity_timer += dt;
+        self.ticks_since_last_input += dt;
+        self.ticks_since_last_rotation += dt;
 
         //Spawn new Piece
-        if self.ticks_without_moving_down == TICKS_BEFORE_NEXT_PIECE {
+        if self.ticks_without_moving_down > TICKS_BEFORE_NEXT_PIECE {
             self.spawn_new_piece();
         }
 
@@ -80,10 +82,11 @@ impl Game {
         self.handle_inputs(ctx);
 
         // IF THE TICK COUNT MATCHES THE CURRENT LEVELS TICK COUNT
-        if self.tick_count % LEVELS_TICK_COUNTS[self.current_level] == 0 {
-            //MOVE PIECE DOWN
+        if self.gravity_timer > LEVELS_GRAVITY_THRESHOLD[self.current_level] {
+            self.gravity_timer = 0.;
+
             if !self.move_piece(0, -1) {
-                self.ticks_without_moving_down += 1;
+                self.ticks_without_moving_down += dt;
                 self.place_piece();
                 println!("Piece at bottom...");
                 println!("Checking Lines...");
