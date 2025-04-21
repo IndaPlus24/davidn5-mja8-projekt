@@ -47,17 +47,20 @@ impl Game {
 
     pub fn render_ghost_piece(&mut self, images: &HashMap<PieceType, Image>, canvas: &mut Canvas){
         let ghost_piece = self.board.get_ghost_piece(&self.active_piece);
-        let image = images.get(&PieceType::X).unwrap();
+        let image = images.get(&self.active_piece.piece_type).unwrap();
 
         let (mr, mc) = ghost_piece.midpoint;
         ghost_piece.block_positions.iter().for_each(|(dr, dc)| {
-            canvas.draw(
-                image,
-                graphics::DrawParam::new().dest(glam::Vec2::new(
+
+            // SET POSITION AND OPACITY
+            let param = graphics::DrawParam::new()
+                .dest(glam::Vec2::new(
                     (BOARD_LOWER_LEFT.0 + (mc + dc) as i32 * BLOCK_SIZE + 1) as f32,
                     (BOARD_LOWER_LEFT.1 - (mr + dr) as i32 * BLOCK_SIZE + 1) as f32,
-                )),
-            );
+                ))
+                .color(graphics::Color::from_rgba(255, 255, 255, 127));
+
+            canvas.draw(image, param);
         });
     }
 
