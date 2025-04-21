@@ -36,7 +36,7 @@ impl AppState {
     pub fn preload_images(ctx: &Context) -> HashMap<PieceType, Image> {
         let mut image_map: HashMap<PieceType, Image> = HashMap::new();
 
-        for i in 0..7 {
+        for i in 0..8 {
             let piece_type = PieceType::get_piecetype_from_num(i);
             let path = piece_type.get_path();
             let image = graphics::Image::from_path(ctx, path).unwrap();
