@@ -23,9 +23,9 @@ pub const HOLD_PIECE_MIDDLE: (isize, isize) = (
 
 //Delays (seconds)
 pub const LEVELS_GRAVITY_THRESHOLD: [f32; 1] = [0.8];
-pub const TICKS_BETWEEN_INPUTS: f32 = 0.1; // 100 ms
-pub const TICKS_BETWEEN_ROTATIONS: f32 = 0.1;
-pub const TICKS_BEFORE_NEXT_PIECE: f32 = 0.00;
+pub const TICKS_BETWEEN_INPUTS: f32 = 0.05; // 50 ms between sotft drop inputs
+pub const TICKS_BETWEEN_ROTATIONS: f32 = 0.1; // 100 ms between rotation inputs
+pub const TICKS_BEFORE_NEXT_PIECE: f32 = 0.00; // can probably remove?
 
 pub const DAS_TICKS: f32 = 0.06; // Delayed Auto Shift - ticks between the inital input until execution
 pub const ARR_TICKS: f32 = 0.04; // Auto Repeat Rate - ticks between piece movement when holding down
