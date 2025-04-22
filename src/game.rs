@@ -9,6 +9,7 @@ use crate::{default_keyboard_keybindings, GameAction, KeyCode, Piece, PieceType}
 pub struct Game {
     pub board: [[Option<PieceType>; BOARD_AMOUNT_COLUMNS]; BOARD_AMOUNT_ROWS],
     pub game_over: bool,
+    pub score : usize, 
     pub gravity_timer: f32,
     pub current_level: usize,
     pub active_piece: Piece,
@@ -37,6 +38,7 @@ impl Game {
         Game {
             board: [[None; BOARD_AMOUNT_COLUMNS]; BOARD_AMOUNT_ROWS],
             game_over: false,
+            score : 0,
             gravity_timer: 0.,
             current_level: 0,
             active_piece,
@@ -81,14 +83,17 @@ impl Game {
             let r = mr + dr;
             let c = mc + dc;
 
+            // If the active piece is outside the board
             if r < 0
                 || r >= BOARD_AMOUNT_ROWS as isize
                 || c < 0
                 || c >= BOARD_AMOUNT_COLUMNS as isize
             {
+
                 return true;
             }
 
+            // If the active piece overlaps with another piece.
             self.board[r as usize][c as usize].is_some()
         })
     }

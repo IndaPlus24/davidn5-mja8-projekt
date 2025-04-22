@@ -8,7 +8,10 @@ mod piece;
 mod rotation;
 
 use std::collections::HashMap;
+use std::error::Error;
 use std::path;
+use std::str::FromStr;
+use csv::{Reader, Writer};
 
 pub use crate::config::input_config::*;
 pub use crate::game::Game;
@@ -67,11 +70,61 @@ impl AppState {
         }
         
     }
+
+    fn save_score(name : String, score : usize) -> Result<(), Box<dyn Error>> {
+
+        println!("Saving score to file ...");
+        let path = "res/highscore.csv";
+
+        //Get previous scores and add new score
+        let mut scores = get_scores_from_file(path);
+        scores.push((name , score));
+        
+        //Sort scores and reverse
+        scores.sort_by(|a,b| b.1.cmp(&a.1));
+
+        //Write top 10 to file 
+        if save_scores_to_file(path, scores){
+            println!("Succesfully saved score to file ...");
+        }
+        Ok(())
+    }
+    
+}
+
+fn get_scores_from_file(path : &str) -> Vec<(String, usize)>{
+    let mut rdr = Reader::from_path(path).expect("Couldn't open file");
+        let mut scores: Vec<(String, usize)> = Vec::new();
+    
+        for result in rdr.records() {
+            let record = result.expect("Couldn't parse result from file");
+            scores.push((record.get(0).unwrap().to_string(),FromStr::from_str(record.get(1).unwrap()).expect("Score is not of type usize")));
+        }
+        scores
+}
+
+fn save_scores_to_file(path : &str, scores :Vec<(String, usize)>) -> bool{
+    let mut wtr = Writer::from_path(path).expect("Couldn't open file");
+    wtr.write_record(&["name", "score"]).expect("Couldnt write to file");  
+
+    for (i,(n,s)) in scores.iter().enumerate(){
+        if i == 10 {
+            break;
+        }
+        let _ = wtr.write_record(&[n, &s.to_string()]);
+    } 
+    true
 }
 
 impl event::EventHandler<ggez::GameError> for AppState {
     fn update(&mut self, ctx: &mut Context) -> GameResult {
         self.game_one.next_tick(ctx);
+
+        if self.game_one.game_over {
+            //TODO Prompt name
+            let name = "";
+            let _ = Self::save_score(name.to_string(), self.game_one.score);
+        }
         Ok(())
     }
 
