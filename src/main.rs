@@ -11,6 +11,7 @@ use std::collections::HashMap;
 use std::error::Error;
 use std::path;
 use std::str::FromStr;
+use consts::{WINDOW_HEIGHT, WINDOW_WIDTH};
 use csv::{Reader, Writer};
 
 pub use crate::config::input_config::*;
@@ -24,7 +25,8 @@ use ggez::input::keyboard::KeyCode;
 use ggez::{conf, event, graphics, Context, ContextBuilder, GameResult};
 
 struct AppState {
-    images: HashMap<PieceType, Image>,
+    piece_assets: HashMap<PieceType, Image>,
+    board_assets: HashMap<String, Image>,
     game_one: Game,
     game_two : Game,
 }
@@ -32,7 +34,8 @@ struct AppState {
 impl AppState {
     fn new(ctx: &mut Context) -> GameResult<AppState> {
         let mut state = AppState {
-            images: AppState::preload_images(&ctx),
+            piece_assets: AppState::preload_piece_assets(ctx),
+            board_assets: AppState::preload_board_assets(ctx),
             game_one: Game::new(),
             game_two : Game::new(),
         };
@@ -41,15 +44,26 @@ impl AppState {
         Ok(state)
     }
 
-    pub fn preload_images(ctx: &Context) -> HashMap<PieceType, Image> {
+    pub fn preload_piece_assets(ctx: &Context) -> HashMap<PieceType, Image> {
         let mut image_map: HashMap<PieceType, Image> = HashMap::new();
 
         for i in 0..8 {
             let piece_type = PieceType::get_piecetype_from_num(i);
             let path = piece_type.get_path();
-            let image = graphics::Image::from_path(ctx, path).unwrap();
+            let image = Image::from_path(ctx, path).unwrap();
             image_map.insert(piece_type, image);
         }
+
+        image_map
+    }
+
+    pub fn preload_board_assets(ctx: &Context) -> HashMap<String, Image> {
+        let mut image_map: HashMap<String, Image> = HashMap::new();
+
+        image_map.insert("main".to_string(), Image::from_path(ctx, "/board/main_board.png").unwrap());
+        image_map.insert("garb_bar".to_string(), Image::from_path(ctx, "/board/attack_bar.png").unwrap());
+        image_map.insert("garb_sep".to_string(), Image::from_path(ctx, "/board/attack_bar_seperator.png").unwrap());
+        image_map.insert("hold".to_string(), Image::from_path(ctx, "/board/hold.png").unwrap());
 
         image_map
     }
@@ -134,7 +148,7 @@ impl event::EventHandler<ggez::GameError> for AppState {
             graphics::Canvas::from_frame(ctx, graphics::Color::from([0.1, 0.2, 0.3, 1.0]));
 
         //Render game
-        self.game_one.render_game(&self.images, &mut canvas, ctx);
+        self.game_one.render_pieces(&self.piece_assets, &mut canvas, ctx);
 
         canvas.finish(ctx)?;
         Ok(())
@@ -148,7 +162,9 @@ pub fn main() -> GameResult {
         .add_resource_path(resource_dir)
         .window_setup(conf::WindowSetup::default().title("Tetris"))
         .window_mode(
-            conf::WindowMode::default().resizable(false), // Fixate window size
+            conf::WindowMode::default()
+                .resizable(false) // Fixate window size
+                .dimensions(WINDOW_WIDTH, WINDOW_HEIGHT)
         );
 
     let (mut context, event_loop) = context_builder.build().expect("Failed to build context.");

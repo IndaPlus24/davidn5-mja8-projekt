@@ -7,8 +7,8 @@ use crate::consts::{BOARD_LOWER_LEFT, BLOCK_SIZE, HOLD_PIECE_MIDDLE, BOARD_AMOUN
 
 
 impl Game {
-    pub fn render_game(&mut self, images: &HashMap<PieceType, Image>, canvas: &mut Canvas, ctx: &mut Context) {
-        self.render_board(images, canvas, ctx);
+    pub fn render_pieces(&mut self, images: &HashMap<PieceType, Image>, canvas: &mut Canvas, ctx: &mut Context) {
+        self.render_board_pieces(images, canvas, ctx);
         self.render_ghost_piece(images, canvas);
         self.render_active_piece(images, canvas);
         self.render_held_piece(images, canvas);
@@ -64,7 +64,7 @@ impl Game {
         });
     }
 
-    pub fn render_board(&mut self, images: &HashMap<PieceType, Image>, canvas: &mut Canvas, ctx: &mut Context){
+    pub fn render_board_pieces(&mut self, images: &HashMap<PieceType, Image>, canvas: &mut Canvas, ctx: &mut Context){
         for r in 0..BOARD_AMOUNT_ROWS {
             for c in 0..BOARD_AMOUNT_COLUMNS {
                 match self.board[r][c] {

@@ -26,10 +26,7 @@ impl Game {
                 return false;
             }
 
-            match self.board[r as usize][c as usize] {
-                Some(_) => false,
-                None => true
-            }
+            self.board[r as usize][c as usize].is_none()
         })
     }
 

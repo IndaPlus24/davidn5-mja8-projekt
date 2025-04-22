@@ -9,9 +9,12 @@ pub const EMPTY_BLOCK_COLOR: Color = Color {
 };
 
 // All of these consts should probably be relative to window size
+pub const WINDOW_WIDTH: f32 = 1600.;
+pub const WINDOW_HEIGHT: f32 = 900.;
+
 pub const BOARD_AMOUNT_COLUMNS: usize = 10;
 pub const BOARD_AMOUNT_ROWS: usize = 40;
-pub const BOARD_LOWER_LEFT: (i32, i32) = (200, 520);
+pub const BOARD_LOWER_LEFT: (i32, i32) = (200, 600);
 pub const HOLD_PIECE_UPPERLEFT: (isize, isize) = (
     BOARD_LOWER_LEFT.0 as isize - 140,
     BOARD_LOWER_LEFT.1 as isize - 50,
