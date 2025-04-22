@@ -43,7 +43,7 @@ impl Game {
     }
 
     pub fn render_pieces(&mut self, assets: &HashMap<PieceType, Image>, canvas: &mut Canvas, pos: (f32, f32), scl: f32) {
-        //Board pieces
+        //Board cells
         let x = pos.0 + if self.can_recieve_garbage {208. * scl} else {168. * scl};
         let y = pos.1 + 608. * scl;
 
@@ -62,6 +62,20 @@ impl Game {
             }
         }
 
+        //Active piece
+        let image = assets.get(&self.active_piece.piece_type).unwrap();
+        let (mr, mc) = self.active_piece.midpoint;
+        self.active_piece.block_positions.iter().for_each(|(dr, dc)| {
+            canvas.draw(
+                image,
+                graphics::DrawParam::new().dest(glam::Vec2::new(
+                    x + (mc + dc) as f32 * 32. * scl,
+                    y - (mr + dr) as f32 * 32. * scl
+                )),
+            );
+        });
+
+        
         //self.render_board_pieces(assets, canvas, ctx);
         //self.render_ghost_piece(assets, canvas);
         //self.render_active_piece(assets, canvas);
