@@ -7,11 +7,46 @@ use crate::consts::{BOARD_LOWER_LEFT, BLOCK_SIZE, HOLD_PIECE_MIDDLE, BOARD_AMOUN
 
 
 impl Game {
-    pub fn render_pieces(&mut self, images: &HashMap<PieceType, Image>, canvas: &mut Canvas, ctx: &mut Context) {
-        self.render_board_pieces(images, canvas, ctx);
-        self.render_ghost_piece(images, canvas);
-        self.render_active_piece(images, canvas);
-        self.render_held_piece(images, canvas);
+    pub fn render_board(&mut self, assets: &HashMap<String, Image>, canvas: &mut Canvas, pos: (f32, f32), scl: f32) {
+        canvas.draw(
+            assets.get("hold").unwrap(),
+            graphics::DrawParam::new()
+                .dest(glam::Vec2::new(pos.0, pos.1))
+                .scale(glam::Vec2::new(scl, scl))
+        );
+
+        let mut x_offset = 164. * scl;
+        if self.can_recieve_garbage {
+            canvas.draw(
+                assets.get("garb_bar").unwrap(),
+                graphics::DrawParam::new()
+                    .dest(glam::Vec2::new(pos.0 + x_offset, pos.1))
+                    .scale(glam::Vec2::new(scl, scl))
+            );
+            // TODO: add garbage meter
+            canvas.draw(
+                assets.get("garb_sep").unwrap(),
+                graphics::DrawParam::new()
+                    .dest(glam::Vec2::new(pos.0 + x_offset + 6. * scl, pos.1 + 383. * scl))
+                    .scale(glam::Vec2::new(scl, scl))
+            );
+            
+            x_offset += 36. * scl;
+        }
+
+        canvas.draw(
+            assets.get("main").unwrap(),
+            graphics::DrawParam::new()
+                .dest(glam::Vec2::new(pos.0 + x_offset, pos.1))
+                .scale(glam::Vec2::new(scl, scl))
+        );
+    }
+
+    pub fn render_pieces(&mut self, assets: &HashMap<PieceType, Image>, canvas: &mut Canvas, ctx: &mut Context) {
+        self.render_board_pieces(assets, canvas, ctx);
+        self.render_ghost_piece(assets, canvas);
+        self.render_active_piece(assets, canvas);
+        self.render_held_piece(assets, canvas);
     }
 
     pub fn render_active_piece(&mut self, images: &HashMap<PieceType, Image>, canvas: &mut Canvas) {

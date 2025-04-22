@@ -144,10 +144,10 @@ impl event::EventHandler<ggez::GameError> for AppState {
 
     fn draw(&mut self, ctx: &mut Context) -> GameResult {
         //CREATE CANVAS
-        let mut canvas =
-            graphics::Canvas::from_frame(ctx, graphics::Color::from([0.1, 0.2, 0.3, 1.0]));
+        let mut canvas = graphics::Canvas::from_frame(ctx, graphics::Color::from([0.1, 0.2, 0.3, 1.0]));
 
         //Render game
+        self.game_one.render_board(&self.board_assets, &mut canvas, (500., 50.), 1.);
         self.game_one.render_pieces(&self.piece_assets, &mut canvas, ctx);
 
         canvas.finish(ctx)?;

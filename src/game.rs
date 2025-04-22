@@ -8,8 +8,10 @@ use crate::{default_keyboard_keybindings, GameAction, KeyCode, Piece, PieceType}
 
 pub struct Game {
     pub board: [[Option<PieceType>; BOARD_AMOUNT_COLUMNS]; BOARD_AMOUNT_ROWS],
+    pub can_recieve_garbage: bool,
+    pub garbage_queue: VecDeque<(usize, usize)>, // (amount, column of garbage hole) 
     pub game_over: bool,
-    pub score : usize, 
+    pub score: usize, 
     pub gravity_timer: f32,
     pub current_level: usize,
     pub active_piece: Piece,
@@ -37,8 +39,10 @@ impl Game {
 
         Game {
             board: [[None; BOARD_AMOUNT_COLUMNS]; BOARD_AMOUNT_ROWS],
+            can_recieve_garbage: false,
+            garbage_queue: VecDeque::new(),
             game_over: false,
-            score : 0,
+            score: 0,
             gravity_timer: 0.,
             current_level: 0,
             active_piece,
