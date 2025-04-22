@@ -42,11 +42,30 @@ impl Game {
         );
     }
 
-    pub fn render_pieces(&mut self, assets: &HashMap<PieceType, Image>, canvas: &mut Canvas, ctx: &mut Context) {
-        self.render_board_pieces(assets, canvas, ctx);
-        self.render_ghost_piece(assets, canvas);
-        self.render_active_piece(assets, canvas);
-        self.render_held_piece(assets, canvas);
+    pub fn render_pieces(&mut self, assets: &HashMap<PieceType, Image>, canvas: &mut Canvas, pos: (f32, f32), scl: f32) {
+        //Board pieces
+        let x = pos.0 + if self.can_recieve_garbage {208. * scl} else {168. * scl};
+        let y = pos.1 + 608. * scl;
+
+        for r in 0..BOARD_AMOUNT_ROWS {
+            for c in 0..BOARD_AMOUNT_COLUMNS {
+                if let Some(piece_type) = self.board[r][c] {
+                    let image = assets.get(&piece_type).unwrap();
+                    canvas.draw(
+                        image,
+                        graphics::DrawParam::new().dest(glam::Vec2::new(
+                            x + c as f32 * 32. * scl,
+                            y - r as f32 * 32. * scl
+                        )),
+                    );
+                }
+            }
+        }
+
+        //self.render_board_pieces(assets, canvas, ctx);
+        //self.render_ghost_piece(assets, canvas);
+        //self.render_active_piece(assets, canvas);
+        //self.render_held_piece(assets, canvas);
     }
 
     pub fn render_active_piece(&mut self, images: &HashMap<PieceType, Image>, canvas: &mut Canvas) {

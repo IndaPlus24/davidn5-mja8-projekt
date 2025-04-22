@@ -148,7 +148,7 @@ impl event::EventHandler<ggez::GameError> for AppState {
 
         //Render game
         self.game_one.render_board(&self.board_assets, &mut canvas, (500., 50.), 1.);
-        self.game_one.render_pieces(&self.piece_assets, &mut canvas, ctx);
+        self.game_one.render_pieces(&self.piece_assets, &mut canvas, (500., 50.), 1.);
 
         canvas.finish(ctx)?;
         Ok(())
