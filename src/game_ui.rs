@@ -75,25 +75,22 @@ impl Game {
             );
         });
 
-        
-        //self.render_board_pieces(assets, canvas, ctx);
-        //self.render_ghost_piece(assets, canvas);
-        //self.render_active_piece(assets, canvas);
-        //self.render_held_piece(assets, canvas);
-    }
+        //Ghost piece
+        let ghost_piece = self.get_ghost_piece();
+        let image = assets.get(&self.active_piece.piece_type).unwrap();
 
-    pub fn render_active_piece(&mut self, images: &HashMap<PieceType, Image>, canvas: &mut Canvas) {
-        let image = images.get(&self.active_piece.piece_type).unwrap();
-        let (mr, mc) = self.active_piece.midpoint;
-        self.active_piece.block_positions.iter().for_each(|(dr, dc)| {
-            canvas.draw(
-                image,
-                graphics::DrawParam::new().dest(glam::Vec2::new(
-                    (BOARD_LOWER_LEFT.0 + (mc + dc) as i32 * BLOCK_SIZE + 1) as f32,
-                    (BOARD_LOWER_LEFT.1 - (mr + dr) as i32 * BLOCK_SIZE + 1) as f32,
-                )),
-            );
-        });       
+        let (mr, mc) = ghost_piece.midpoint;
+        ghost_piece.block_positions.iter().for_each(|(dr, dc)| {
+            // SET POSITION AND OPACITY
+            let param = graphics::DrawParam::new()
+                .dest(glam::Vec2::new(
+                    x + (mc + dc) as f32 * 32. * scl,
+                    y - (mr + dr) as f32 * 32. * scl
+                ))
+                .color(graphics::Color::from_rgba(255, 255, 255, 15));
+
+            canvas.draw(image, param);
+        });
     }
 
     pub fn render_held_piece(&mut self, images: &HashMap<PieceType, Image>, canvas: &mut Canvas) {
@@ -110,64 +107,6 @@ impl Game {
                 );
 
             });
-        }
-    }
-
-    pub fn render_ghost_piece(&mut self, images: &HashMap<PieceType, Image>, canvas: &mut Canvas){
-        let ghost_piece = self.get_ghost_piece();
-        let image = images.get(&self.active_piece.piece_type).unwrap();
-
-        let (mr, mc) = ghost_piece.midpoint;
-        ghost_piece.block_positions.iter().for_each(|(dr, dc)| {
-
-            // SET POSITION AND OPACITY
-            let param = graphics::DrawParam::new()
-                .dest(glam::Vec2::new(
-                    (BOARD_LOWER_LEFT.0 + (mc + dc) as i32 * BLOCK_SIZE + 1) as f32,
-                    (BOARD_LOWER_LEFT.1 - (mr + dr) as i32 * BLOCK_SIZE + 1) as f32,
-                ))
-                .color(graphics::Color::from_rgba(255, 255, 255, 127));
-
-            canvas.draw(image, param);
-        });
-    }
-
-    pub fn render_board_pieces(&mut self, images: &HashMap<PieceType, Image>, canvas: &mut Canvas, ctx: &mut Context){
-        for r in 0..BOARD_AMOUNT_ROWS {
-            for c in 0..BOARD_AMOUNT_COLUMNS {
-                match self.board[r][c] {
-                    Some(piece_type) => {
-                        let image = images.get(&piece_type).unwrap();
-                        canvas.draw(
-                            image,
-                            graphics::DrawParam::new().dest(glam::Vec2::new(
-                                (BOARD_LOWER_LEFT.0 + c as i32 * BLOCK_SIZE + 1) as f32,
-                                (BOARD_LOWER_LEFT.1 - r as i32 * BLOCK_SIZE + 1) as f32,
-                            )),
-                        );
-                    },
-
-                    None => {
-                        if r < 20 {
-                            let rectangle = graphics::Mesh::new_rectangle(
-                                ctx,
-                                graphics::DrawMode::fill(),
-                                graphics::Rect::new_i32(
-                                    BOARD_LOWER_LEFT.0 + c as i32 * BLOCK_SIZE + 1,
-                                    BOARD_LOWER_LEFT.1 - r as i32 * BLOCK_SIZE + 1,
-                                    BLOCK_SIZE - 2,
-                                    BLOCK_SIZE - 2,
-                                ),
-                                EMPTY_BLOCK_COLOR,
-                            )
-                            .expect("COULDNT CREATE RECTANGLE FROM BLOCK");
-        
-                            canvas.draw(&rectangle, graphics::DrawParam::default()); 
-                        }
-                        
-                    }
-                }
-            }
         }
     }
 }
