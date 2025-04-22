@@ -27,7 +27,7 @@ impl PieceType {
             PieceType::S => String::from("/pieces/green.png"),
             PieceType::T => String::from("/pieces/magenta.png"),
             PieceType::Z => String::from("/pieces/red.png"),
-            PieceType::X => String::from("/pieces/grey.png"),
+            PieceType::X => String::from("/pieces/gray.png"),
         }
     }
 
