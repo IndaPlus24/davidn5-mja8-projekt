@@ -122,7 +122,7 @@ impl Game {
         }
 
         //Handle inputs
-        self.handle_inputs(ctx);
+        self.handle_game_inputs(ctx);
 
         // IF THE TICK COUNT MATCHES THE CURRENT LEVELS TICK COUNT
         if self.gravity_timer > LEVELS_GRAVITY_THRESHOLD[self.current_level] {

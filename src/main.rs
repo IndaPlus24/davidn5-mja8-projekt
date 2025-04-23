@@ -1,12 +1,11 @@
 mod board;
 mod config;
+mod ui_components;
 mod consts;
 mod game;
-mod game_ui;
 mod inputs;
 mod piece;
 mod rotation;
-mod start_screen;
 mod animation_state;
 
 use std::collections::HashMap;
@@ -15,6 +14,9 @@ use std::path;
 use std::str::FromStr;
 use consts::{WINDOW_HEIGHT, WINDOW_WIDTH, GAME_1_POS, GAME_1_SCL, GameState};
 use csv::{Reader, Writer};
+use ui_components::main_menu;
+
+use crate::ui_components::start_screen;
 
 pub use crate::config::input_config::*;
 pub use crate::game::Game;
@@ -76,6 +78,7 @@ impl AppState {
         let mut image_map: HashMap<String, Image> = HashMap::new();
 
         image_map.insert("start_screen".to_string(), Image::from_path(ctx, "/ui_assets/start_screen.png").unwrap());
+        image_map.insert("empty_box".to_string(), Image::from_path(ctx, "/ui_assets/empty_box.png").unwrap());
 
         image_map
     }
@@ -153,6 +156,9 @@ impl event::EventHandler<ggez::GameError> for AppState {
                 let name = "";
                 let _ = Self::save_score(name.to_string(), self.game_one.score);
                 self.game_one.game_state = GameState::HighscoreInput;
+            },
+            GameState::StartScreen => {
+                self.game_one.handle_start_screen_inputs(ctx);
             }
             _=>{}
         }
@@ -173,6 +179,9 @@ impl event::EventHandler<ggez::GameError> for AppState {
             GameState::StartScreen => {
                 start_screen::render_start_screen(&self.menu_assets,&mut canvas, ctx, 1., &mut self.game_one.animation_state);
             }, 
+            GameState::MainMenu => {
+                main_menu::render_main_menu(&self.menu_assets, &mut canvas, ctx, 1.);
+            }
             _ =>{}
         }
         

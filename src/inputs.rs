@@ -1,5 +1,3 @@
-use ggez::input::keyboard;
-
 use crate::consts::{
     ARR_TICKS, DAS_TICKS, TICKS_BEFORE_NEXT_PIECE, TICKS_BETWEEN_INPUTS,
     TICKS_BETWEEN_ROTATIONS,GameState
@@ -9,11 +7,8 @@ use crate::{Game, Piece, ROTATION_180, ROTATION_CCW, ROTATION_CW};
 use crate::config::input_config::*;
 
 impl Game {
-    pub fn handle_inputs(&mut self, ctx: &ggez::Context) {
+    pub fn handle_game_inputs(&mut self, ctx: &ggez::Context) {
         let keyboard = &ctx.keyboard;
-
-        match self.game_state {
-            GameState::Singleplayer => {
             let dt = ctx.time.delta().as_secs_f32();
 
             let right_held =
@@ -117,13 +112,12 @@ impl Game {
                 self.held_piece = Some(held_piece);
                 self.can_hold = false;
             }
-            },
-            GameState::StartScreen => {
-                if keyboard.is_key_just_pressed(*self.controls.get(&GameAction::HardDrop).unwrap()){
-                    self.game_state = GameState::MainMenu
-                }
-            }
-            _=>{}
+    }
+
+    pub fn handle_start_screen_inputs(&mut self, ctx: &ggez::Context){
+        let keyboard = &ctx.keyboard;
+        if keyboard.is_key_just_pressed(*self.controls.get(&GameAction::HardDrop).unwrap()){
+            self.game_state = GameState::MainMenu;
         }
     }
 }
