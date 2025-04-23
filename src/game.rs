@@ -8,7 +8,7 @@ use crate::{default_keyboard_keybindings, GameAction, KeyCode, Piece, PieceType}
 
 pub struct Game {
     pub board: [[Option<PieceType>; BOARD_AMOUNT_COLUMNS]; BOARD_AMOUNT_ROWS],
-    pub can_recieve_garbage: bool,
+    pub battle_mode: bool,
     pub garbage_queue: VecDeque<(usize, usize)>, // (amount, column of garbage hole) 
     pub game_over: bool,
     pub score: usize, 
@@ -39,7 +39,7 @@ impl Game {
 
         Game {
             board: [[None; BOARD_AMOUNT_COLUMNS]; BOARD_AMOUNT_ROWS],
-            can_recieve_garbage: false,
+            battle_mode: false,
             garbage_queue: VecDeque::new(),
             game_over: false,
             score: 0,

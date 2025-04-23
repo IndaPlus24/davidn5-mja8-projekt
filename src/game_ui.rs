@@ -16,7 +16,7 @@ impl Game {
         );
 
         let mut x_offset = 164. * scl;
-        if self.can_recieve_garbage {
+        if self.battle_mode {
             canvas.draw(
                 assets.get("garb_bar").unwrap(),
                 graphics::DrawParam::new()
@@ -44,7 +44,7 @@ impl Game {
 
     pub fn render_pieces(&mut self, assets: &HashMap<PieceType, Image>, canvas: &mut Canvas, pos: (f32, f32), scl: f32) {
         //Board cells
-        let x = pos.0 + if self.can_recieve_garbage {204. * scl} else {168. * scl};
+        let x = pos.0 + if self.battle_mode {204. * scl} else {168. * scl};
         let y = pos.1 + 608. * scl;
 
         for r in 0..BOARD_AMOUNT_ROWS {
@@ -53,10 +53,12 @@ impl Game {
                     let image = assets.get(&piece_type).unwrap();
                     canvas.draw(
                         image,
-                        graphics::DrawParam::new().dest(glam::Vec2::new(
-                            x + c as f32 * 32. * scl,
-                            y - r as f32 * 32. * scl
-                        )),
+                        graphics::DrawParam::new()
+                            .dest(glam::Vec2::new(
+                                x + c as f32 * 32. * scl,
+                                y - r as f32 * 32. * scl
+                            ))
+                            .scale(glam::Vec2::new(scl, scl))
                     );
                 }
             }
@@ -68,10 +70,12 @@ impl Game {
         self.active_piece.block_positions.iter().for_each(|(dr, dc)| {
             canvas.draw(
                 image,
-                graphics::DrawParam::new().dest(glam::Vec2::new(
-                    x + (mc + dc) as f32 * 32. * scl,
-                    y - (mr + dr) as f32 * 32. * scl
-                )),
+                graphics::DrawParam::new()
+                    .dest(glam::Vec2::new(
+                        x + (mc + dc) as f32 * 32. * scl,
+                        y - (mr + dr) as f32 * 32. * scl
+                    ))
+                    .scale(glam::Vec2::new(scl, scl))
             );
         });
 
@@ -87,6 +91,7 @@ impl Game {
                     x + (mc + dc) as f32 * 32. * scl,
                     y - (mr + dr) as f32 * 32. * scl
                 ))
+                .scale(glam::Vec2::new(scl, scl))
                 .color(graphics::Color::from_rgba(255, 255, 255, 15));
 
             canvas.draw(image, param);
@@ -105,17 +110,19 @@ impl Game {
             hold_piece.block_positions.iter().for_each(|(dr, dc)| {
                 canvas.draw(
                     image,
-                    graphics::DrawParam::new().dest(glam::Vec2::new(
-                        x + *dc as f32 * 32. * scl,
-                        y - *dr as f32 * 32. * scl
-                    )),
+                    graphics::DrawParam::new()
+                        .dest(glam::Vec2::new(
+                            x + *dc as f32 * 32. * scl,
+                            y - *dr as f32 * 32. * scl
+                        ))
+                        .scale(glam::Vec2::new(scl, scl))
                 );
             });
         }
 
         //Next queue
         let (mut x, mut y) = (pos.0 + 556. * scl, pos.1 + 80. * scl);
-        if self.can_recieve_garbage {x += 36. * scl};
+        if self.battle_mode {x += 36. * scl};
         
         for i in 0..5 {
             let next_piece = &self.piece_queue[i];
@@ -127,10 +134,12 @@ impl Game {
             next_piece.block_positions.iter().for_each(|(dr, dc)| {
                 canvas.draw(
                     image,
-                    graphics::DrawParam::new().dest(glam::Vec2::new(
-                        x + *dc as f32 * 32. * scl,
-                        y - *dr as f32 * 32. * scl
-                    )),
+                    graphics::DrawParam::new()
+                        .dest(glam::Vec2::new(
+                            x + *dc as f32 * 32. * scl,
+                            y - *dr as f32 * 32. * scl
+                        ))
+                        .scale(glam::Vec2::new(scl, scl))
                 );
             });
 
