@@ -14,7 +14,7 @@ use std::path;
 use std::str::FromStr;
 use consts::{WINDOW_HEIGHT, WINDOW_WIDTH, GAME_1_POS, GAME_1_SCL, GameState};
 use csv::{Reader, Writer};
-use ui_components::main_menu;
+use ui_components::{gamemode_selector, main_menu};
 
 use crate::ui_components::start_screen;
 
@@ -162,6 +162,9 @@ impl event::EventHandler<ggez::GameError> for AppState {
             },
             GameState::MainMenu => {
                 self.game_one.handle_main_menu_inputs(ctx);
+            },
+            GameState::GameModeSelector =>{
+                self.game_one.handle_gamemode_selector_inputs(ctx);
             }
             _=>{}
         }
@@ -170,7 +173,6 @@ impl event::EventHandler<ggez::GameError> for AppState {
     }
 
     fn draw(&mut self, ctx: &mut Context) -> GameResult {
-        //CREATE CANVAS
         let mut canvas = graphics::Canvas::from_frame(ctx, graphics::Color::from([0.1, 0.2, 0.3, 1.0]));
 
         match self.game_one.game_state {
@@ -184,6 +186,9 @@ impl event::EventHandler<ggez::GameError> for AppState {
             }, 
             GameState::MainMenu => {
                 main_menu::render_main_menu(&self.menu_assets, &mut canvas, ctx, 1., &mut self.game_one.animation_state);
+            },
+            GameState::GameModeSelector => {
+                gamemode_selector::render_gamemode_selector(&self.menu_assets, &mut canvas, ctx, 1., &mut self.game_one.animation_state);
             }
             _ =>{}
         }

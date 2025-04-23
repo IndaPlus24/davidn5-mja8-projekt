@@ -131,4 +131,19 @@ impl Game {
             self.game_state = if self.animation_state.selected_item_main_menu == 0 {GameState::GameModeSelector}else {GameState::Settings};
         }
     }
+
+    pub fn handle_gamemode_selector_inputs(&mut self, ctx : &ggez::Context){
+        let keyboard = &ctx.keyboard;
+        if keyboard.is_key_just_pressed(*self.controls.get(&GameAction::SoftDrop).unwrap()){
+            self.animation_state.selected_item_gamemode_selector = if self.animation_state.selected_item_gamemode_selector == 2 {2} else {self.animation_state.selected_item_gamemode_selector + 1};
+        }else if keyboard.is_key_just_pressed(*self.controls.get(&GameAction::Up).unwrap()){
+            self.animation_state.selected_item_gamemode_selector = if self.animation_state.selected_item_gamemode_selector == 0 {0} else {self.animation_state.selected_item_gamemode_selector - 1};
+        }else if keyboard.is_key_just_pressed(*self.controls.get(&GameAction::HardDrop).unwrap()){
+            match self.animation_state.selected_item_gamemode_selector {
+                0 => {self.game_state = GameState::Multiplayer},
+                1 => {self.game_state = GameState::Singleplayer},
+                _ => {self.game_state = GameState::VsBots}
+            }
+        }
+    }
 }

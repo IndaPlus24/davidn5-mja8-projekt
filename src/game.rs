@@ -41,7 +41,7 @@ impl Game {
 
         Game {
             board: [[None; BOARD_AMOUNT_COLUMNS]; BOARD_AMOUNT_ROWS],
-            game_state : GameState::MainMenu, // Change GameState during testing so you dont have to go through screens
+            game_state : GameState::StartScreen, // Change GameState during testing so you dont have to go through screens
             animation_state: AnimationState::new(),
             battle_mode: false,
             garbage_queue: VecDeque::new(),

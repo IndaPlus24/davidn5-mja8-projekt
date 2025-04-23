@@ -3,7 +3,7 @@ use std::collections::HashMap;
 
 use crate::animation_state::AnimationState;
 
-pub fn render_main_menu(assets : &HashMap<String, Image>, canvas : &mut Canvas, ctx : &mut Context, scl : f32, animation_state : &mut AnimationState){
+pub fn render_gamemode_selector(assets : &HashMap<String, Image>, canvas : &mut Canvas, ctx : &mut Context, scl : f32, animation_state : &mut AnimationState){
     let (w,h) = ctx.gfx.drawable_size();
     let center = (w / 2., h/2.);
 
@@ -17,48 +17,63 @@ pub fn render_main_menu(assets : &HashMap<String, Image>, canvas : &mut Canvas, 
             .scale(glam::Vec2::new(scl, scl))
     );
 
-    let main_menu = Text::new(TextFragment{
-        text : "MAIN MENU".to_string(),
-        font : Some("Tetris font".to_string()),
-        color: Some(Color::WHITE), 
-        scale : Some(PxScale::from(90.0))
-
-    });
-
-    canvas.draw(&main_menu,
-        graphics::DrawParam::new()
-            .dest(glam::Vec2::new(center.0 - image_half_size.0 + 110., center.1 - 400.))
-            .scale(glam::Vec2::new(scl, scl))
-    );
-
     let start_game = Text::new(TextFragment{
         text : "START GAME".to_string(),
         font : Some("Tetris font".to_string()),
         color: Some(Color::WHITE), 
-        scale : Some(PxScale::from(60.0))
+        scale : Some(PxScale::from(80.0))
 
     });
 
     canvas.draw(&start_game,
         graphics::DrawParam::new()
-            .dest(glam::Vec2::new(center.0 - image_half_size.0 + 200., center.1 - 100.))
+            .dest(glam::Vec2::new(center.0 - image_half_size.0 + 110., center.1 - 400.))
             .scale(glam::Vec2::new(scl, scl))
     );
 
-    let settings = Text::new(TextFragment{
-        text : "SETTINGS".to_string(),
+    let multiplayer = Text::new(TextFragment{
+        text : "1V1".to_string(),
         font : Some("Tetris font".to_string()),
         color: Some(Color::WHITE), 
         scale : Some(PxScale::from(60.0))
 
     });
 
-    canvas.draw(&settings,
+    canvas.draw(&multiplayer,
         graphics::DrawParam::new()
-            .dest(glam::Vec2::new(center.0 - image_half_size.0 + 200., center.1 + 100.))
+            .dest(glam::Vec2::new(center.0 - image_half_size.0 + 200., center.1 - 170.))
             .scale(glam::Vec2::new(scl, scl))
     );
 
+    let default = Text::new(TextFragment{
+        text : "DEFAULT".to_string(),
+        font : Some("Tetris font".to_string()),
+        color: Some(Color::WHITE), 
+        scale : Some(PxScale::from(60.0))
+
+    });
+
+    canvas.draw(&default,
+        graphics::DrawParam::new()
+            .dest(glam::Vec2::new(center.0 - image_half_size.0 + 200., center.1))
+            .scale(glam::Vec2::new(scl, scl))
+    );
+
+    let vs_bots = Text::new(TextFragment{
+        text : "VS BOTS".to_string(),
+        font : Some("Tetris font".to_string()),
+        color: Some(Color::WHITE), 
+        scale : Some(PxScale::from(60.0))
+
+    });
+
+    canvas.draw(&vs_bots,
+        graphics::DrawParam::new()
+            .dest(glam::Vec2::new(center.0 - image_half_size.0 + 200., center.1 + 170.))
+            .scale(glam::Vec2::new(scl, scl))
+    );
+
+    
     let arrow = Text::new(TextFragment{
         text : ">".to_string(),
         font : Some("Tetris font".to_string()),
@@ -67,13 +82,19 @@ pub fn render_main_menu(assets : &HashMap<String, Image>, canvas : &mut Canvas, 
 
     });
 
-    let arrow_y = if animation_state.selected_item_main_menu == 0 {center.1 - 100.}else {center.1 + 100.};
+    let arrow_y = match animation_state.selected_item_gamemode_selector {
+        0 => {center.1 - 170.},
+        1 => {center.1},
+        _ => {center.1 + 170.}
+    };
 
     canvas.draw(&arrow,
         graphics::DrawParam::new()
             .dest(glam::Vec2::new(center.0 - image_half_size.0 + 100., arrow_y))
             .scale(glam::Vec2::new(scl, scl))
     );
+
+    
 
 
 }
