@@ -1,5 +1,5 @@
 use crate::consts::{
-    ARR_TICKS, DAS_TICKS, HOLD_PIECE_MIDDLE, TICKS_BEFORE_NEXT_PIECE, TICKS_BETWEEN_INPUTS,
+    ARR_TICKS, DAS_TICKS, TICKS_BEFORE_NEXT_PIECE, TICKS_BETWEEN_INPUTS,
     TICKS_BETWEEN_ROTATIONS,
 };
 use crate::{Game, Piece, ROTATION_180, ROTATION_CCW, ROTATION_CW};
@@ -95,15 +95,14 @@ impl Game {
             println!("Holding Piece");
 
             let mut held_piece = self.active_piece.clone();
-            held_piece.midpoint = HOLD_PIECE_MIDDLE;
+            held_piece.midpoint = (20, 4);
             held_piece.rotation = 0;
             let blocks: Vec<(isize, isize)> =
                 Piece::get_block_positions(self.active_piece.piece_type, 0);
             held_piece.block_positions = blocks;
 
             match self.held_piece.take() {
-                Some(mut previous_held) => {
-                    previous_held.midpoint = (20, 4);
+                Some(previous_held) => {
                     self.active_piece = previous_held;
                 }
                 None => {

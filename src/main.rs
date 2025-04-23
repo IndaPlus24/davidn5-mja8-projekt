@@ -11,7 +11,7 @@ use std::collections::HashMap;
 use std::error::Error;
 use std::path;
 use std::str::FromStr;
-use consts::{WINDOW_HEIGHT, WINDOW_WIDTH};
+use consts::{WINDOW_HEIGHT, WINDOW_WIDTH, GAME_1_POS, GAME_1_SCL};
 use csv::{Reader, Writer};
 
 pub use crate::config::input_config::*;
@@ -147,8 +147,8 @@ impl event::EventHandler<ggez::GameError> for AppState {
         let mut canvas = graphics::Canvas::from_frame(ctx, graphics::Color::from([0.1, 0.2, 0.3, 1.0]));
 
         //Render game
-        self.game_one.render_board(&self.board_assets, &mut canvas, (500., 50.), 1.);
-        self.game_one.render_pieces(&self.piece_assets, &mut canvas, (500., 50.), 1.);
+        self.game_one.render_board(&self.board_assets, &mut canvas, GAME_1_POS, GAME_1_SCL);
+        self.game_one.render_pieces(&self.piece_assets, &mut canvas, GAME_1_POS, GAME_1_SCL);
 
         canvas.finish(ctx)?;
         Ok(())

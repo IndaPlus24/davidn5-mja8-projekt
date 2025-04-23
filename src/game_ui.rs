@@ -1,9 +1,9 @@
 use std::collections::HashMap;
 
-use ggez::{glam, graphics::{self, Canvas, Image}, Context};
+use ggez::{glam, graphics::{self, Canvas, Image}};
 
 use crate::{Game, PieceType};
-use crate::consts::{BOARD_LOWER_LEFT, BLOCK_SIZE, HOLD_PIECE_MIDDLE, BOARD_AMOUNT_COLUMNS, BOARD_AMOUNT_ROWS, EMPTY_BLOCK_COLOR};
+use crate::consts::{BOARD_AMOUNT_COLUMNS, BOARD_AMOUNT_ROWS};
 
 
 impl Game {
@@ -91,22 +91,34 @@ impl Game {
 
             canvas.draw(image, param);
         });
-    }
 
-    pub fn render_held_piece(&mut self, images: &HashMap<PieceType, Image>, canvas: &mut Canvas) {
-        if let Some(held_piece) = &self.held_piece {
-            let image = images.get(&held_piece.piece_type).unwrap();
+        //Hold piece
+        if let Some(hold_piece) = &self.held_piece {
+            let piece_type = if self.can_hold {hold_piece.piece_type} else {PieceType::X};
+            let image = assets.get(&piece_type).unwrap();
 
-            held_piece.block_positions.iter().for_each(|(dr, dc)| {
+            let (mut x, mut y) = (pos.0 + 68. * scl, pos.1 + 80. * scl);
+            let (x_offset, y_offset) = get_piece_offset(hold_piece.piece_type, scl);
+            x += x_offset;
+            y += y_offset;
+
+            hold_piece.block_positions.iter().for_each(|(dr, dc)| {
                 canvas.draw(
                     image,
                     graphics::DrawParam::new().dest(glam::Vec2::new(
-                        (HOLD_PIECE_MIDDLE.0 + *dc * (BLOCK_SIZE as isize+ 1)) as f32,
-                        (HOLD_PIECE_MIDDLE.1 - *dr * (BLOCK_SIZE as isize + 1)) as f32,
+                        x + *dc as f32 * 32. * scl,
+                        y - *dr as f32 * 32. * scl
                     )),
                 );
-
             });
         }
+    }
+}
+
+fn get_piece_offset(piece_type: PieceType, scl: f32) -> (f32, f32) {
+    match piece_type {
+        PieceType::I => (-16. * scl, -16. * scl),
+        PieceType::O => (-16. * scl, 0.),
+        _ => (0., 0.),
     }
 }
