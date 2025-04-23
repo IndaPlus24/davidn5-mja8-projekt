@@ -11,6 +11,7 @@ pub enum GameAction {
     RotateCcw,
     Rotate180,
     HoldPiece,
+    Up,
 }
 
 /*
@@ -28,6 +29,7 @@ pub fn default_keyboard_keybindings () -> HashMap<GameAction, KeyCode> {
     map.insert(RotateCcw, KeyCode::Z);
     map.insert(Rotate180, KeyCode::A);
     map.insert(HoldPiece, KeyCode::C);
+    map.insert(Up,KeyCode::Up);
     map
     
 }
@@ -47,7 +49,7 @@ pub fn multi_controller_keyboard_keybindings() -> Vec<HashMap<GameAction, KeyCod
     player1.insert(RotateCcw, KeyCode::Z);
     player1.insert(Rotate180, KeyCode::A);
     player1.insert(HoldPiece, KeyCode::C);
-
+    player1.insert(Up, KeyCode::Up);
 
     let mut player2 = HashMap::new();
     player2.insert(MoveRight, KeyCode::Right);
@@ -79,6 +81,8 @@ pub fn default_drivarkaden_keybindings() -> Vec<HashMap<GameAction, KeyCode>>{
     player1.insert(RotateCcw, KeyCode::Space); // Y
     player1.insert(Rotate180, KeyCode::Z); // top right
     player1.insert(HoldPiece, KeyCode::LControl); // B
+    player1.insert(Up, KeyCode::Up);
+
 
 
     let mut player2 = HashMap::new();
@@ -90,6 +94,8 @@ pub fn default_drivarkaden_keybindings() -> Vec<HashMap<GameAction, KeyCode>>{
     player2.insert(RotateCcw, KeyCode::W); // Y
     player2.insert(Rotate180, KeyCode::I); // Top Right
     player2.insert(HoldPiece, KeyCode::A); //B
+    player2.insert(Up, KeyCode::R);
+
 
 
     vec![player1, player2]

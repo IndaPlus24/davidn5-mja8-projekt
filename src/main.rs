@@ -159,6 +159,9 @@ impl event::EventHandler<ggez::GameError> for AppState {
             },
             GameState::StartScreen => {
                 self.game_one.handle_start_screen_inputs(ctx);
+            },
+            GameState::MainMenu => {
+                self.game_one.handle_main_menu_inputs(ctx);
             }
             _=>{}
         }
@@ -180,7 +183,7 @@ impl event::EventHandler<ggez::GameError> for AppState {
                 start_screen::render_start_screen(&self.menu_assets,&mut canvas, ctx, 1., &mut self.game_one.animation_state);
             }, 
             GameState::MainMenu => {
-                main_menu::render_main_menu(&self.menu_assets, &mut canvas, ctx, 1.);
+                main_menu::render_main_menu(&self.menu_assets, &mut canvas, ctx, 1., &mut self.game_one.animation_state);
             }
             _ =>{}
         }

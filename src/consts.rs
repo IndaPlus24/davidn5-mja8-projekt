@@ -26,5 +26,6 @@ pub enum GameState{
     Multiplayer, 
     VsBots,  
     GameOver, 
-    HighscoreInput
+    HighscoreInput,
+    Settings
 }

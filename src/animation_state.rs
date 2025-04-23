@@ -4,6 +4,7 @@ pub struct AnimationState {
     pub velocity : f32,
     pub acceleration : f32,
     pub going_down_start_screen : bool, 
+    pub selected_item_main_menu : i32, 
 
 }
 
@@ -16,7 +17,9 @@ impl AnimationState{
             velocity : 0.,
             acceleration : 0.05,
 
-            // Another animation..
+            // Arrow Main Menu
+            selected_item_main_menu : 0, // (0 - START GAME)....(1 - SETTINGS)
+
         }
     }
 }

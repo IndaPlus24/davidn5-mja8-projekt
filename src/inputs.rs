@@ -120,4 +120,15 @@ impl Game {
             self.game_state = GameState::MainMenu;
         }
     }
+
+    pub fn handle_main_menu_inputs(&mut self, ctx : &ggez::Context){
+        let keyboard = &ctx.keyboard;
+        if keyboard.is_key_just_pressed(*self.controls.get(&GameAction::SoftDrop).unwrap()){
+            self.animation_state.selected_item_main_menu = 1
+        }else if keyboard.is_key_just_pressed(*self.controls.get(&GameAction::Up).unwrap()){
+            self.animation_state.selected_item_main_menu = 0;
+        }else if keyboard.is_key_just_pressed(*self.controls.get(&GameAction::HardDrop).unwrap()){
+            self.game_state = if self.animation_state.selected_item_main_menu == 0 {GameState::GameModeSelector}else {GameState::Settings};
+        }
+    }
 }
