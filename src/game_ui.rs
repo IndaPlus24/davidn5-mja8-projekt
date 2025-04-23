@@ -44,7 +44,7 @@ impl Game {
 
     pub fn render_pieces(&mut self, assets: &HashMap<PieceType, Image>, canvas: &mut Canvas, pos: (f32, f32), scl: f32) {
         //Board cells
-        let x = pos.0 + if self.can_recieve_garbage {208. * scl} else {168. * scl};
+        let x = pos.0 + if self.can_recieve_garbage {204. * scl} else {168. * scl};
         let y = pos.1 + 608. * scl;
 
         for r in 0..BOARD_AMOUNT_ROWS {
@@ -111,6 +111,32 @@ impl Game {
                     )),
                 );
             });
+        }
+
+        //Next queue
+        let (mut x, mut y) = (pos.0 + 556. * scl, pos.1 + 80. * scl);
+        if self.can_recieve_garbage {x += 36. * scl};
+        
+        for i in 0..5 {
+            let next_piece = &self.piece_queue[i];
+            let (x_offset, y_offset) = get_piece_offset(next_piece.piece_type, scl);
+            x += x_offset;
+            y += y_offset;
+
+            let image = assets.get(&next_piece.piece_type).unwrap();
+            next_piece.block_positions.iter().for_each(|(dr, dc)| {
+                canvas.draw(
+                    image,
+                    graphics::DrawParam::new().dest(glam::Vec2::new(
+                        x + *dc as f32 * 32. * scl,
+                        y - *dr as f32 * 32. * scl
+                    )),
+                );
+            });
+
+            x -= x_offset;
+            y -= y_offset;
+            y += 96.;
         }
     }
 }
