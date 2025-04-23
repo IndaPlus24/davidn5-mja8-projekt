@@ -2,6 +2,7 @@ use std::collections::{HashMap, VecDeque};
 
 use ggez::Context;
 
+use crate::animation_state::AnimationState;
 use crate::board::{BOARD_AMOUNT_COLUMNS, BOARD_AMOUNT_ROWS};
 use crate::consts::{LEVELS_GRAVITY_THRESHOLD, TICKS_BEFORE_NEXT_PIECE, GameState};
 use crate::{default_keyboard_keybindings, GameAction, KeyCode, Piece, PieceType};
@@ -9,6 +10,7 @@ use crate::{default_keyboard_keybindings, GameAction, KeyCode, Piece, PieceType}
 pub struct Game {
     pub board: [[Option<PieceType>; BOARD_AMOUNT_COLUMNS]; BOARD_AMOUNT_ROWS],
     pub game_state : GameState,
+    pub animation_state : AnimationState,
     pub battle_mode: bool,
     pub garbage_queue: VecDeque<(usize, usize)>, // (amount, column of garbage hole) 
     pub score: usize, 
@@ -40,6 +42,7 @@ impl Game {
         Game {
             board: [[None; BOARD_AMOUNT_COLUMNS]; BOARD_AMOUNT_ROWS],
             game_state : GameState::StartScreen,
+            animation_state: AnimationState::new(),
             battle_mode: false,
             garbage_queue: VecDeque::new(),
             score: 0,

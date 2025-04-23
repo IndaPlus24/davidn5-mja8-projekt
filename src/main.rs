@@ -7,6 +7,7 @@ mod inputs;
 mod piece;
 mod rotation;
 mod start_screen;
+mod animation_state;
 
 use std::collections::HashMap;
 use std::error::Error;
@@ -143,14 +144,19 @@ fn save_scores_to_file(path : &str, scores :Vec<(String, usize)>) -> bool{
 
 impl event::EventHandler<ggez::GameError> for AppState {
     fn update(&mut self, ctx: &mut Context) -> GameResult {
-        self.game_one.next_tick(ctx);
-
-        if self.game_one.game_state == GameState::GameOver {
-            //TODO Prompt name
-            let name = "";
-            let _ = Self::save_score(name.to_string(), self.game_one.score);
-            self.game_one.game_state = GameState::HighscoreInput;
+        match self.game_one.game_state{
+            GameState::Singleplayer => {
+                self.game_one.next_tick(ctx);
+            },
+            GameState::GameOver => {
+                //TODO Prompt name
+                let name = "";
+                let _ = Self::save_score(name.to_string(), self.game_one.score);
+                self.game_one.game_state = GameState::HighscoreInput;
+            }
+            _=>{}
         }
+
         Ok(())
     }
 
@@ -165,7 +171,7 @@ impl event::EventHandler<ggez::GameError> for AppState {
                 self.game_one.render_pieces(&self.piece_assets, &mut canvas, GAME_1_POS, GAME_1_SCL);
             },
             GameState::StartScreen => {
-                start_screen::render_start_screen(&self.menu_assets,&mut canvas, ctx, 1.);
+                start_screen::render_start_screen(&self.menu_assets,&mut canvas, ctx, 1., &mut self.game_one.animation_state);
             }, 
             _ =>{}
         }
@@ -184,7 +190,7 @@ pub fn main() -> GameResult {
         .window_setup(conf::WindowSetup::default().title("Tetris"))
         .window_mode(
             conf::WindowMode::default()
-                .resizable(true) // Fixate window size
+                .resizable(true) 
                 .dimensions(WINDOW_WIDTH, WINDOW_HEIGHT)
         );
 
