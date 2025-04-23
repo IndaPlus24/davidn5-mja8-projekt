@@ -189,6 +189,13 @@ impl event::EventHandler<ggez::GameError> for AppState {
             },
             GameState::GameModeSelector => {
                 gamemode_selector::render_gamemode_selector(&self.menu_assets, &mut canvas, ctx, 1., &mut self.game_one.animation_state);
+            },
+            GameState::Multiplayer => {
+                // If on keyboard switch controlls during the game and then switch back ... 
+                // since inputs for menus will be weird using multiplayer settings.
+            },
+            GameState::VsBots => {
+                //Render 1v1 board but only load single player inputs that work on one of the boards.
             }
             _ =>{}
         }
