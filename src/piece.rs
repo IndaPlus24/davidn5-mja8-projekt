@@ -20,14 +20,14 @@ pub enum PieceType {
 impl PieceType {
     pub fn get_path(&self) -> String {
         match self {
-            PieceType::I => String::from("/cyan.png"),
-            PieceType::J => String::from("/blue.png"),
-            PieceType::L => String::from("/orange.png"),
-            PieceType::O => String::from("/yellow.png"),
-            PieceType::S => String::from("/green.png"),
-            PieceType::T => String::from("/magenta.png"),
-            PieceType::Z => String::from("/red.png"),
-            PieceType::X => String::from("/grey.png"),
+            PieceType::I => String::from("/pieces/cyan.png"),
+            PieceType::J => String::from("/pieces/blue.png"),
+            PieceType::L => String::from("/pieces/orange.png"),
+            PieceType::O => String::from("/pieces/yellow.png"),
+            PieceType::S => String::from("/pieces/green.png"),
+            PieceType::T => String::from("/pieces/magenta.png"),
+            PieceType::Z => String::from("/pieces/red.png"),
+            PieceType::X => String::from("/pieces/gray.png"),
         }
     }
 
