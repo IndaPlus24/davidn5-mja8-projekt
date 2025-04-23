@@ -6,12 +6,13 @@ mod game_ui;
 mod inputs;
 mod piece;
 mod rotation;
+mod start_screen;
 
 use std::collections::HashMap;
 use std::error::Error;
 use std::path;
 use std::str::FromStr;
-use consts::{WINDOW_HEIGHT, WINDOW_WIDTH, GAME_1_POS, GAME_1_SCL};
+use consts::{WINDOW_HEIGHT, WINDOW_WIDTH, GAME_1_POS, GAME_1_SCL, GameState};
 use csv::{Reader, Writer};
 
 pub use crate::config::input_config::*;
@@ -27,6 +28,7 @@ use ggez::{conf, event, graphics, Context, ContextBuilder, GameResult};
 struct AppState {
     piece_assets: HashMap<PieceType, Image>,
     board_assets: HashMap<String, Image>,
+    menu_assets : HashMap<String, Image>,
     game_one: Game,
     game_two : Game,
 }
@@ -36,6 +38,7 @@ impl AppState {
         let mut state = AppState {
             piece_assets: AppState::preload_piece_assets(ctx),
             board_assets: AppState::preload_board_assets(ctx),
+            menu_assets : AppState::preload_menu_assets(ctx),
             game_one: Game::new(),
             game_two : Game::new(),
         };
@@ -64,6 +67,14 @@ impl AppState {
         image_map.insert("garb_bar".to_string(), Image::from_path(ctx, "/board/attack_bar.png").unwrap());
         image_map.insert("garb_sep".to_string(), Image::from_path(ctx, "/board/attack_bar_seperator.png").unwrap());
         image_map.insert("hold".to_string(), Image::from_path(ctx, "/board/hold.png").unwrap());
+
+        image_map
+    }
+
+    pub fn preload_menu_assets(ctx: &Context) -> HashMap<String, Image> {
+        let mut image_map: HashMap<String, Image> = HashMap::new();
+
+        image_map.insert("start_screen".to_string(), Image::from_path(ctx, "/ui_assets/start_screen.png").unwrap());
 
         image_map
     }
@@ -134,10 +145,11 @@ impl event::EventHandler<ggez::GameError> for AppState {
     fn update(&mut self, ctx: &mut Context) -> GameResult {
         self.game_one.next_tick(ctx);
 
-        if self.game_one.game_over {
+        if self.game_one.game_state == GameState::GameOver {
             //TODO Prompt name
             let name = "";
             let _ = Self::save_score(name.to_string(), self.game_one.score);
+            self.game_one.game_state = GameState::HighscoreInput;
         }
         Ok(())
     }
@@ -146,9 +158,18 @@ impl event::EventHandler<ggez::GameError> for AppState {
         //CREATE CANVAS
         let mut canvas = graphics::Canvas::from_frame(ctx, graphics::Color::from([0.1, 0.2, 0.3, 1.0]));
 
-        //Render game
-        self.game_one.render_board(&self.board_assets, &mut canvas, GAME_1_POS, GAME_1_SCL);
-        self.game_one.render_pieces(&self.piece_assets, &mut canvas, GAME_1_POS, GAME_1_SCL);
+        match self.game_one.game_state {
+            GameState::Singleplayer => {
+                //Render game
+                self.game_one.render_board(&self.board_assets, &mut canvas, GAME_1_POS, GAME_1_SCL);
+                self.game_one.render_pieces(&self.piece_assets, &mut canvas, GAME_1_POS, GAME_1_SCL);
+            },
+            GameState::StartScreen => {
+                start_screen::render_start_screen(&self.menu_assets,&mut canvas, ctx, 1.);
+            }, 
+            _ =>{}
+        }
+        
 
         canvas.finish(ctx)?;
         Ok(())
@@ -163,12 +184,17 @@ pub fn main() -> GameResult {
         .window_setup(conf::WindowSetup::default().title("Tetris"))
         .window_mode(
             conf::WindowMode::default()
-                .resizable(false) // Fixate window size
+                .resizable(true) // Fixate window size
                 .dimensions(WINDOW_WIDTH, WINDOW_HEIGHT)
         );
 
     let (mut context, event_loop) = context_builder.build().expect("Failed to build context.");
     let state = AppState::new(&mut context).expect("Failed to create state.");
+
+    context.gfx.add_font(
+        "Tetris font",
+        graphics::FontData::from_path(&context, "/PressStart2P-Regular.ttf")?,
+    );
 
     println!("OPENED WINDOW");
     event::run(context, event_loop, state) // Run window event loop

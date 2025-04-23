@@ -1,6 +1,6 @@
 // All of these consts should probably be relative to window size
-pub const WINDOW_WIDTH: f32 = 1600.;
-pub const WINDOW_HEIGHT: f32 = 900.;
+pub const WINDOW_WIDTH: f32 = 1920.;
+pub const WINDOW_HEIGHT: f32 = 1080.;
 
 pub const GAME_1_POS: (f32, f32) = (100., 100.);
 pub const GAME_1_SCL: f32 = 1.;
@@ -16,3 +16,15 @@ pub const TICKS_BEFORE_NEXT_PIECE: f32 = 0.00; // can probably remove?
 
 pub const DAS_TICKS: f32 = 0.06; // Delayed Auto Shift - ticks between the inital input until execution
 pub const ARR_TICKS: f32 = 0.04; // Auto Repeat Rate - ticks between piece movement when holding down
+
+#[derive(PartialEq)]
+pub enum GameState{
+    StartScreen, 
+    MainMenu,
+    GameModeSelector,
+    Singleplayer,
+    Multiplayer, 
+    VsBots,  
+    GameOver, 
+    HighscoreInput
+}
