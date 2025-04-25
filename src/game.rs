@@ -4,16 +4,16 @@ use ggez::Context;
 
 use crate::animation_state::AnimationState;
 use crate::board::{BOARD_AMOUNT_COLUMNS, BOARD_AMOUNT_ROWS};
-use crate::consts::{LEVELS_GRAVITY_THRESHOLD, TICKS_BEFORE_NEXT_PIECE, GameState};
+use crate::consts::{GameState, LEVELS_GRAVITY_THRESHOLD, TICKS_BEFORE_NEXT_PIECE};
 use crate::{default_keyboard_keybindings, GameAction, KeyCode, Piece, PieceType};
 
 pub struct Game {
     pub board: [[Option<PieceType>; BOARD_AMOUNT_COLUMNS]; BOARD_AMOUNT_ROWS],
-    pub game_state : GameState,
-    pub animation_state : AnimationState,
+    pub game_state: GameState,
+    pub animation_state: AnimationState,
     pub battle_mode: bool,
-    pub garbage_queue: VecDeque<(usize, usize)>, // (amount, column of garbage hole) 
-    pub score: usize, 
+    pub garbage_queue: VecDeque<(usize, usize)>, // (amount, column of garbage hole)
+    pub score: usize,
     pub gravity_timer: f32,
     pub current_level: usize,
     pub active_piece: Piece,
@@ -41,7 +41,7 @@ impl Game {
 
         Game {
             board: [[None; BOARD_AMOUNT_COLUMNS]; BOARD_AMOUNT_ROWS],
-            game_state : GameState::StartScreen, // Change GameState during testing so you dont have to go through screens
+            game_state: GameState::StartScreen, // Change GameState during testing so you dont have to go through screens
             animation_state: AnimationState::new(),
             battle_mode: false,
             garbage_queue: VecDeque::new(),
@@ -96,7 +96,6 @@ impl Game {
                 || c < 0
                 || c >= BOARD_AMOUNT_COLUMNS as isize
             {
-
                 return true;
             }
 
