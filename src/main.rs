@@ -3,20 +3,22 @@ mod board;
 mod config;
 mod consts;
 mod game;
-mod inputs;
+mod game_inputs;
+mod menu_inputs;
 mod piece;
 mod rotation;
 mod ui_components;
+mod scoring;
 
-use consts::{GameState, GAME_1_POS, GAME_1_SCL, WINDOW_HEIGHT, WINDOW_WIDTH};
+use animation_state::AnimationState;
+use consts::{ScreenState, GAME_1_POS, GAME_1_SCL, WINDOW_HEIGHT, WINDOW_WIDTH};
 use csv::{Reader, Writer};
+use menu_inputs::*;
 use std::collections::HashMap;
 use std::error::Error;
 use std::path;
 use std::str::FromStr;
-use ui_components::{bot_selecter, gamemode_selector, main_menu};
-
-use crate::ui_components::start_screen;
+use ui_components::{bot_selector, gamemode_selector, main_menu, start_screen};
 
 pub use crate::config::input_config::*;
 pub use crate::game::Game;
@@ -28,9 +30,16 @@ use ggez::input::keyboard::KeyCode;
 use ggez::{conf, event, graphics, Context, ContextBuilder, GameResult};
 
 struct AppState {
+    //Screen states and info
+    animation_state: AnimationState,
+    screen_state: ScreenState,
+
+    // Assets
     piece_assets: HashMap<PieceType, Image>,
     board_assets: HashMap<String, Image>,
     menu_assets: HashMap<String, Image>,
+
+    // Games
     game_one: Game,
     game_two: Game,
 }
@@ -38,9 +47,13 @@ struct AppState {
 impl AppState {
     fn new(ctx: &mut Context) -> GameResult<AppState> {
         let mut state = AppState {
+            animation_state: AnimationState::new(),
+            screen_state: ScreenState::StartScreen,
+
             piece_assets: AppState::preload_piece_assets(ctx),
             board_assets: AppState::preload_board_assets(ctx),
             menu_assets: AppState::preload_menu_assets(ctx),
+
             game_one: Game::new(),
             game_two: Game::new(),
         };
@@ -165,27 +178,27 @@ fn save_scores_to_file(path: &str, scores: Vec<(String, usize)>) -> bool {
 
 impl event::EventHandler<ggez::GameError> for AppState {
     fn update(&mut self, ctx: &mut Context) -> GameResult {
-        match self.game_one.game_state {
-            GameState::Singleplayer => {
+        match self.screen_state {
+            ScreenState::Singleplayer => {
                 self.game_one.next_tick(ctx);
             }
-            GameState::GameOver => {
+            ScreenState::GameOver => {
                 //TODO Prompt name
                 let name = "";
                 let _ = Self::save_score(name.to_string(), self.game_one.score);
-                self.game_one.game_state = GameState::HighscoreInput;
+                self.screen_state = ScreenState::HighscoreInput;
             }
-            GameState::StartScreen => {
-                self.game_one.handle_start_screen_inputs(ctx);
+            ScreenState::StartScreen => {
+                handle_start_screen_inputs(ctx, &mut self.screen_state);
             }
-            GameState::MainMenu => {
-                self.game_one.handle_main_menu_inputs(ctx);
+            ScreenState::MainMenu => {
+                handle_main_menu_inputs(ctx, &mut self.screen_state, &mut self.animation_state);
             }
-            GameState::GameModeSelector => {
-                self.game_one.handle_gamemode_selector_inputs(ctx);
+            ScreenState::GameModeSelector => {
+                handle_gamemode_selector_inputs(ctx, &mut self.screen_state, &mut self.animation_state);
             }
-            GameState::BotSelector => {
-                self.game_one.handle_bot_selector_inputs(ctx);
+            ScreenState::BotSelector => {
+                handle_bot_selector_inputs(ctx, &mut self.screen_state, &mut self.animation_state);
             }
             _ => {}
         }
@@ -193,12 +206,13 @@ impl event::EventHandler<ggez::GameError> for AppState {
         Ok(())
     }
 
+
     fn draw(&mut self, ctx: &mut Context) -> GameResult {
         let mut canvas =
             graphics::Canvas::from_frame(ctx, graphics::Color::from([0.1, 0.2, 0.3, 1.0]));
 
-        match self.game_one.game_state {
-            GameState::Singleplayer => {
+        match self.screen_state {
+            ScreenState::Singleplayer => {
                 //Render game
                 self.game_one
                     .render_board(&self.board_assets, &mut canvas, GAME_1_POS, GAME_1_SCL);
@@ -209,47 +223,43 @@ impl event::EventHandler<ggez::GameError> for AppState {
                     GAME_1_SCL,
                 );
             }
-            GameState::StartScreen => {
+            ScreenState::StartScreen => {
                 start_screen::render_start_screen(
                     &self.menu_assets,
                     &mut canvas,
-                    ctx,
                     1.,
-                    &mut self.game_one.animation_state,
+                    &mut self.animation_state,
                 );
             }
-            GameState::MainMenu => {
+            ScreenState::MainMenu => {
                 main_menu::render_main_menu(
                     &self.menu_assets,
                     &mut canvas,
-                    ctx,
                     1.,
-                    &mut self.game_one.animation_state,
+                    &mut self.animation_state,
                 );
             }
-            GameState::GameModeSelector => {
+            ScreenState::GameModeSelector => {
                 gamemode_selector::render_gamemode_selector(
                     &self.menu_assets,
                     &mut canvas,
-                    ctx,
                     1.,
-                    &mut self.game_one.animation_state,
+                    &mut self.animation_state,
                 );
             }
-            GameState::BotSelector => {
-                bot_selecter::render_bot_selector(
+            ScreenState::BotSelector => {
+                bot_selector::render_bot_selector(
                     &self.menu_assets,
                     &mut canvas,
-                    ctx,
                     1.,
-                    &mut self.game_one.animation_state,
+                    &mut self.animation_state,
                 );
             }
-            GameState::Multiplayer => {
+            ScreenState::Multiplayer => {
                 // If on keyboard switch controlls during the game and then switch back ...
                 // since inputs for menus will be weird using multiplayer settings.
             }
-            GameState::VsBots => {
+            ScreenState::VsBots => {
                 //Render 1v1 board but only load single player inputs that work on one of the boards.
             }
             _ => {}

@@ -1,5 +1,5 @@
 use crate::consts::{
-    GameState, ARR_TICKS, DAS_TICKS, TICKS_BEFORE_NEXT_PIECE, TICKS_BETWEEN_INPUTS,
+    ARR_TICKS, DAS_TICKS, TICKS_BEFORE_NEXT_PIECE, TICKS_BETWEEN_INPUTS,
     TICKS_BETWEEN_ROTATIONS,
 };
 use crate::{Game, Piece, ROTATION_180, ROTATION_CCW, ROTATION_CW};
@@ -88,7 +88,7 @@ impl Game {
             self.ticks_since_last_rotation = 0.;
         }
 
-        if keyboard.is_key_just_pressed(*self.controls.get(&GameAction::HoldPiece).unwrap())
+        if keyboard.is_key_just_pressed(*self.controls.get(&GameAction::Hold).unwrap())
             && self.can_hold
         {
             println!("Holding Piece");
@@ -111,78 +111,6 @@ impl Game {
 
             self.held_piece = Some(held_piece);
             self.can_hold = false;
-        }
-    }
-
-    pub fn handle_start_screen_inputs(&mut self, ctx: &ggez::Context) {
-        let keyboard = &ctx.keyboard;
-        if keyboard.is_key_just_pressed(*self.controls.get(&GameAction::HardDrop).unwrap()) {
-            self.game_state = GameState::MainMenu;
-        }
-    }
-
-    pub fn handle_main_menu_inputs(&mut self, ctx: &ggez::Context) {
-        let keyboard = &ctx.keyboard;
-        if keyboard.is_key_just_pressed(*self.controls.get(&GameAction::SoftDrop).unwrap()) {
-            self.animation_state.selected_item_main_menu = 1
-        } else if keyboard.is_key_just_pressed(*self.controls.get(&GameAction::Up).unwrap()) {
-            self.animation_state.selected_item_main_menu = 0;
-        } else if keyboard.is_key_just_pressed(*self.controls.get(&GameAction::HardDrop).unwrap()) {
-            self.game_state = if self.animation_state.selected_item_main_menu == 0 {
-                GameState::GameModeSelector
-            } else {
-                GameState::Settings
-            };
-        }
-    }
-
-    pub fn handle_gamemode_selector_inputs(&mut self, ctx: &ggez::Context) {
-        let keyboard = &ctx.keyboard;
-        if keyboard.is_key_just_pressed(*self.controls.get(&GameAction::SoftDrop).unwrap()) {
-            self.animation_state.selected_item_gamemode_selector =
-                if self.animation_state.selected_item_gamemode_selector == 2 {
-                    2
-                } else {
-                    self.animation_state.selected_item_gamemode_selector + 1
-                };
-        } else if keyboard.is_key_just_pressed(*self.controls.get(&GameAction::Up).unwrap()) {
-            self.animation_state.selected_item_gamemode_selector =
-                if self.animation_state.selected_item_gamemode_selector == 0 {
-                    0
-                } else {
-                    self.animation_state.selected_item_gamemode_selector - 1
-                };
-        } else if keyboard.is_key_just_pressed(*self.controls.get(&GameAction::HardDrop).unwrap()) {
-            match self.animation_state.selected_item_gamemode_selector {
-                0 => self.game_state = GameState::Multiplayer,
-                1 => self.game_state = GameState::Singleplayer,
-                _ => self.game_state = GameState::BotSelector,
-            }
-        }
-    }
-
-    pub fn handle_bot_selector_inputs(&mut self, ctx: &ggez::Context) {
-        let keyboard = &ctx.keyboard;
-        if keyboard.is_key_just_pressed(*self.controls.get(&GameAction::SoftDrop).unwrap()) {
-            self.animation_state.selected_item_bot_selector =
-                if self.animation_state.selected_item_bot_selector == 2 {
-                    2
-                } else {
-                    self.animation_state.selected_item_bot_selector + 1
-                };
-        } else if keyboard.is_key_just_pressed(*self.controls.get(&GameAction::Up).unwrap()) {
-            self.animation_state.selected_item_bot_selector =
-                if self.animation_state.selected_item_bot_selector == 0 {
-                    0
-                } else {
-                    self.animation_state.selected_item_bot_selector - 1
-                };
-        } else if keyboard.is_key_just_pressed(*self.controls.get(&GameAction::HardDrop).unwrap()) {
-            match self.animation_state.selected_item_bot_selector {
-                0 => self.game_state = GameState::Multiplayer,
-                1 => self.game_state = GameState::Singleplayer,
-                _ => self.game_state = GameState::VsBots,
-            }
         }
     }
 }

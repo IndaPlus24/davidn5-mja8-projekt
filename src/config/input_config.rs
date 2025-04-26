@@ -10,14 +10,12 @@ pub enum GameAction {
     RotateCw,
     RotateCcw,
     Rotate180,
-    HoldPiece,
-    Up,
+    Hold,
 }
 
-/*
-    Returns default_keyboard_keybindings
-*/
-pub fn default_keyboard_keybindings () -> HashMap<GameAction, KeyCode> {
+
+// Returns default_keyboard_keybindings
+pub fn default_keyboard_keybindings() -> HashMap<GameAction, KeyCode> {
     use GameAction::*;
 
     let mut map = HashMap::new();
@@ -28,8 +26,7 @@ pub fn default_keyboard_keybindings () -> HashMap<GameAction, KeyCode> {
     map.insert(RotateCw, KeyCode::X);
     map.insert(RotateCcw, KeyCode::Z);
     map.insert(Rotate180, KeyCode::A);
-    map.insert(HoldPiece, KeyCode::C);
-    map.insert(Up,KeyCode::Up);
+    map.insert(Hold, KeyCode::C);
     map
     
 }
@@ -48,8 +45,7 @@ pub fn multi_controller_keyboard_keybindings() -> Vec<HashMap<GameAction, KeyCod
     player1.insert(RotateCcw, KeyCode::Q);
     player1.insert(Rotate180, KeyCode::W);
     player1.insert(RotateCw, KeyCode::E);
-    player1.insert(HoldPiece, KeyCode::Z);
-    player1.insert(Up, KeyCode::Up);
+    player1.insert(Hold, KeyCode::Z);
 
     let mut player2 = HashMap::new();
     player2.insert(MoveRight, KeyCode::L);
@@ -59,8 +55,7 @@ pub fn multi_controller_keyboard_keybindings() -> Vec<HashMap<GameAction, KeyCod
     player2.insert(RotateCcw, KeyCode::U);
     player2.insert(Rotate180, KeyCode::I);
     player2.insert(RotateCw, KeyCode::O);
-    player2.insert(HoldPiece, KeyCode::M);
-    player2.insert(Up, KeyCode::Up);
+    player2.insert(Hold, KeyCode::M);
 
 
     vec![player1, player2]
@@ -81,8 +76,7 @@ pub fn default_drivarkaden_keybindings() -> Vec<HashMap<GameAction, KeyCode>>{
     player1.insert(RotateCw, KeyCode::LShift); // X
     player1.insert(RotateCcw, KeyCode::Space); // Y
     player1.insert(Rotate180, KeyCode::Z); // top right
-    player1.insert(HoldPiece, KeyCode::LControl); // B
-    player1.insert(Up, KeyCode::Up);
+    player1.insert(Hold, KeyCode::LControl); // B
 
 
 
@@ -94,8 +88,7 @@ pub fn default_drivarkaden_keybindings() -> Vec<HashMap<GameAction, KeyCode>>{
     player2.insert(RotateCw, KeyCode::Q); // X
     player2.insert(RotateCcw, KeyCode::W); // Y
     player2.insert(Rotate180, KeyCode::I); // Top Right
-    player2.insert(HoldPiece, KeyCode::A); //B
-    player2.insert(Up, KeyCode::R);
+    player2.insert(Hold, KeyCode::A); //B
 
 
 

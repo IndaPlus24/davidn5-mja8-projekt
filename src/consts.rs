@@ -18,7 +18,7 @@ pub const DAS_TICKS: f32 = 0.06; // Delayed Auto Shift - ticks between the inita
 pub const ARR_TICKS: f32 = 0.04; // Auto Repeat Rate - ticks between piece movement when holding down
 
 #[derive(PartialEq)]
-pub enum GameState {
+pub enum ScreenState {
     StartScreen,
     MainMenu,
     GameModeSelector,
