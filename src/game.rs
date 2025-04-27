@@ -81,7 +81,7 @@ impl Game {
 
             score: 0,
             lines: 0,
-            level: 0,
+            level: 1,
             pieces: 0,
             start_time: Instant::now(),
         }
@@ -101,7 +101,7 @@ impl Game {
 
         self.score = 0;
         self.lines = 0;
-        self.level = 0;
+        self.level = 1;
         self.pieces = 0;
         self.start_time = Instant::now();
     }

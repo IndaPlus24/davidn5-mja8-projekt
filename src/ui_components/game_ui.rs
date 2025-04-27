@@ -168,6 +168,39 @@ impl Game {
                         .scale(glam::Vec2::new(scl, scl))
                 );
 
+                // Level
+                let mut level = Text::new(TextFragment{
+                    text: "Level".to_string(),
+                    font: Some("Tetris font".to_string()),
+                    color: Some(Color::WHITE), 
+                    scale: Some(PxScale::from(24.))
+                });
+                level.set_layout(TextLayout{
+                    h_align: TextAlign::End,
+                    v_align: TextAlign::Middle
+                });
+                canvas.draw(&level,
+                    graphics::DrawParam::new()
+                        .dest(glam::Vec2::new(pos.0 + 156. * scl, pos.1 + 496. * scl))
+                        .scale(glam::Vec2::new(scl, scl))
+                );
+
+                let mut level_count = Text::new(TextFragment{
+                    text: self.level.to_string(),
+                    font: Some("Tetris font".to_string()),
+                    color: Some(Color::WHITE), 
+                    scale: Some(PxScale::from(16.))
+                });
+                level_count.set_layout(TextLayout{
+                    h_align: TextAlign::End,
+                    v_align: TextAlign::Middle
+                });
+                canvas.draw(&level_count,
+                    graphics::DrawParam::new()
+                        .dest(glam::Vec2::new(pos.0 + 156. * scl, pos.1 + 528. * scl))
+                        .scale(glam::Vec2::new(scl, scl))
+                );
+
                 // Lines
                 let mut lines = Text::new(TextFragment{
                     text: "Lines".to_string(),
@@ -175,7 +208,7 @@ impl Game {
                     color: Some(Color::WHITE), 
                     scale: Some(PxScale::from(24.))
                 });
-                lines.set_layout(TextLayout {
+                lines.set_layout(TextLayout{
                     h_align: TextAlign::End,
                     v_align: TextAlign::Middle
                 });
@@ -191,7 +224,7 @@ impl Game {
                     color: Some(Color::WHITE), 
                     scale: Some(PxScale::from(16.))
                 });
-                line_count.set_layout(TextLayout {
+                line_count.set_layout(TextLayout{
                     h_align: TextAlign::End,
                     v_align: TextAlign::Middle
                 });
