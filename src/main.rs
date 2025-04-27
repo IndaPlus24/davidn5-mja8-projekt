@@ -217,13 +217,22 @@ impl event::EventHandler<ggez::GameError> for AppState {
         match self.screen_state {
             ScreenState::Singleplayer => {
                 //Render game
-                self.game_one
-                    .render_board(&self.board_assets, &mut canvas, GAME_1_POS, GAME_1_SCL);
+                self.game_one.render_board(
+                    &self.board_assets,
+                    &mut canvas,
+                    GAME_1_POS,
+                    GAME_1_SCL
+                );
                 self.game_one.render_pieces(
                     &self.piece_assets,
                     &mut canvas,
                     GAME_1_POS,
                     GAME_1_SCL,
+                );
+                self.game_one.render_stats(
+                    &mut canvas,
+                    GAME_1_POS,
+                    GAME_1_SCL
                 );
             }
             ScreenState::StartScreen => {

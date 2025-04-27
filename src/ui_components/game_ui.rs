@@ -1,8 +1,8 @@
 use std::collections::HashMap;
 
-use ggez::{glam, graphics::{self, Canvas, Image}};
+use ggez::{glam, graphics::{self, Canvas, Color, Image, PxScale, Text, TextFragment, TextLayout}};
 
-use crate::{Game, PieceType};
+use crate::{consts::BoardRenderType, Game, PieceType};
 use crate::consts::{BOARD_AMOUNT_COLUMNS, BOARD_AMOUNT_ROWS};
 
 
@@ -146,6 +146,33 @@ impl Game {
             x -= x_offset;
             y -= y_offset;
             y += 96.;
+        }
+    }
+
+    // Render different stats depending on gamemode
+    pub fn render_stats(&mut self, canvas: &mut Canvas, pos: (f32, f32), scl: f32) {
+        match self.render_type {
+            BoardRenderType::Marathon => {
+                let mut score = Text::new(TextFragment{
+                    text: self.score.to_string(),
+                    font: Some("Tetris font".to_string()),
+                    color: Some(Color::WHITE), 
+                    scale: Some(PxScale::from(24.))
+                });
+                score.set_layout(TextLayout::center());
+
+                canvas.draw(&score,
+                    graphics::DrawParam::new()
+                        .dest(glam::Vec2::new(pos.0 + 328., pos.1 + 668.))
+                        .scale(glam::Vec2::new(scl, scl))
+                );
+            },
+            BoardRenderType::FourtyLines => {
+
+            },
+            BoardRenderType::Versus => {
+
+            },
         }
     }
 }
