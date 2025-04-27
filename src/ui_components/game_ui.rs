@@ -153,8 +153,9 @@ impl Game {
     pub fn render_stats(&mut self, canvas: &mut Canvas, pos: (f32, f32), scl: f32) {
         match self.render_type {
             BoardRenderType::Marathon => {
+                let formatted_score = get_formatted_score(self.score);
                 let mut score = Text::new(TextFragment{
-                    text: self.score.to_string(),
+                    text: formatted_score,
                     font: Some("Tetris font".to_string()),
                     color: Some(Color::WHITE), 
                     scale: Some(PxScale::from(24.))
@@ -183,4 +184,20 @@ fn get_piece_offset(piece_type: PieceType, scl: f32) -> (f32, f32) {
         PieceType::O => (-16. * scl, 0.),
         _ => (0., 0.),
     }
+}
+
+fn get_formatted_score(score: usize) -> String {
+    let mut s = score;
+    let mega = s / 1_000_000;
+    s %= 1_000_000;
+    let kilo = s / 1_000;
+    s %= 1_000;
+
+    if mega == 0 {
+        if kilo == 0 {
+            return s.to_string();
+        }
+        return format!("{},{:0>3}", kilo, s);
+    }
+    return format!("{},{:0>3},{:0>3}", mega, kilo, s);
 }
