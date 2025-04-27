@@ -2,17 +2,8 @@ use std::time::Instant;
 
 use crate::scoring::ScoreType;
 use crate::Game;
-use crate::{Piece, PieceType};
-use crate::{ROTATION_CW, ROTATION_CCW};
+use crate::Piece;
 pub use crate::consts::{BOARD_AMOUNT_COLUMNS, BOARD_AMOUNT_ROWS};
-
-use crate::rotation::{
-    KICK_TABLE_180,
-    KICK_TABLE_CCW_I,
-    KICK_TABLE_CCW_REGULAR,
-    KICK_TABLE_CW_I,
-    KICK_TABLE_CW_REGULAR,
-};
 
 impl Game {
     pub fn is_valid_position(&mut self, dx: isize, dy: isize) -> bool {
@@ -33,13 +24,25 @@ impl Game {
         })
     }
 
+    pub fn is_solid_tile(&mut self, r: isize, c: isize) -> bool {
+        if c >= BOARD_AMOUNT_COLUMNS as isize
+        || c < 0
+        || r < 0
+        {return true;}
+
+        self.board[r as usize][c as usize].is_some()
+    }
+
     pub fn move_piece(&mut self, dx: isize, dy: isize) -> bool {
         if !self.is_valid_position(dx, dy) {
             return false;
         }
         self.active_piece.midpoint.0 += dy;
         self.active_piece.midpoint.1 += dx;
-        
+
+        self.t_spin = false;
+        self.t_spin_mini = false;
+
         self.on_ground = !self.is_valid_position(0, -1);
         self.on_ground_start = Some(Instant::now());
 
@@ -55,7 +58,7 @@ impl Game {
 
         let score_type = self.get_score_type();
         self.add_score(score_type);
-        
+
         self.spawn_new_piece();
         self.last_drop = Instant::now();
         true
@@ -78,43 +81,8 @@ impl Game {
         ghost.midpoint.0 += dy+1;
         ghost
     }
-    
-    pub fn rotate(&mut self, rotation_type: usize) -> bool {
-        let piece = self.active_piece.clone();
-        let new_rotation: usize = (piece.rotation + rotation_type) % 4;
-
-        // Set up rotated piece for kick table checks
-        let mut rotated_piece = Piece::new(piece.piece_type, new_rotation);
-        rotated_piece.midpoint = piece.midpoint;
-        self.active_piece = rotated_piece;
-
-        // Fetch the suitable kick table
-        let kick_table = match rotation_type {
-            ROTATION_CW => match piece.piece_type {
-                PieceType::I => KICK_TABLE_CW_I[new_rotation],
-                _ => KICK_TABLE_CW_REGULAR[new_rotation],
-            },
-            ROTATION_CCW => match piece.piece_type {
-                PieceType::I => KICK_TABLE_CCW_I[new_rotation],
-                _ => KICK_TABLE_CCW_REGULAR[new_rotation],
-            },
-            _ => KICK_TABLE_180[new_rotation],
-        };
-        
-        // Try kick table offsets
-        for (dx, dy) in kick_table {
-            if self.move_piece(dx, dy) {
-                self.active_piece.rotation = new_rotation;
-                return true;
-            }
-        }
-
-        self.active_piece = piece;
-        false
-    }
 
     pub fn get_score_type(&mut self) -> Option<ScoreType> {
-
         // Clear lines
         let mut rows_to_remove: Vec<usize> = Vec::new();
         for row in 0..BOARD_AMOUNT_ROWS {
@@ -145,13 +113,13 @@ impl Game {
         self.lines += lines_cleared;
         match lines_cleared {
             0 => {
-                if self.t_spin {Some(ScoreType::TSpin)}
-                else if self.t_spin_mini {Some(ScoreType::TSpinMini)}
+                if self.t_spin_mini {Some(ScoreType::TSpinMini)}
+                else if self.t_spin {Some(ScoreType::TSpin)}
                 else {None}
             },
             1 => {
-                if self.t_spin {Some(ScoreType::TSpinSingle)}
-                else if self.t_spin_mini {Some(ScoreType::TSpinMiniSingle)}
+                if self.t_spin_mini {Some(ScoreType::TSpinMiniSingle)}
+                else if self.t_spin {Some(ScoreType::TSpinSingle)}
                 else {Some(ScoreType::Single)}
             },
             2 => {

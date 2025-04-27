@@ -62,6 +62,7 @@ impl Game {
                 _ => {
                     if self.back_to_back {
                         points *= 1.5;
+                        println!("B2B!");
                     }
                     self.back_to_back = true;
                 }

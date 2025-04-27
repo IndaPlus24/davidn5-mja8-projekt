@@ -182,7 +182,6 @@ impl Game {
         if let Some(das_start) = self.das_start {
             // Check if DAS is charged
             if !self.das_charged && das_start.elapsed() >= self.das {
-                println!("das charged");
                 self.das_charged = true;
                 self.arr_start = Some(das_start + self.das);
             }
