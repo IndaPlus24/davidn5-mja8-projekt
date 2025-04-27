@@ -59,7 +59,9 @@ impl Game {
     }
 
     pub fn hard_drop(&mut self) -> bool {
-        while self.move_piece(0, -1) {}
+        while self.move_piece(0, -1) {
+            self.score += 2;
+        }
         self.place_piece()
     }
 
