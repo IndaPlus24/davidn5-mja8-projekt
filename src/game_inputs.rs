@@ -1,7 +1,5 @@
-use crate::consts::{
-    ARR_TICKS, DAS_TICKS, TICKS_BEFORE_NEXT_PIECE, TICKS_BETWEEN_INPUTS,
-    TICKS_BETWEEN_ROTATIONS,
-};
+use std::time::Instant;
+
 use crate::{Game, Piece, ROTATION_180, ROTATION_CCW, ROTATION_CW};
 
 use crate::config::input_config::*;
@@ -9,85 +7,74 @@ use crate::config::input_config::*;
 impl Game {
     pub fn handle_game_inputs(&mut self, ctx: &ggez::Context) {
         let keyboard = &ctx.keyboard;
-        let dt = ctx.time.delta().as_secs_f32();
 
-        let right_held =
-            keyboard.is_key_pressed(*self.controls.get(&GameAction::MoveRight).unwrap());
-        let left_held = keyboard.is_key_pressed(*self.controls.get(&GameAction::MoveLeft).unwrap());
-
-        let direction = if right_held && !left_held {
-            Some(1)
-        } else if left_held && !right_held {
-            Some(-1)
-        } else {
-            None
-        };
-        match direction {
-            Some(dir) => {
-                if self.das_direction != Some(dir) {
-                    // New direction pressed: move once and start DAS
-                    self.move_piece(dir, 0);
-                    self.das_direction = Some(dir);
-                    self.das_timer = 0.;
-                    self.arr_timer = 0.;
-                } else {
-                    self.das_timer += dt;
-                    if self.das_timer >= DAS_TICKS {
-                        self.arr_timer += dt;
-                        if self.arr_timer >= ARR_TICKS {
-                            self.move_piece(dir, 0);
-                            self.arr_timer = 0.;
-                        }
-                    }
-                }
-            }
-            None => {
-                // No direction held
-                self.das_direction = None;
-                self.das_timer = 0.;
-                self.arr_timer = 0.;
+        // Move left
+        if keyboard.is_key_just_pressed(*self.controls.get(&GameAction::MoveLeft).unwrap()) {
+            self.move_piece(-1, 0);
+            self.moving_left = true;
+            self.moving_right = false;
+            self.das_charged = false;
+            self.das_start = Some(Instant::now());
+            self.arr_start = None;
+        }
+        if keyboard.is_key_just_released(*self.controls.get(&GameAction::MoveLeft).unwrap()) {
+            if !self.moving_right {
+                self.moving_left = false;
+                self.das_charged = false;
+                self.das_start = None;
+                self.arr_start = None;
             }
         }
 
-        if keyboard.is_key_pressed(*self.controls.get(&GameAction::SoftDrop).unwrap())
-            && self.ticks_since_last_input > TICKS_BETWEEN_INPUTS
-        {
-            self.move_piece(0, -1);
-            self.ticks_since_last_input = 0.;
+        // Move right
+        if keyboard.is_key_just_pressed(*self.controls.get(&GameAction::MoveRight).unwrap()) {
+            self.move_piece(1, 0);
+            self.moving_right = true;
+            self.moving_left = false;
+            self.das_charged = false;
+            self.das_start = Some(Instant::now());
+            self.arr_start = None;
+        }
+        if keyboard.is_key_just_released(*self.controls.get(&GameAction::MoveRight).unwrap()) {
+            if !self.moving_left {
+                self.moving_right = false;
+                self.das_charged = false;
+                self.das_start = None;
+                self.arr_start = None;
+            }
         }
 
+        // Soft drop
+        if keyboard.is_key_just_pressed(*self.controls.get(&GameAction::SoftDrop).unwrap()) {
+            self.last_drop = Instant::now();
+            self.set_gravity(self.gravity + self.sds);
+        }
+        if keyboard.is_key_just_released(*self.controls.get(&GameAction::SoftDrop).unwrap()) {
+            self.set_gravity(self.gravity - self.sds);
+        }
+
+        // Hard drop
         if keyboard.is_key_just_pressed(*self.controls.get(&GameAction::HardDrop).unwrap()) {
             self.hard_drop();
-            self.ticks_since_last_input = 0.;
-            //Spawn new piece immedietly
-            self.ticks_without_moving_down = TICKS_BEFORE_NEXT_PIECE + 1.;
-            self.check_full_line();
         }
 
-        if keyboard.is_key_just_pressed(*self.controls.get(&GameAction::RotateCw).unwrap())
-            && self.ticks_since_last_rotation > TICKS_BETWEEN_ROTATIONS
-        {
+        // Rotation handling
+        if keyboard.is_key_just_pressed(*self.controls.get(&GameAction::RotateCw).unwrap()) {
             println!("Rotating CW...");
             self.rotate(ROTATION_CW);
-            self.ticks_since_last_rotation = 0.;
         }
 
-        if keyboard.is_key_just_pressed(*self.controls.get(&GameAction::RotateCcw).unwrap())
-            && self.ticks_since_last_rotation > TICKS_BETWEEN_ROTATIONS
-        {
+        if keyboard.is_key_just_pressed(*self.controls.get(&GameAction::RotateCcw).unwrap()) {
             println!("Rotating CCW...");
             self.rotate(ROTATION_CCW);
-            self.ticks_since_last_rotation = 0.;
         }
 
-        if keyboard.is_key_just_pressed(*self.controls.get(&GameAction::Rotate180).unwrap())
-            && self.ticks_since_last_rotation > TICKS_BETWEEN_ROTATIONS
-        {
+        if keyboard.is_key_just_pressed(*self.controls.get(&GameAction::Rotate180).unwrap()) {
             println!("Rotating 180...");
             self.rotate(ROTATION_180);
-            self.ticks_since_last_rotation = 0.;
         }
 
+        // Hold
         if keyboard.is_key_just_pressed(*self.controls.get(&GameAction::Hold).unwrap())
             && self.can_hold
         {

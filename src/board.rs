@@ -1,3 +1,5 @@
+use std::time::Instant;
+
 use crate::Game;
 use crate::{Piece, PieceType};
 use crate::{ROTATION_CW, ROTATION_CCW};
@@ -36,6 +38,10 @@ impl Game {
         }
         self.active_piece.midpoint.0 += dy;
         self.active_piece.midpoint.1 += dx;
+        
+        self.on_ground = !self.is_valid_position(0, -1);
+        self.on_ground_start = Some(Instant::now());
+        
         true
     }
 
@@ -45,6 +51,9 @@ impl Game {
         piece.block_positions.iter().for_each(|(dr, dc)| {
             self.board[(mr+dr) as usize][(mc+dc) as usize] = Some(piece.piece_type);
         });
+        // TODO: calculate score
+        self.check_full_line();
+        self.spawn_new_piece();
         true
     }
 

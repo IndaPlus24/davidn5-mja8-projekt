@@ -48,7 +48,7 @@ impl AppState {
     fn new(ctx: &mut Context) -> GameResult<AppState> {
         let mut state = AppState {
             animation_state: AnimationState::new(),
-            screen_state: ScreenState::StartScreen,
+            screen_state: ScreenState::Singleplayer,
 
             piece_assets: AppState::preload_piece_assets(ctx),
             board_assets: AppState::preload_board_assets(ctx),
@@ -57,6 +57,9 @@ impl AppState {
             game_one: Game::new(),
             game_two: Game::new(),
         };
+
+        state.game_one.reset_game();
+        state.game_two.reset_game();
 
         state.check_args();
         Ok(state)
@@ -180,7 +183,7 @@ impl event::EventHandler<ggez::GameError> for AppState {
     fn update(&mut self, ctx: &mut Context) -> GameResult {
         match self.screen_state {
             ScreenState::Singleplayer => {
-                self.game_one.next_tick(ctx);
+                self.game_one.update(ctx);
             }
             ScreenState::GameOver => {
                 //TODO Prompt name

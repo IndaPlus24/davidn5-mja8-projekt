@@ -1,9 +1,10 @@
 use std::collections::{HashMap, VecDeque};
+use std::time::{Duration, Instant};
 
 use ggez::Context;
 
 use crate::board::{BOARD_AMOUNT_COLUMNS, BOARD_AMOUNT_ROWS};
-use crate::consts::{LEVELS_GRAVITY_THRESHOLD, TICKS_BEFORE_NEXT_PIECE};
+use crate::consts::LEVEL_GRAVITIES;
 use crate::{default_keyboard_keybindings, GameAction, KeyCode, Piece, PieceType};
 
 pub struct Game {
@@ -11,57 +12,101 @@ pub struct Game {
     pub game_over: bool,
     pub battle_mode: bool,
     pub garbage_queue: VecDeque<(usize, usize)>, // (amount, column of garbage hole)
-    pub score: usize,
-    pub gravity_timer: f32,
-    pub current_level: usize,
     pub active_piece: Piece,
     pub held_piece: Option<Piece>,
     pub piece_queue: VecDeque<Piece>,
-    pub ticks_since_last_input: f32,
-    pub ticks_since_last_rotation: f32,
-    pub ticks_without_moving_down: f32,
     pub can_hold: bool,
     pub controls: HashMap<GameAction, KeyCode>,
-    pub das_direction: Option<isize>,
-    pub das_timer: f32,
-    pub arr_timer: f32,
+
+    // Timing/movement tomfoolery
+    pub moving_right: bool,
+    pub moving_left: bool,
+
+    pub das: Duration,
+    pub das_start: Option<Instant>,
+    pub das_charged: bool,
+    pub arr: Duration,
+    pub arr_start: Option<Instant>,
+    pub sds: f32, // Soft drop speed (cells per second)
+    pub gravity: f32, // (cells per second)
+    pub last_drop: Instant,
+    pub fall_timing: Duration, // (time per cell)
+    pub on_ground: bool,
+    pub on_ground_start: Option<Instant>, // Timer for lock delay
+    pub actions_from_ground: usize, // Action counter. If it reaches 15, the piece will automatically lock in place
+
+    // Stats
+    pub score: usize,
+    pub lines: usize,
+    pub level: usize,
+    pub pieces: usize,
+    pub start_time: Instant,
 }
 
 impl Game {
     pub fn new() -> Self {
-        let mut piece_queue: VecDeque<Piece> = VecDeque::new();
-        let l = PieceType::get_random_as_list();
-        for p in l {
-            piece_queue.push_back(Piece::new(p, 0));
-        }
-
-        let active_piece = piece_queue.pop_front().unwrap();
-
         Game {
             board: [[None; BOARD_AMOUNT_COLUMNS]; BOARD_AMOUNT_ROWS],
             game_over: false,
             battle_mode: false,
             garbage_queue: VecDeque::new(),
-            score: 0,
-            gravity_timer: 0.,
-            current_level: 0,
-            active_piece,
+            active_piece: Piece::new(PieceType::Z, 0),
             held_piece: None,
-            piece_queue,
-            ticks_since_last_input: 0.,
-            ticks_since_last_rotation: 0.,
-            ticks_without_moving_down: 0.,
+            piece_queue: VecDeque::new(),
             can_hold: true,
             controls: default_keyboard_keybindings(),
-            das_direction: None,
-            das_timer: 0.,
-            arr_timer: 0.,
+
+            moving_right: false,
+            moving_left: false,
+
+            das: Duration::from_millis(85),
+            das_start: None,
+            das_charged: false,
+            arr: Duration::from_millis(10),
+            arr_start: None,
+            sds: 10.,
+            gravity: LEVEL_GRAVITIES[0],
+            last_drop: Instant::now(),
+            fall_timing: Duration::from_millis((1000. / LEVEL_GRAVITIES[0]) as u64),
+            on_ground: false,
+            on_ground_start: None,
+            actions_from_ground: 0,
+
+            score: 0,
+            lines: 0,
+            level: 0,
+            pieces: 0,
+            start_time: Instant::now(),
         }
+    }
+
+    pub fn reset_game(&mut self) {
+        self.board = [[None; BOARD_AMOUNT_COLUMNS]; BOARD_AMOUNT_ROWS];
+        self.game_over = false;
+        self.held_piece = None;
+        self.garbage_queue = VecDeque::new();
+        self.piece_queue = VecDeque::new();
+        self.spawn_new_piece();
+
+        self.moving_right = false;
+        self.moving_left = false;
+        self.last_drop = Instant::now();
+
+        self.score = 0;
+        self.lines = 0;
+        self.level = 0;
+        self.pieces = 0;
+        self.start_time = Instant::now();
+    }
+
+    pub fn set_gravity(&mut self, gravity: f32) {
+        self.gravity = gravity;
+        self.fall_timing = Duration::from_millis((1000. / gravity) as u64);
     }
 
     pub fn spawn_new_piece(&mut self) {
         if self.piece_queue.len() < 7 {
-            //7-bag
+            // 7-bag
             let l = PieceType::get_random_as_list();
             for p in l {
                 self.piece_queue.push_back(Piece::new(p, 0));
@@ -70,67 +115,63 @@ impl Game {
 
         println!("Spawning new piece...");
         self.active_piece = self.piece_queue.pop_front().unwrap();
+        self.can_hold = true;
+        self.on_ground = false;
 
-        if self.check_game_over() {
+        // Check if spawn location is valid
+        if !self.is_valid_position(0, 0) {
             println!("Game Over!");
             self.game_over = true;
         }
 
-        self.ticks_without_moving_down = 0.;
-        self.can_hold = true;
+        if !self.is_valid_position(0, -1) {
+            self.on_ground = true;
+            self.on_ground_start = Some(Instant::now());
+        }
     }
 
-    pub fn check_game_over(&mut self) -> bool {
-        let piece = &self.active_piece;
-        let (mr, mc) = self.active_piece.midpoint;
-        piece.block_positions.iter().any(|(dr, dc)| {
-            let r = mr + dr;
-            let c = mc + dc;
 
-            // If the active piece is outside the board
-            if r < 0
-                || r >= BOARD_AMOUNT_ROWS as isize
-                || c < 0
-                || c >= BOARD_AMOUNT_COLUMNS as isize
-            {
-                return true;
-            }
-
-            // If the active piece overlaps with another piece.
-            self.board[r as usize][c as usize].is_some()
-        })
-    }
-
-    pub fn next_tick(&mut self, ctx: &mut Context) {
+    pub fn update(&mut self, ctx: &mut Context) {
         if self.game_over {
             return;
-        }
-
-        let dt = ctx.time.delta().as_secs_f32();
-
-        self.gravity_timer += dt;
-        self.ticks_since_last_input += dt;
-        self.ticks_since_last_rotation += dt;
-
-        //Spawn new Piece
-        if self.ticks_without_moving_down > TICKS_BEFORE_NEXT_PIECE {
-            self.spawn_new_piece();
         }
 
         //Handle inputs
         self.handle_game_inputs(ctx);
 
-        // IF THE TICK COUNT MATCHES THE CURRENT LEVELS TICK COUNT
-        if self.gravity_timer > LEVELS_GRAVITY_THRESHOLD[self.current_level] {
-            self.gravity_timer = 0.;
+        // Downward movement (soft drop or natural fall)
+        while !self.on_ground && self.last_drop.elapsed() >= self.fall_timing {
+            self.last_drop += self.fall_timing;
+            self.move_piece(0, -1);
+        }
 
-            if !self.move_piece(0, -1) {
-                self.ticks_without_moving_down += dt;
+        // Horizontal movement
+        if let Some(das_start) = self.das_start {
+            // Check if DAS is charged
+            if !self.das_charged && das_start.elapsed() >= self.das {
+                println!("das charged");
+                self.das_charged = true;
+                self.arr_start = Some(Instant::now());
+            }
+
+            if let Some(mut arr_start) = self.arr_start {
+                // Move if ARR allows
+                while arr_start.elapsed() >= self.arr {
+                    if self.moving_left {
+                        if !self.move_piece(-1, 0) {break}
+                    }
+                    else if self.moving_right {
+                        if !self.move_piece(1, 0) {break}
+                    }
+                    arr_start += self.arr;
+                }
+            }
+        }
+        
+        // Place piece if it has been stationary for .5 seconds
+        if let Some(t) = self.on_ground_start {
+            if self.on_ground && t.elapsed() >= Duration::from_millis(500) {
                 self.place_piece();
-                println!("Piece at bottom...");
-                println!("Checking Lines...");
-                self.check_full_line();
-                self.spawn_new_piece();
             }
         }
     }

@@ -9,13 +9,7 @@ pub const BOARD_AMOUNT_COLUMNS: usize = 10;
 pub const BOARD_AMOUNT_ROWS: usize = 40;
 
 //Delays (seconds)
-pub const LEVELS_GRAVITY_THRESHOLD: [f32; 1] = [0.8];
-pub const TICKS_BETWEEN_INPUTS: f32 = 0.05; // 50 ms between soft drop inputs
-pub const TICKS_BETWEEN_ROTATIONS: f32 = 0.1; // 100 ms between rotation inputs
-pub const TICKS_BEFORE_NEXT_PIECE: f32 = 0.00; // can probably remove?
-
-pub const DAS_TICKS: f32 = 0.06; // Delayed Auto Shift - ticks between the inital input until execution
-pub const ARR_TICKS: f32 = 0.04; // Auto Repeat Rate - ticks between piece movement when holding down
+pub const LEVEL_GRAVITIES: [f32; 1] = [0.8]; // Cells per second
 
 #[derive(PartialEq)]
 pub enum ScreenState {
