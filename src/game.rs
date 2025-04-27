@@ -24,6 +24,7 @@ pub struct Game {
     // Timing/movement tomfoolery
     pub moving_right: bool,
     pub moving_left: bool,
+    pub soft_dropping: bool,
 
     pub das: Duration,
     pub das_start: Option<Instant>,
@@ -63,6 +64,7 @@ impl Game {
 
             moving_right: false,
             moving_left: false,
+            soft_dropping: false,
 
             das: Duration::from_millis(85),
             das_start: None,
@@ -153,7 +155,9 @@ impl Game {
         // Downward movement (soft drop or natural fall)
         while !self.on_ground && self.last_drop.elapsed() >= self.fall_timing {
             self.last_drop += self.fall_timing;
-            self.move_piece(0, -1);
+            if self.move_piece(0, -1) && self.soft_dropping {
+                self.score += 1;
+            }
         }
 
         // Horizontal movement

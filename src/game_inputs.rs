@@ -46,10 +46,12 @@ impl Game {
 
         // Soft drop
         if keyboard.is_key_just_pressed(*self.controls.get(&GameAction::SoftDrop).unwrap()) {
+            self.soft_dropping = true;
             self.last_drop = Instant::now();
             self.set_gravity_soft(self.gravity + self.sds);
         }
         if keyboard.is_key_just_released(*self.controls.get(&GameAction::SoftDrop).unwrap()) {
+            self.soft_dropping = false;
             self.set_gravity_soft(self.gravity);
         }
 
