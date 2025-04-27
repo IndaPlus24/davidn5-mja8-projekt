@@ -166,7 +166,7 @@ impl Game {
             if !self.das_charged && das_start.elapsed() >= self.das {
                 println!("das charged");
                 self.das_charged = true;
-                self.arr_start = Some(Instant::now());
+                self.arr_start = Some(das_start + self.das);
             }
 
             if let Some(mut arr_start) = self.arr_start {
