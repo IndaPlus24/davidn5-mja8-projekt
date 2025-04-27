@@ -1,4 +1,5 @@
 use std::collections::{HashMap, VecDeque};
+use std::f32::INFINITY;
 use std::time::{Duration, Instant};
 
 use ggez::Context;
@@ -62,9 +63,9 @@ impl Game {
             das: Duration::from_millis(85),
             das_start: None,
             das_charged: false,
-            arr: Duration::from_millis(10),
+            arr: Duration::from_millis(0),
             arr_start: None,
-            sds: 10.,
+            sds: INFINITY,
             gravity: LEVEL_GRAVITIES[0],
             last_drop: Instant::now(),
             fall_timing: Duration::from_millis((1000. / LEVEL_GRAVITIES[0]) as u64),
@@ -99,8 +100,13 @@ impl Game {
         self.start_time = Instant::now();
     }
 
-    pub fn set_gravity(&mut self, gravity: f32) {
+    // Used for leveling and regular gravity increase 
+    pub fn set_gravity_hard(&mut self, gravity: f32) {
         self.gravity = gravity;
+        self.fall_timing = Duration::from_millis((1000. / gravity) as u64);
+    }
+    // Used for soft drop, handles INFINITY edge case
+    pub fn set_gravity_soft(&mut self, gravity: f32) {
         self.fall_timing = Duration::from_millis((1000. / gravity) as u64);
     }
 

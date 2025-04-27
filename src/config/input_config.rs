@@ -19,16 +19,15 @@ pub fn default_keyboard_keybindings() -> HashMap<GameAction, KeyCode> {
     use GameAction::*;
 
     let mut map = HashMap::new();
-    map.insert(MoveRight, KeyCode::Right);
-    map.insert(MoveLeft, KeyCode::Left);
-    map.insert(SoftDrop, KeyCode::Down);
+    map.insert(MoveLeft, KeyCode::A);
+    map.insert(MoveRight, KeyCode::D);
+    map.insert(SoftDrop, KeyCode::S);
     map.insert(HardDrop, KeyCode::Space);
-    map.insert(RotateCw, KeyCode::X);
-    map.insert(RotateCcw, KeyCode::Z);
-    map.insert(Rotate180, KeyCode::A);
-    map.insert(Hold, KeyCode::C);
+    map.insert(RotateCw, KeyCode::L);
+    map.insert(RotateCcw, KeyCode::J);
+    map.insert(Rotate180, KeyCode::K);
+    map.insert(Hold, KeyCode::LShift);
     map
-    
 }
 
 /*

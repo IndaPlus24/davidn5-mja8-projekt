@@ -41,7 +41,7 @@ impl Game {
         
         self.on_ground = !self.is_valid_position(0, -1);
         self.on_ground_start = Some(Instant::now());
-        
+
         true
     }
 
@@ -54,6 +54,7 @@ impl Game {
         // TODO: calculate score
         self.check_full_line();
         self.spawn_new_piece();
+        self.last_drop = Instant::now();
         true
     }
 
