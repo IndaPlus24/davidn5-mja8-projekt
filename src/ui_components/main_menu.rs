@@ -1,11 +1,11 @@
-use ggez::{glam, graphics::{self, Canvas, Color, Image, PxScale, Text, TextFragment}, Context};
+use ggez::{glam, graphics::{self, Canvas, Color, Image, PxScale, Text, TextFragment}};
 use std::collections::HashMap;
 
 use crate::animation_state::AnimationState;
+use crate::consts::{WINDOW_HEIGHT, WINDOW_WIDTH};
 
-pub fn render_main_menu(assets : &HashMap<String, Image>, canvas : &mut Canvas, ctx : &mut Context, scl : f32, animation_state : &mut AnimationState){
-    let (w,h) = ctx.gfx.drawable_size();
-    let center = (w / 2., h/2.);
+pub fn render_main_menu(assets: &HashMap<String, Image>, canvas: &mut Canvas, scl: f32, animation_state: &mut AnimationState){
+    let center = (WINDOW_WIDTH / 2., WINDOW_HEIGHT / 2.);
 
     let image = assets.get("empty_box").unwrap();
     let image_half_size = (image.width() as f32 / 2., image.height() as f32 / 2.);

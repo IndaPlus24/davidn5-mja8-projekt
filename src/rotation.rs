@@ -1,3 +1,5 @@
+use crate::{Game, Piece, PieceType};
+
 pub const ROTATION_CW:  usize = 1;
 pub const ROTATION_180: usize = 2;
 pub const ROTATION_CCW: usize = 3;
@@ -85,3 +87,66 @@ pub const KICK_TABLE_180: [[(isize, isize); 6]; 4] = [
     [(0, 0), ( 0,  1), ( 1,  1), (-1,  1), ( 1, 0), (-1, 0)], // 0 -> 2
     [(0, 0), ( 1,  0), ( 1,  2), ( 1,  1), ( 0, 2), ( 0, 1)], // 1 -> 3
 ];
+
+impl Game {
+    pub fn rotate(&mut self, rotation_type: usize) -> bool {
+        let piece = self.active_piece.clone();
+        let new_rotation: usize = (piece.rotation + rotation_type) % 4;
+
+        // Set up rotated piece for kick table checks
+        let mut rotated_piece = Piece::new(piece.piece_type, new_rotation);
+        rotated_piece.midpoint = piece.midpoint;
+        self.active_piece = rotated_piece;
+
+        // Fetch the suitable kick table
+        let kick_table = match rotation_type {
+            ROTATION_CW => match piece.piece_type {
+                PieceType::I => KICK_TABLE_CW_I[new_rotation],
+                _ => KICK_TABLE_CW_REGULAR[new_rotation],
+            },
+            ROTATION_CCW => match piece.piece_type {
+                PieceType::I => KICK_TABLE_CCW_I[new_rotation],
+                _ => KICK_TABLE_CCW_REGULAR[new_rotation],
+            },
+            _ => KICK_TABLE_180[new_rotation],
+        };
+        
+        // Try kick table offsets
+        for (dx, dy) in kick_table {
+            if self.move_piece(dx, dy) {
+                self.active_piece.rotation = new_rotation;
+
+                // Check for T-Spin and T-Spin Mini
+                if piece.piece_type == PieceType::T {
+                    let (mr, mc) = self.active_piece.midpoint;
+                    // Four corners around midpoint (dr, dc)
+                    let around: [(isize, isize); 4] = [(1, -1), (1, 1), (-1, 1), (-1, -1)];
+                    // Amount of corners in front of the t-piece that is solid (0, 1 or 2)
+                    let mut front_count = 0;
+                    // Amount of corners behind the t-piece that is solid (0, 1 or 2)
+                    let mut back_count = 0;
+
+                    for (i, (dr, dc)) in around.iter().enumerate() {
+                        if self.is_solid_tile(mr + dr, mc + dc) {
+                            if i == new_rotation || i == (new_rotation + 1) % 4 {
+                                front_count += 1;
+                            } else {
+                                back_count += 1;
+                            }
+                        }
+                    }
+
+                    if front_count + back_count >= 3 {
+                        self.t_spin = true;
+                        self.t_spin_mini = front_count == 1;
+                    }
+                }
+
+                return true;
+            }
+        }
+
+        self.active_piece = piece;
+        false
+    }
+}
