@@ -45,6 +45,14 @@ pub struct Game {
     pub level: usize,
     pub pieces: usize,
     pub start_time: Instant,
+
+    // Scoring checks
+    pub t_spin: bool,
+    pub t_spin_mini: bool,
+    pub prev_clear: bool, // true if previous piece resulted in a line clear
+    pub combo: usize,
+    pub latest_clear_difficult: bool, // true if latest line clear was a tetris or t-spin
+    pub back_to_back: bool,
 }
 
 impl Game {
@@ -84,6 +92,13 @@ impl Game {
             level: 1,
             pieces: 0,
             start_time: Instant::now(),
+
+            t_spin: false,
+            t_spin_mini: false,
+            prev_clear: false,
+            combo: 0,
+            latest_clear_difficult: false,
+            back_to_back: false,
         }
     }
 
@@ -104,6 +119,9 @@ impl Game {
         self.level = 1;
         self.pieces = 0;
         self.start_time = Instant::now();
+
+        self.latest_clear_difficult = false;
+        self.back_to_back = false;
     }
 
     // Used for leveling and regular gravity increase 

@@ -1,5 +1,6 @@
 use std::time::Instant;
 
+use crate::scoring::ScoreType;
 use crate::Game;
 use crate::{Piece, PieceType};
 use crate::{ROTATION_CW, ROTATION_CCW};
@@ -51,8 +52,10 @@ impl Game {
         piece.block_positions.iter().for_each(|(dr, dc)| {
             self.board[(mr+dr) as usize][(mc+dc) as usize] = Some(piece.piece_type);
         });
-        // TODO: calculate score
-        self.check_full_line();
+
+        let score_type = self.get_score_type();
+        self.add_score(score_type);
+        
         self.spawn_new_piece();
         self.last_drop = Instant::now();
         true
@@ -110,8 +113,9 @@ impl Game {
         false
     }
 
-    pub fn check_full_line(&mut self) {
+    pub fn get_score_type(&mut self) -> Option<ScoreType> {
 
+        // Clear lines
         let mut rows_to_remove: Vec<usize> = Vec::new();
         for row in 0..BOARD_AMOUNT_ROWS {
             // CHECK IF ROW IS FULL
@@ -120,11 +124,13 @@ impl Game {
                     Some(_) => true,
                     None => false
                 }
-            }) { // cursed lol
-                println!("ROW: {} IS FULL", row);
+            }) {
                 rows_to_remove.push(row as usize);
             }
         }
+
+        let lines_cleared = rows_to_remove.len();
+
         if !rows_to_remove.is_empty() {
             rows_to_remove.reverse();
 
@@ -133,6 +139,31 @@ impl Game {
                 for r in row..BOARD_AMOUNT_ROWS-1 {
                     self.board[r] = self.board[r + 1].clone()
                 }
+            }
+        }
+
+        self.lines += lines_cleared;
+        match lines_cleared {
+            0 => {
+                if self.t_spin {Some(ScoreType::TSpin)}
+                else if self.t_spin_mini {Some(ScoreType::TSpinMini)}
+                else {None}
+            },
+            1 => {
+                if self.t_spin {Some(ScoreType::TSpinSingle)}
+                else if self.t_spin_mini {Some(ScoreType::TSpinMiniSingle)}
+                else {Some(ScoreType::Single)}
+            },
+            2 => {
+                if self.t_spin {Some(ScoreType::TspinDouble)}
+                else {Some(ScoreType::Double)}
+            },
+            3 => {
+                if self.t_spin {Some(ScoreType::TSpinTriple)}
+                else {Some(ScoreType::Triple)}
+            },
+            _ => {
+                Some(ScoreType::Tetris)
             }
         }
     }
