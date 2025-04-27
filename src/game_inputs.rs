@@ -99,5 +99,10 @@ impl Game {
             self.held_piece = Some(held_piece);
             self.can_hold = false;
         }
+
+        // Reset
+        if keyboard.is_key_just_pressed(ggez::input::keyboard::KeyCode::R) {
+            self.reset_game();
+        }
     }
 }

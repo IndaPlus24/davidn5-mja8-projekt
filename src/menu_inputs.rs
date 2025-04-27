@@ -1,10 +1,10 @@
 use crate::{animation_state::AnimationState, ScreenState, KeyCode};
 
-// TODO: change these according to launch type
+// TODO: change key codes according to launch type
 const UP: KeyCode = KeyCode::Up;
 const DOWN: KeyCode = KeyCode::Down;
-const LEFT: KeyCode = KeyCode::Left;
-const RIGHT: KeyCode = KeyCode::Right;
+const LEFT: KeyCode = KeyCode::Left; // will be used for settings
+const RIGHT: KeyCode = KeyCode::Right; // will be used for settings
 const SELECT: KeyCode = KeyCode::Space;
 
 pub fn handle_start_screen_inputs(ctx: &ggez::Context, screen_state: &mut ScreenState) {

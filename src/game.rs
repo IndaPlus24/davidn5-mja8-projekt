@@ -5,11 +5,13 @@ use std::time::{Duration, Instant};
 use ggez::Context;
 
 use crate::board::{BOARD_AMOUNT_COLUMNS, BOARD_AMOUNT_ROWS};
-use crate::consts::LEVEL_GRAVITIES;
+use crate::consts::{BoardRenderType, LEVEL_GRAVITIES};
 use crate::{default_keyboard_keybindings, GameAction, KeyCode, Piece, PieceType};
 
 pub struct Game {
     pub board: [[Option<PieceType>; BOARD_AMOUNT_COLUMNS]; BOARD_AMOUNT_ROWS],
+    pub render_type: BoardRenderType,
+
     pub game_over: bool,
     pub battle_mode: bool,
     pub garbage_queue: VecDeque<(usize, usize)>, // (amount, column of garbage hole)
@@ -48,6 +50,8 @@ impl Game {
     pub fn new() -> Self {
         Game {
             board: [[None; BOARD_AMOUNT_COLUMNS]; BOARD_AMOUNT_ROWS],
+            render_type: BoardRenderType::Marathon,
+
             game_over: false,
             battle_mode: false,
             garbage_queue: VecDeque::new(),
@@ -139,6 +143,7 @@ impl Game {
 
     pub fn update(&mut self, ctx: &mut Context) {
         if self.game_over {
+            if ctx.keyboard.is_key_just_pressed(KeyCode::R) {self.reset_game();}
             return;
         }
 

@@ -24,3 +24,9 @@ pub enum ScreenState {
     Settings,
     BotSelector,
 }
+
+pub enum BoardRenderType {
+    Marathon,
+    FourtyLines,
+    Versus,
+}
