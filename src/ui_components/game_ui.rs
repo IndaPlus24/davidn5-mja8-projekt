@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use ggez::{glam, graphics::{self, Canvas, Color, Image, PxScale, Text, TextFragment, TextLayout}};
+use ggez::{glam, graphics::{self, Canvas, Color, Image, PxScale, Text, TextAlign, TextFragment, TextLayout}};
 
 use crate::{consts::BoardRenderType, Game, PieceType};
 use crate::consts::{BOARD_AMOUNT_COLUMNS, BOARD_AMOUNT_ROWS};
@@ -153,6 +153,7 @@ impl Game {
     pub fn render_stats(&mut self, canvas: &mut Canvas, pos: (f32, f32), scl: f32) {
         match self.render_type {
             BoardRenderType::Marathon => {
+                // Score
                 let formatted_score = get_formatted_score(self.score);
                 let mut score = Text::new(TextFragment{
                     text: formatted_score,
@@ -161,10 +162,42 @@ impl Game {
                     scale: Some(PxScale::from(24.))
                 });
                 score.set_layout(TextLayout::center());
-
                 canvas.draw(&score,
                     graphics::DrawParam::new()
-                        .dest(glam::Vec2::new(pos.0 + 328., pos.1 + 668.))
+                        .dest(glam::Vec2::new(pos.0 + 328. * scl, pos.1 + 668. * scl))
+                        .scale(glam::Vec2::new(scl, scl))
+                );
+
+                // Lines
+                let mut lines = Text::new(TextFragment{
+                    text: "Lines".to_string(),
+                    font: Some("Tetris font".to_string()),
+                    color: Some(Color::WHITE), 
+                    scale: Some(PxScale::from(24.))
+                });
+                lines.set_layout(TextLayout {
+                    h_align: TextAlign::End,
+                    v_align: TextAlign::Middle
+                });
+                canvas.draw(&lines,
+                    graphics::DrawParam::new()
+                        .dest(glam::Vec2::new(pos.0 + 156. * scl, pos.1 + 592. * scl))
+                        .scale(glam::Vec2::new(scl, scl))
+                );
+
+                let mut line_count = Text::new(TextFragment{
+                    text: format!("{}/150", self.lines),
+                    font: Some("Tetris font".to_string()),
+                    color: Some(Color::WHITE), 
+                    scale: Some(PxScale::from(16.))
+                });
+                line_count.set_layout(TextLayout {
+                    h_align: TextAlign::End,
+                    v_align: TextAlign::Middle
+                });
+                canvas.draw(&line_count,
+                    graphics::DrawParam::new()
+                        .dest(glam::Vec2::new(pos.0 + 156. * scl, pos.1 + 624. * scl))
                         .scale(glam::Vec2::new(scl, scl))
                 );
             },
