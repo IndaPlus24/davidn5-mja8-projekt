@@ -1,17 +1,61 @@
 use std::collections::{HashSet, VecDeque};
 
-use crate::{board::{self, BOARD_AMOUNT_COLUMNS, BOARD_AMOUNT_ROWS}, Game, Piece, PieceType, ROTATION_180, ROTATION_CCW, ROTATION_CW};
+use crate::{board::{BOARD_AMOUNT_COLUMNS, BOARD_AMOUNT_ROWS}, Game, PieceType, ROTATION_CCW, ROTATION_CW};
 use super::{bot_input::BotInput, move_outcome::{MoveOutcome, MovementState}};
 
 pub struct Bot {
     pub game : Game,
     pub inputs : Vec<BotInput>,
     pub fitness : f64,
-    pub weights : Vec<f64>,
+    pub weights : [f64 ; 4],
     pub game_steps : i32,
 }
 
 impl Bot{
+
+    pub fn new() -> Self {
+        Self{
+            game: Game::new(),
+            inputs: Vec::new(),
+            fitness: 0.,
+            weights: [
+                //Placeholder values from https://github.com/takado8/Tetris
+                -0.798752914564018,
+                0.522287506868767,
+                -0.24921408023878,
+                -0.164626498034284
+            ],
+            game_steps: 0,
+        }
+    }
+
+    pub fn get_best_move_sequence(&mut self) -> Vec<BotInput>{
+        let all_outcomes = self.get_all_move_outcomes();
+        self.evaluate_move_outcomes(all_outcomes).move_sequence
+    }
+
+    pub fn evaluate_move_outcomes(&self, outcomes: Vec<MoveOutcome>) -> MoveOutcome {
+        let mut evaluation: Vec<f64> = Vec::new();
+
+        let weights = self.weights;
+        for outcome in &outcomes {
+            evaluation.push(
+                outcome.aggregate_height as f64 * weights[0]
+                    + outcome.lines_cleared as f64 * weights[1]
+                    + outcome.holes as f64 * weights[2]
+                    + outcome.bumpiness as f64 * weights[3]
+            );
+        }
+        let best_index = evaluation
+            .iter()
+            .enumerate()
+            .max_by(|(_, a), (_, b)| a.total_cmp(b))
+            .map(|(index, _)| index)
+            .unwrap_or(0);
+
+        outcomes[best_index].clone()
+    }
+
     pub fn get_all_move_outcomes(&mut self) -> Vec<MoveOutcome> {
         let mut final_states: Vec<MoveOutcome> = Vec::new();
         let mut visited: HashSet<((isize,isize),usize)> = HashSet::new();
@@ -19,7 +63,7 @@ impl Bot{
         let mut visited_board_states: HashSet<
             [[Option<PieceType>; BOARD_AMOUNT_COLUMNS]; BOARD_AMOUNT_ROWS],
         > = HashSet::new();
-        let moves: Vec<(i32, i32)> = vec![(-1, 0), (0, -1), (0, 1)]; // down left right
+        let moves: Vec<(i32, i32)> = vec![(0, -1), (0, 1),(-1, 0)]; //left right down
 
         let start_state = MovementState {
             game : self.game.clone(),
