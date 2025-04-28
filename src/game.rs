@@ -8,6 +8,7 @@ use crate::board::{BOARD_AMOUNT_COLUMNS, BOARD_AMOUNT_ROWS};
 use crate::consts::{BoardRenderType, LEVEL_GRAVITIES};
 use crate::{default_keyboard_keybindings, GameAction, KeyCode, Piece, PieceType};
 
+#[derive(Clone)]
 pub struct Game {
     pub board: [[Option<PieceType>; BOARD_AMOUNT_COLUMNS]; BOARD_AMOUNT_ROWS],
     pub render_type: BoardRenderType,

@@ -25,6 +25,7 @@ pub enum ScreenState {
     BotSelector,
 }
 
+#[derive(Clone)]
 pub enum BoardRenderType {
     Marathon,
     FourtyLines,

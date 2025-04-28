@@ -9,6 +9,7 @@ mod piece;
 mod rotation;
 mod ui_components;
 mod scoring;
+mod bots;
 
 use animation_state::AnimationState;
 use consts::{ScreenState, GAME_1_POS, GAME_1_SCL, WINDOW_HEIGHT, WINDOW_WIDTH};
