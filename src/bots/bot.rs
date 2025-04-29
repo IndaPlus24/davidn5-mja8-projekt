@@ -1,8 +1,12 @@
-use std::collections::{HashSet, VecDeque};
+use std::{collections::{HashSet, VecDeque}, time::Duration};
+
+use ggez::Context;
+use rand::Rng;
 
 use crate::{board::{BOARD_AMOUNT_COLUMNS, BOARD_AMOUNT_ROWS}, Game, PieceType, ROTATION_CCW, ROTATION_CW};
 use super::{bot_input::BotInput, move_outcome::{MoveOutcome, MovementState}};
 
+#[derive(Clone)]
 pub struct Bot {
     pub game : Game,
     pub inputs : Vec<BotInput>,
@@ -118,8 +122,6 @@ impl Bot{
                             visited_board_states.insert(current_state.game.board.clone());
 
                             let mut moves = current_state.moves_so_far.clone();
-
-                            println!("{:?}, {}", current_state.game.active_piece.midpoint, current_state.game.active_piece.rotation);
                             
                             moves.push(BotInput::HardDrop);
                             final_states.push(MoveOutcome {
@@ -176,4 +178,82 @@ impl Bot{
         }
         final_states
     }
+
+    pub fn random_weights() -> [f64 ; 4] {
+        let mut rng = rand::rng();
+        [rng.random_range(-1.0..1.0);4 ]
+    }
+
+    pub fn crossover(parent1: &Bot, parent2: &Bot) -> Bot {
+        let mut child = Bot::new();
+        for i in 0..child.weights.len() {
+            child.weights[i] = if rand::random() {
+                parent1.weights[i]
+            } else {
+                parent2.weights[i]
+            };
+        }
+
+        child
+    }
+
+    pub fn mutate(&mut self) {
+        let mut rng = rand::rng();
+        for weight in &mut self.weights.iter_mut() {
+            if rng.random::<f32>() < MUTATION_RATE {
+                *weight += rng.random_range(-0.1..0.1);
+            }
+        }
+    }
+
+    pub fn compute_fitness(&self) -> f64 {
+        let lines_cleared = self.game.score as f64;
+        let survival_bonus = self.game_steps as f64 * 0.01; // small reward for lasting long
+        let height_penalty = Game::get_aggregate_height(&self.game.board) as f64 * 0.5;
+
+        lines_cleared * 10.0 + survival_bonus - height_penalty
+    }
+
+    pub fn render_bot_game(&mut self, ctx: &mut Context) {
+        if self.inputs.len() == 0 {
+            self.inputs = self.get_best_move_sequence();
+        }
+
+        if self.game.game_over{
+            return;
+        }
+
+
+        // IF THE TICK COUNT MATCHES THE CURRENT LEVELS TICK COUNT
+        if self.game.last_drop.elapsed() >= self.game.fall_timing{
+            self.game.last_drop += self.game.fall_timing;
+
+            while let Some(input) = self.inputs.pop() {
+                match input {
+                    BotInput::MoveLeft => {
+                        self.game.move_piece(-1, 0);
+                    }
+                    BotInput::MoveRight => {
+                        self.game.move_piece(1, 0);
+                    }
+                    BotInput::RotateCCW => {
+                        self.game.rotate(ROTATION_CCW);
+                    }
+                    BotInput::RotateCW => {
+                        self.game.rotate(ROTATION_CW);
+                    }
+                    BotInput::MoveDown => {
+                        self.game.move_piece(0, -1);
+                        self.game.score += 1;
+                    }
+                    BotInput::HardDrop => {
+                        while self.game.move_piece(0, -1) {}
+                        self.game.score += 1;
+                        self.game.place_piece();
+                    }
+                }
+            }
+        }
+    }
 }
+const MUTATION_RATE: f32 = 0.05;

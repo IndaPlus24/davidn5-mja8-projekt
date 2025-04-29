@@ -12,6 +12,7 @@ mod scoring;
 mod bots;
 
 use animation_state::AnimationState;
+use bots::bot::Bot;
 use consts::{ScreenState, GAME_1_POS, GAME_1_SCL, WINDOW_HEIGHT, WINDOW_WIDTH};
 use csv::{Reader, Writer};
 use menu_inputs::*;
@@ -43,13 +44,16 @@ struct AppState {
     // Games
     game_one: Game,
     game_two: Game,
+
+    // Bots,
+    bot : Bot,
 }
 
 impl AppState {
     fn new(ctx: &mut Context) -> GameResult<AppState> {
         let mut state = AppState {
             animation_state: AnimationState::new(),
-            screen_state: ScreenState::Singleplayer,
+            screen_state: ScreenState::VsBots,
 
             piece_assets: AppState::preload_piece_assets(ctx),
             board_assets: AppState::preload_board_assets(ctx),
@@ -57,10 +61,14 @@ impl AppState {
 
             game_one: Game::new(),
             game_two: Game::new(),
+
+            bot : Bot::new(),
         };
 
         state.game_one.reset_game();
         state.game_two.reset_game();
+
+        state.bot.game.reset_game();
 
         state.check_args();
         Ok(state)
@@ -203,6 +211,9 @@ impl event::EventHandler<ggez::GameError> for AppState {
             }
             ScreenState::BotSelector => {
                 handle_bot_selector_inputs(ctx, &mut self.screen_state, &mut self.animation_state);
+            },
+            ScreenState::VsBots => {
+                self.bot.render_bot_game(ctx);
             }
             _ => {}
         }
@@ -216,7 +227,7 @@ impl event::EventHandler<ggez::GameError> for AppState {
             graphics::Canvas::from_frame(ctx, graphics::Color::from([0.1, 0.2, 0.3, 1.0]));
 
         match self.screen_state {
-            ScreenState::Singleplayer => {
+            ScreenState::Singleplayer =>{
                 //Render game
                 self.game_one.render_board(
                     &self.board_assets,
@@ -273,12 +284,29 @@ impl event::EventHandler<ggez::GameError> for AppState {
                 // since inputs for menus will be weird using multiplayer settings.
             }
             ScreenState::VsBots => {
-                //Render 1v1 board but only load single player inputs that work on one of the boards.
+                //Render game
+                self.bot.game.render_board(
+                    &self.board_assets,
+                    &mut canvas,
+                    GAME_1_POS,
+                    GAME_1_SCL
+                );
+                self.bot.game.render_pieces(
+                    &self.piece_assets,
+                    &mut canvas,
+                    GAME_1_POS,
+                    GAME_1_SCL,
+                );
+                self.bot.game.render_stats(
+                    &mut canvas,
+                    GAME_1_POS,
+                    GAME_1_SCL
+                );
             }
             _ => {}
         }
 
-        canvas.finish(ctx)?;
+        canvas.finish(ctx)?;    
         Ok(())
     }
 }
