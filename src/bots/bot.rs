@@ -205,13 +205,9 @@ impl Bot{
             }
         }
     }
-
+    
     pub fn compute_fitness(&self) -> f64 {
-        let lines_cleared = self.game.score as f64;
-        let survival_bonus = self.game_steps as f64 * 0.01; // small reward for lasting long
-        let height_penalty = Game::get_aggregate_height(&self.game.board) as f64 * 0.5;
-
-        lines_cleared * 10.0 + survival_bonus - height_penalty
+        self.game.score as f64
     }
 
     pub fn render_bot_game(&mut self, ctx: &mut Context) {
@@ -248,12 +244,58 @@ impl Bot{
                     }
                     BotInput::HardDrop => {
                         while self.game.move_piece(0, -1) {}
-                        self.game.score += 1;
+                        self.game.score += 2;
                         self.game.place_piece();
                     }
                 }
             }
         }
+    }
+
+    pub fn run_game_without_ui(&mut self, max_game_steps : i32) {
+        while self.game_steps < max_game_steps {
+
+            self.game_steps += 1; 
+
+            if self.inputs.len() == 0 {
+                self.inputs = self.get_best_move_sequence();
+            }
+    
+            if self.game.game_over{
+                    break;
+            }
+    
+    
+            // IF THE TICK COUNT MATCHES THE CURRENT LEVELS TICK COUNT  
+            while let Some(input) = self.inputs.pop() {
+                match input {
+                    BotInput::MoveLeft => {
+                        self.game.move_piece(-1, 0);
+                    }
+                    BotInput::MoveRight => {
+                        self.game.move_piece(1, 0);
+                    }
+                    BotInput::RotateCCW => {
+                        self.game.rotate(ROTATION_CCW);
+                    }
+                    BotInput::RotateCW => {
+                        self.game.rotate(ROTATION_CW);
+                    }
+                    BotInput::MoveDown => {
+                        self.game.move_piece(0, -1);
+                        self.game.score += 1;
+                    }
+                    BotInput::HardDrop => {
+                        while self.game.move_piece(0, -1) {}
+                        self.game.score += 2;
+                        self.game.place_piece();
+                    }
+                }
+            }
+        }
+
+        self.fitness = self.compute_fitness();
+        
     }
 }
 const MUTATION_RATE: f32 = 0.05;

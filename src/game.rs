@@ -144,14 +144,14 @@ impl Game {
             }
         }
 
-        println!("Spawning new piece...");
+        //println!("Spawning new piece...");
         self.active_piece = self.piece_queue.pop_front().unwrap();
         self.can_hold = true;
         self.on_ground = false;
 
         // Check if spawn location is valid
         if !self.is_valid_position(0, 0) {
-            println!("Game Over!");
+            //println!("Game Over!");
             self.game_over = true;
         }
 
