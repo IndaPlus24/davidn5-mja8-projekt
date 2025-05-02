@@ -1,39 +1,77 @@
-use std::{collections::{HashSet, VecDeque}, time::Duration};
+use std::{
+    collections::{HashSet, VecDeque},
+    f64::{INFINITY, NEG_INFINITY},
+};
 
 use ggez::Context;
 use rand::Rng;
 
-use crate::{board::{BOARD_AMOUNT_COLUMNS, BOARD_AMOUNT_ROWS}, Game, PieceType, ROTATION_CCW, ROTATION_CW};
-use super::{bot_input::BotInput, move_outcome::{MoveOutcome, MovementState}};
+use super::{
+    bot_input::BotInput,
+    move_outcome::{MoveOutcome, MovementState},
+};
+use crate::{
+    board::{BOARD_AMOUNT_COLUMNS, BOARD_AMOUNT_ROWS},
+    Game, PieceType, ROTATION_CCW, ROTATION_CW,
+};
 
 #[derive(Clone)]
 pub struct Bot {
-    pub game : Game,
-    pub inputs : Vec<BotInput>,
-    pub fitness : f64,
-    pub weights : [f64 ; 4],
-    pub game_steps : i32,
+    pub game: Game,
+    pub inputs: Vec<BotInput>,
+    pub fitness: f64,
+    pub weights: [f64; 4],
+    pub game_steps: i32,
 }
 
-impl Bot{
-
+impl Bot {
     pub fn new() -> Self {
-        Self{
+        Self {
             game: Game::new(),
             inputs: Vec::new(),
             fitness: 0.,
-            weights: [
-                //Placeholder values from https://github.com/takado8/Tetris
-                -0.798752914564018,
-                0.522287506868767,
-                -0.24921408023878,
-                -0.164626498034284
-            ],
+            weights: [-0.510066, 0.760666, -0.35663, -0.184483],
             game_steps: 0,
         }
     }
 
-    pub fn get_best_move_sequence(&mut self) -> Vec<BotInput>{
+    pub fn with_random_unit_weights() -> Self {
+        let mut w = Bot::random_weights();
+        Self::normalize(&mut w);
+        Self {
+            weights: w,
+            fitness: 0.0,
+            game: Game::new(),
+            inputs: vec![],
+            game_steps: 0,
+        }
+    }
+
+    fn normalize(w: &mut [f64; 4]) {
+        let norm = w.iter().map(|x| x * x).sum::<f64>().sqrt();
+        for i in 0..4 {
+            w[i] /= norm;
+        }
+    }
+
+    pub fn weighted_crossover(p1: &Bot, p2: &Bot) -> Self {
+        let mut w = [
+            p1.weights[0] * p1.fitness + p2.weights[0] * p2.fitness,
+            p1.weights[1] * p1.fitness + p2.weights[1] * p2.fitness,
+            p1.weights[2] * p1.fitness + p2.weights[2] * p2.fitness,
+            p1.weights[3] * p1.fitness + p2.weights[3] * p2.fitness,
+        ];
+        Self::normalize(&mut w);
+        Self {
+            weights: w,
+            fitness: 0.0,
+            game: Game::new(),
+            inputs: vec![],
+            game_steps: 0,
+        }
+    }
+
+    pub fn get_best_move_sequence(&mut self) -> Vec<BotInput> {
         let all_outcomes = self.get_all_move_outcomes();
         self.evaluate_move_outcomes(all_outcomes).move_sequence
     }
@@ -47,7 +85,7 @@ impl Bot{
                 outcome.aggregate_height as f64 * weights[0]
                     + outcome.lines_cleared as f64 * weights[1]
                     + outcome.holes as f64 * weights[2]
-                    + outcome.bumpiness as f64 * weights[3]
+                    + outcome.bumpiness as f64 * weights[3],
             );
         }
         let best_index = evaluation
@@ -62,15 +100,15 @@ impl Bot{
 
     pub fn get_all_move_outcomes(&mut self) -> Vec<MoveOutcome> {
         let mut final_states: Vec<MoveOutcome> = Vec::new();
-        let mut visited: HashSet<((isize,isize),usize)> = HashSet::new();
+        let mut visited: HashSet<((isize, isize), usize)> = HashSet::new();
         let mut queue: VecDeque<MovementState> = VecDeque::new();
         let mut visited_board_states: HashSet<
             [[Option<PieceType>; BOARD_AMOUNT_COLUMNS]; BOARD_AMOUNT_ROWS],
         > = HashSet::new();
-        let moves: Vec<(i32, i32)> = vec![(0, -1), (0, 1),(-1, 0)]; //left right down
+        let moves: Vec<(i32, i32)> = vec![(0, -1), (0, 1), (-1, 0)]; //left right down
 
         let start_state = MovementState {
-            game : self.game.clone(),
+            game: self.game.clone(),
             moves_so_far: Vec::new(),
         };
 
@@ -84,8 +122,7 @@ impl Bot{
                 let mut game_clone = current_state.game.clone();
 
                 //If its possible to move the piece in the direction
-                if game_clone.move_piece(*dc as isize,*dr as isize) {
-
+                if game_clone.move_piece(*dc as isize, *dr as isize) {
                     let mut new_moves = current_state.moves_so_far.clone();
                     new_moves.push(match (dr, dc) {
                         (-1, 0) => BotInput::MoveDown,
@@ -95,22 +132,24 @@ impl Bot{
                     });
 
                     let new_state = MovementState {
-                        game : game_clone,
+                        game: game_clone,
                         moves_so_far: new_moves,
                     };
 
                     let p = &new_state.game.active_piece;
-                    if !visited.contains(&((p.midpoint.0,p.midpoint.1), p.rotation)) {
-                        visited.insert(((p.midpoint.0,p.midpoint.1), p.rotation));
+                    if !visited.contains(&((p.midpoint.0, p.midpoint.1), p.rotation)) {
+                        visited.insert(((p.midpoint.0, p.midpoint.1), p.rotation));
                         queue.push_back(new_state.clone());
                         // These Piece types only have 2 "types" of rotations
                         if new_state.game.active_piece.piece_type == PieceType::Z
-                        || new_state.game.active_piece.piece_type == PieceType::S
-                        || new_state.game.active_piece.piece_type == PieceType::I{
-                            visited.insert(((new_state.game.active_piece.midpoint), (new_state.game.active_piece.rotation + 2) % 4));
+                            || new_state.game.active_piece.piece_type == PieceType::S
+                            || new_state.game.active_piece.piece_type == PieceType::I
+                        {
+                            visited.insert((
+                                (new_state.game.active_piece.midpoint),
+                                (new_state.game.active_piece.rotation + 2) % 4,
+                            ));
                         }
-                        
-
                     }
                 } else {
                     //If the Piece cant move down the current state is a final state
@@ -122,11 +161,13 @@ impl Bot{
                             visited_board_states.insert(current_state.game.board.clone());
 
                             let mut moves = current_state.moves_so_far.clone();
-                            
+
                             moves.push(BotInput::HardDrop);
                             final_states.push(MoveOutcome {
                                 lines_cleared: Game::count_lines_cleared(&current_state.game.board),
-                                aggregate_height: Game::get_aggregate_height(&current_state.game.board),
+                                aggregate_height: Game::get_aggregate_height(
+                                    &current_state.game.board,
+                                ),
                                 holes: Game::count_holes(&current_state.game.board),
                                 bumpiness: Game::count_bumpiness(&current_state.game.board),
                                 is_t_spin: false, // TODO CHECK IF MOVE IS A T SPIN,
@@ -138,7 +179,10 @@ impl Bot{
             }
 
             // Rotations
-            if current_state.game.active_piece.piece_type != PieceType::O {
+            if current_state.game.active_piece.piece_type != PieceType::O
+                && !current_state.moves_so_far.contains(&BotInput::RotateCW)
+                && !current_state.moves_so_far.contains(&BotInput::RotateCCW)
+            {
                 let rotations = vec![
                     (ROTATION_CW, BotInput::RotateCW),
                     (ROTATION_CCW, BotInput::RotateCCW),
@@ -153,22 +197,24 @@ impl Bot{
                             new_moves.push(BotInput::MoveDown);
 
                             let new_state = MovementState {
-                                game : game_clone,
+                                game: game_clone,
                                 moves_so_far: new_moves,
                             };
 
                             let p = &new_state.game.active_piece;
-                        if !visited.contains(&((p.midpoint.0,p.midpoint.1), p.rotation)){
-                            visited.insert(((p.midpoint.0,p.midpoint.1), p.rotation));
-                            queue.push_back(new_state.clone());
+                            if !visited.contains(&((p.midpoint.0, p.midpoint.1), p.rotation)) {
+                                visited.insert(((p.midpoint.0, p.midpoint.1), p.rotation));
+                                queue.push_back(new_state.clone());
 
-
-                            // These Piece types only have 2 "types" of rotations
-                            if new_state.game.active_piece.piece_type == PieceType::Z
-                            || new_state.game.active_piece.piece_type == PieceType::S
-                            || new_state.game.active_piece.piece_type == PieceType::I
+                                // These Piece types only have 2 "types" of rotations
+                                if new_state.game.active_piece.piece_type == PieceType::Z
+                                    || new_state.game.active_piece.piece_type == PieceType::S
+                                    || new_state.game.active_piece.piece_type == PieceType::I
                                 {
-                                    visited.insert(((new_state.game.active_piece.midpoint), (new_state.game.active_piece.rotation + 2) % 4));
+                                    visited.insert((
+                                        (new_state.game.active_piece.midpoint),
+                                        (new_state.game.active_piece.rotation + 2) % 4,
+                                    ));
                                 }
                             }
                         }
@@ -181,49 +227,40 @@ impl Bot{
 
     pub fn random_weights() -> [f64; 4] {
         let mut rng = rand::rng();
-        [(); 4].map(|_| rng.random_range(-1.0..1.0))
-    }
-    
-
-    pub fn crossover(parent1: &Bot, parent2: &Bot) -> Bot {
-        let mut child = Bot::new();
-        for i in 0..child.weights.len() {
-            child.weights[i] = if rand::random() {
-                parent1.weights[i]
-            } else {
-                parent2.weights[i]
-            };
-        }
-
-        child
+        [(); 4].map(|_| rng.random::<f64>() * if rng.random_bool(0.5) { -1. } else { 1.0 })
     }
 
-    pub fn mutate(&mut self, MUTATION_RATE : f32) {
+    pub fn mutate(&mut self) {
         let mut rng = rand::rng();
-        for weight in &mut self.weights.iter_mut() {
-            if rng.random::<f32>() < MUTATION_RATE {
-                *weight += rng.random_range(-0.1..0.1);
-            }
-        }
+        let i = rng.random_range(0..4);
+        let delta: f64 = rng.random_range(-0.2..0.2);
+        self.weights[i] += delta;
+        Self::normalize(&mut self.weights);
     }
-    
+
     pub fn compute_fitness(&self) -> f64 {
-        let line_clear_bonus = self.game.lines as f64 * 10.0;
-        let hole_penalty = Game::count_holes(&self.game.board) as f64 * -5.0;
-        let bumpiness_penalty = Game::count_bumpiness(&self.game.board) as f64 * -2.0;
-        line_clear_bonus + hole_penalty + bumpiness_penalty
+        self.game.score as f64
     }
 
-    pub fn render_bot_game(&mut self, ctx: &mut Context) {
-        if self.inputs.len() == 0 {
+    pub fn render_bot_game(&mut self, _ctx: &mut Context) {
+        // Get a new move sequence if needed
+        if self.inputs.is_empty() {
             self.inputs = self.get_best_move_sequence();
+
+            // If no moves available, we can't continue
+            if self.inputs.is_empty() {
+                return;
+            }
+
+            // Reverse the inputs so we can pop from the end
+            self.inputs.reverse();
         }
 
-        if self.game.game_over{
+        if self.game.game_over {
             return;
         }
 
-        if self.game.last_drop.elapsed() >= self.game.fall_timing{
+        if self.game.last_drop.elapsed() >= self.game.fall_timing {
             self.game.last_drop += self.game.fall_timing;
 
             if let Some(input) = self.inputs.pop() {
@@ -254,21 +291,19 @@ impl Bot{
         }
     }
 
-    pub fn run_game_without_ui(&mut self, max_game_steps : i32) {
+    pub fn run_game_without_ui(&mut self, max_game_steps: i32) -> f64 {
         while self.game_steps < max_game_steps {
-
-            self.game_steps += 1; 
+            self.game_steps += 1;
 
             if self.inputs.len() == 0 {
                 self.inputs = self.get_best_move_sequence();
             }
-    
-            if self.game.game_over{
-                    break;
+
+            if self.game.game_over {
+                break;
             }
-    
-    
-            // IF THE TICK COUNT MATCHES THE CURRENT LEVELS TICK COUNT  
+
+            // IF THE TICK COUNT MATCHES THE CURRENT LEVELS TICK COUNT
             while let Some(input) = self.inputs.pop() {
                 match input {
                     BotInput::MoveLeft => {
@@ -297,6 +332,6 @@ impl Bot{
         }
 
         self.fitness = self.compute_fitness();
-        
+        self.fitness
     }
 }

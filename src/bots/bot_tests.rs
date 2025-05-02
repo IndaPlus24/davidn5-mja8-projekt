@@ -2,9 +2,8 @@
 mod tests {
     use crate::{
         board::{BOARD_AMOUNT_COLUMNS, BOARD_AMOUNT_ROWS},
-        bots::bot::Bot,
-        bots::bot_input::BotInput::*,
-        Piece, PieceType,
+        bots::{bot::Bot, bot_input::BotInput::*},
+        Game, Piece, PieceType,
     };
 
     #[test]
@@ -47,7 +46,7 @@ mod tests {
     #[allow(non_snake_case)]
     fn test_find_all_move_outcomes_piece_L() {
         let mut bot = Bot::new();
-    
+
         bot.game.board = [[None; BOARD_AMOUNT_COLUMNS]; BOARD_AMOUNT_ROWS];
         bot.game.active_piece = Piece::new(PieceType::L, 0);
 
@@ -77,7 +76,7 @@ mod tests {
             Some(PieceType::I),
             Some(PieceType::I),
             Some(PieceType::I),
-            Some(PieceType::I),          
+            Some(PieceType::I),
         ];
         bot.game.board[1] = [
             None,
@@ -89,7 +88,7 @@ mod tests {
             Some(PieceType::I),
             Some(PieceType::I),
             Some(PieceType::I),
-            Some(PieceType::I),          
+            Some(PieceType::I),
         ];
         bot.game.board[2] = [
             None,
@@ -101,7 +100,7 @@ mod tests {
             Some(PieceType::I),
             Some(PieceType::I),
             Some(PieceType::I),
-            Some(PieceType::I),          
+            Some(PieceType::I),
         ];
         bot.game.board[3] = [
             None,
@@ -113,7 +112,7 @@ mod tests {
             Some(PieceType::I),
             Some(PieceType::I),
             Some(PieceType::I),
-            Some(PieceType::I),          
+            Some(PieceType::I),
         ];
         bot.game.active_piece = Piece::new(PieceType::I, 0);
 
@@ -121,8 +120,191 @@ mod tests {
 
         assert_eq!(
             move_sequence,
-            [MoveLeft, MoveLeft, MoveLeft, MoveDown, MoveDown, MoveDown, MoveDown, MoveDown, MoveDown, MoveDown, MoveDown, MoveDown, MoveDown, MoveDown, MoveDown, MoveDown, MoveDown, MoveDown, RotateCW, MoveDown, MoveDown, MoveDown, MoveDown, HardDrop]
+            [
+                MoveLeft, MoveLeft, MoveLeft, MoveDown, MoveDown, MoveDown, MoveDown, MoveDown,
+                MoveDown, MoveDown, MoveDown, MoveDown, MoveDown, MoveDown, MoveDown, MoveDown,
+                MoveDown, MoveDown, RotateCW, MoveDown, MoveDown, MoveDown, MoveDown, HardDrop
+            ]
         );
+    }
 
+    #[test]
+    #[allow(non_snake_case)]
+    pub fn test_aggregate_height() {
+        let mut bot = Bot::new();
+
+        bot.game.board = [[None; BOARD_AMOUNT_COLUMNS]; BOARD_AMOUNT_ROWS];
+        bot.game.board[0] = [
+            None,
+            Some(PieceType::I),
+            Some(PieceType::I),
+            Some(PieceType::I),
+            Some(PieceType::I),
+            Some(PieceType::I),
+            Some(PieceType::I),
+            Some(PieceType::I),
+            Some(PieceType::I),
+            Some(PieceType::I),
+        ];
+        bot.game.board[1] = [
+            None,
+            Some(PieceType::I),
+            Some(PieceType::I),
+            Some(PieceType::I),
+            Some(PieceType::I),
+            Some(PieceType::I),
+            Some(PieceType::I),
+            Some(PieceType::I),
+            Some(PieceType::I),
+            Some(PieceType::I),
+        ];
+        bot.game.board[2] = [
+            None,
+            Some(PieceType::I),
+            Some(PieceType::I),
+            Some(PieceType::I),
+            Some(PieceType::I),
+            Some(PieceType::I),
+            Some(PieceType::I),
+            Some(PieceType::I),
+            Some(PieceType::I),
+            Some(PieceType::I),
+        ];
+        bot.game.board[3] = [
+            None,
+            Some(PieceType::I),
+            Some(PieceType::I),
+            Some(PieceType::I),
+            Some(PieceType::I),
+            Some(PieceType::I),
+            Some(PieceType::I),
+            Some(PieceType::I),
+            Some(PieceType::I),
+            Some(PieceType::I),
+        ];
+
+        let h = Game::get_aggregate_height(&bot.game.board);
+
+        assert_eq!(h, 36.0);
+    }
+
+    #[test]
+    #[allow(non_snake_case)]
+    pub fn test_holes() {
+        let mut bot = Bot::new();
+
+        bot.game.board = [[None; BOARD_AMOUNT_COLUMNS]; BOARD_AMOUNT_ROWS];
+        bot.game.board[0] = [
+            None,
+            Some(PieceType::I),
+            Some(PieceType::I),
+            Some(PieceType::I),
+            Some(PieceType::I),
+            Some(PieceType::I),
+            Some(PieceType::I),
+            Some(PieceType::I),
+            Some(PieceType::I),
+            Some(PieceType::I),
+        ];
+        bot.game.board[1] = [
+            None,
+            Some(PieceType::I),
+            None,
+            Some(PieceType::I),
+            Some(PieceType::I),
+            Some(PieceType::I),
+            Some(PieceType::I),
+            Some(PieceType::I),
+            Some(PieceType::I),
+            Some(PieceType::I),
+        ];
+        bot.game.board[2] = [
+            None,
+            Some(PieceType::I),
+            Some(PieceType::I),
+            Some(PieceType::I),
+            Some(PieceType::I),
+            Some(PieceType::I),
+            None,
+            Some(PieceType::I),
+            Some(PieceType::I),
+            Some(PieceType::I),
+        ];
+        bot.game.board[3] = [
+            None,
+            Some(PieceType::I),
+            Some(PieceType::I),
+            Some(PieceType::I),
+            Some(PieceType::I),
+            Some(PieceType::I),
+            Some(PieceType::I),
+            Some(PieceType::I),
+            Some(PieceType::I),
+            Some(PieceType::I),
+        ];
+
+        let h = Game::count_holes(&bot.game.board);
+
+        assert_eq!(h, 2.0);
+    }
+
+    #[test]
+    #[allow(non_snake_case)]
+    pub fn test_get_bumpiness() {
+        let mut bot = Bot::new();
+
+        bot.game.board = [[None; BOARD_AMOUNT_COLUMNS]; BOARD_AMOUNT_ROWS];
+        bot.game.board[0] = [
+            None,
+            Some(PieceType::I),
+            Some(PieceType::I),
+            Some(PieceType::I),
+            Some(PieceType::I),
+            Some(PieceType::I),
+            Some(PieceType::I),
+            Some(PieceType::I),
+            Some(PieceType::I),
+            Some(PieceType::I),
+        ];
+        bot.game.board[1] = [
+            None,
+            Some(PieceType::I),
+            Some(PieceType::I),
+            Some(PieceType::I),
+            Some(PieceType::I),
+            Some(PieceType::I),
+            Some(PieceType::I),
+            Some(PieceType::I),
+            Some(PieceType::I),
+            Some(PieceType::I),
+        ];
+        bot.game.board[2] = [
+            None,
+            Some(PieceType::I),
+            Some(PieceType::I),
+            Some(PieceType::I),
+            Some(PieceType::I),
+            Some(PieceType::I),
+            Some(PieceType::I),
+            Some(PieceType::I),
+            Some(PieceType::I),
+            Some(PieceType::I),
+        ];
+        bot.game.board[3] = [
+            None,
+            Some(PieceType::I),
+            Some(PieceType::I),
+            Some(PieceType::I),
+            Some(PieceType::I),
+            Some(PieceType::I),
+            Some(PieceType::I),
+            Some(PieceType::I),
+            Some(PieceType::I),
+            Some(PieceType::I),
+        ];
+
+        let h = Game::count_bumpiness(&bot.game.board);
+
+        assert_eq!(h, 4.0);
     }
 }

@@ -1,5 +1,6 @@
 mod animation_state;
 mod board;
+mod bots;
 mod config;
 mod consts;
 mod game;
@@ -7,9 +8,8 @@ mod game_inputs;
 mod menu_inputs;
 mod piece;
 mod rotation;
-mod ui_components;
 mod scoring;
-mod bots;
+mod ui_components;
 
 use animation_state::AnimationState;
 use bots::bot::Bot;
@@ -47,11 +47,14 @@ struct AppState {
     game_two: Game,
 
     // Bots,
-    bot : Bot,
+    bot: Bot,
 }
 
 impl AppState {
-    fn new(ctx: &mut Context, args : Option<Vec<HashMap<GameAction, KeyCode>>>) -> GameResult<AppState> {
+    fn new(
+        ctx: &mut Context,
+        args: Option<Vec<HashMap<GameAction, KeyCode>>>,
+    ) -> GameResult<AppState> {
         let mut state = AppState {
             animation_state: AnimationState::new(),
             screen_state: ScreenState::VsBots,
@@ -63,20 +66,18 @@ impl AppState {
             game_one: Game::new(),
             game_two: Game::new(),
 
-            bot : Bot::new(),
+            bot: Bot::new(),
         };
 
         state.game_one.reset_game();
         state.game_two.reset_game();
 
-        if let Some(keybinds) = args{
+        if let Some(keybinds) = args {
             state.game_one.controls = keybinds[0].clone();
             state.game_two.controls = keybinds[1].clone();
         }
 
         state.bot.game.reset_game();
-
-        state.bot.weights =[-0.7301756626462232, -0.07878889017051716, 0.9923397580894662, 0.6407879005891134];
 
         Ok(state)
     }
@@ -198,11 +199,15 @@ impl event::EventHandler<ggez::GameError> for AppState {
                 handle_main_menu_inputs(ctx, &mut self.screen_state, &mut self.animation_state);
             }
             ScreenState::GameModeSelector => {
-                handle_gamemode_selector_inputs(ctx, &mut self.screen_state, &mut self.animation_state);
+                handle_gamemode_selector_inputs(
+                    ctx,
+                    &mut self.screen_state,
+                    &mut self.animation_state,
+                );
             }
             ScreenState::BotSelector => {
                 handle_bot_selector_inputs(ctx, &mut self.screen_state, &mut self.animation_state);
-            },
+            }
             ScreenState::VsBots => {
                 self.bot.render_bot_game(ctx);
             }
@@ -212,31 +217,23 @@ impl event::EventHandler<ggez::GameError> for AppState {
         Ok(())
     }
 
-
     fn draw(&mut self, ctx: &mut Context) -> GameResult {
         let mut canvas =
             graphics::Canvas::from_frame(ctx, graphics::Color::from([0.1, 0.2, 0.3, 1.0]));
 
         match self.screen_state {
-            ScreenState::Singleplayer =>{
+            ScreenState::Singleplayer => {
                 //Render game
-                self.game_one.render_board(
-                    &self.board_assets,
-                    &mut canvas,
-                    GAME_1_POS,
-                    GAME_1_SCL
-                );
+                self.game_one
+                    .render_board(&self.board_assets, &mut canvas, GAME_1_POS, GAME_1_SCL);
                 self.game_one.render_pieces(
                     &self.piece_assets,
                     &mut canvas,
                     GAME_1_POS,
                     GAME_1_SCL,
                 );
-                self.game_one.render_stats(
-                    &mut canvas,
-                    GAME_1_POS,
-                    GAME_1_SCL
-                );
+                self.game_one
+                    .render_stats(&mut canvas, GAME_1_POS, GAME_1_SCL);
             }
             ScreenState::StartScreen => {
                 start_screen::render_start_screen(
@@ -276,33 +273,28 @@ impl event::EventHandler<ggez::GameError> for AppState {
             }
             ScreenState::VsBots => {
                 //Render game
-                self.bot.game.render_board(
-                    &self.board_assets,
-                    &mut canvas,
-                    GAME_1_POS,
-                    GAME_1_SCL
-                );
+                self.bot
+                    .game
+                    .render_board(&self.board_assets, &mut canvas, GAME_1_POS, GAME_1_SCL);
                 self.bot.game.render_pieces(
                     &self.piece_assets,
                     &mut canvas,
                     GAME_1_POS,
                     GAME_1_SCL,
                 );
-                self.bot.game.render_stats(
-                    &mut canvas,
-                    GAME_1_POS,
-                    GAME_1_SCL
-                );
+                self.bot
+                    .game
+                    .render_stats(&mut canvas, GAME_1_POS, GAME_1_SCL);
             }
             _ => {}
         }
 
-        canvas.finish(ctx)?;    
+        canvas.finish(ctx)?;
         Ok(())
     }
 }
 
-pub fn check_args() -> Option<Vec<HashMap<GameAction, KeyCode>>>{
+pub fn check_args() -> Option<Vec<HashMap<GameAction, KeyCode>>> {
     let args: Vec<String> = std::env::args().collect();
 
     //Sets controls to that of --drifarkaden
@@ -312,7 +304,7 @@ pub fn check_args() -> Option<Vec<HashMap<GameAction, KeyCode>>>{
     //Runs the program in train ai mode.
     else if args.contains(&"--train".to_string()) {
         train_ai();
-        loop{
+        loop {
             println!("Trainging AI...");
             train_ai();
         }

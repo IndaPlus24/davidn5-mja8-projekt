@@ -1,3 +1,4 @@
+use rand::seq::IndexedRandom;
 use rand::Rng;
 use rayon::prelude::*;
 use rayon::ThreadPoolBuilder;
@@ -6,96 +7,62 @@ use crate::Game;
 
 use super::bot::Bot;
 
-
 const POP_SIZE: usize = 1000;
-const ITERATIONS: usize = 20;
+const ITERATIONS: usize = 5;
+const TOURNAMENT_SIZE: usize = 100;
+const OFFSPRING_COUNT: usize = (POP_SIZE as f64 * 0.3) as usize;
+const GAMES_PER_EVALUATION: usize = 100;
+const STEPS_PER_GAME: i32 = 500;
 
 pub fn train_ai() {
-
-    let pool = ThreadPoolBuilder::new()
-        .num_threads(15)
+    ThreadPoolBuilder::new()
+        .num_threads(8)
         .build_global()
         .expect("Failed to build thread pool");
 
     let mut population: Vec<Bot> = (0..POP_SIZE)
-        .map(|_| Bot {
-            game: Game::new(),
-            inputs: Vec::new(),
-            fitness: 0.0,
-            weights: Bot::random_weights(),
-            game_steps: 0,
-        })
+        .map(|_| Bot::with_random_unit_weights())
         .collect();
 
-    for i in 0..ITERATIONS {
-        println!("Starting training cycle {} ...", i);
-        population = train_population(&mut population, i);
-    }
+    for generation in 0..ITERATIONS {
+        println!("Generation {} ...", generation);
 
-    population.sort_by(|a, b| b.fitness.partial_cmp(&a.fitness).unwrap());
+        population.par_iter_mut().for_each(|bot| {
+            bot.fitness = (0..GAMES_PER_EVALUATION)
+                .map(|_| bot.run_game_without_ui(STEPS_PER_GAME))
+                .sum();
+        });
 
-    let best_agent = population[0].clone();
+        population.sort_by(|a, b| b.fitness.partial_cmp(&a.fitness).unwrap());
 
-    // TODO SAVE TO FILE
+        println!("Top fitness: {}", population[0].fitness);
 
-    println!(
-        "Best Agent... \n 
-    {:?}", best_agent.weights
-    );
-    std::process::exit(0)
-}
+        let mut rng = rand::rng();
+        let mut offspring: Vec<Bot> = vec![];
 
-pub fn train_population(population: &mut Vec<Bot>, epoch : usize) -> Vec<Bot> {
-    println!("Starting game on {} agents...", population.len());
+        while offspring.len() < OFFSPRING_COUNT {
+            let tournament: Vec<&Bot> = population
+                .choose_multiple(&mut rng, TOURNAMENT_SIZE)
+                .collect();
 
-    // Generate multiple random seeds for testing
-    let mut rng = rand::rng();
-    let seeds: Vec<u64> = (0..5).map(|_| rng.random()).collect(); // Test on 5 different maps
+            let mut selected = tournament.clone();
+            selected.sort_by(|a, b| b.fitness.partial_cmp(&a.fitness).unwrap());
 
-    population.par_iter_mut().enumerate().for_each(|(i, agent)|{
-        agent.run_game_without_ui(100000);
-    });
+            let parent1 = selected[0];
+            let parent2 = selected[1];
 
-    println!("Evaluating Agents...");
+            let mut child = Bot::weighted_crossover(parent1, parent2);
+            if rng.random_bool(0.05) {
+                child.mutate();
+            }
 
-    // Sort by fitness in descending order
-    population.sort_by(|a, b| b.fitness.partial_cmp(&a.fitness).unwrap());
-
-    for (i, bot) in population.iter().take(10).enumerate() {
-        println!("Top {} fitness: {}", i, bot.fitness);
-    }
-    
-    // Take top 10% as elites
-    let elite_count = (population.len() as f32 * 0.1).ceil() as usize;
-    let elite_population: Vec<Bot> = population[..elite_count].to_vec();
-
-    let mut new_population: Vec<Bot> = Vec::new();
-
-    // Keep the elite
-    for elite in &elite_population {
-        new_population.push(elite.clone());
-    }
-
-    // Reproduce until population is full
-    let mut rng = rand::rng();
-    while new_population.len() < population.len() {
-        let i = rng.random_range(0..elite_population.len());
-        let mut j = rng.random_range(0..elite_population.len());
-        while j == i {
-            j = rng.random_range(0..elite_population.len());
+            offspring.push(child);
         }
 
-        let parent1 = &elite_population[i];
-        let parent2 = &elite_population[j];
-
-        let mut child = Bot::crossover(parent1, parent2);
-        let mut mutation_rate = 0.05;
-        if epoch > 750{mutation_rate = 0.01}
-        else if epoch > 500{mutation_rate = 0.03}
-
-        child.mutate(mutation_rate); // Apply mutation
-        new_population.push(child);
+        population.truncate(POP_SIZE - OFFSPRING_COUNT);
+        population.extend(offspring);
     }
 
-    new_population
+    population.sort_by(|a, b| b.fitness.partial_cmp(&a.fitness).unwrap());
+    println!("Best weights: {:?}", population[0].weights);
 }

@@ -13,16 +13,16 @@ impl Game {
 
         let mut found_height: HashSet<usize> = HashSet::new();
 
-        for r in 0..BOARD_AMOUNT_ROWS {
+        for r in 0..19 {
             for c in 0..BOARD_AMOUNT_COLUMNS {
-                if board[r][c].is_some() && !found_height.contains(&c) {
-                    height += r as f32;
+                if board[19 - r][c].is_some() && !found_height.contains(&c) {
+                    height += (20 - r) as f32;
                     found_height.insert(c);
                 }
             }
         }
 
-        height / 200.
+        height
     }
 
     pub fn count_holes(
@@ -30,15 +30,18 @@ impl Game {
     ) -> f32 {
         let mut holes: f32 = 0.;
 
-        for r in 0..(BOARD_AMOUNT_ROWS as i32 - 1) as usize {
-            for c in 0..BOARD_AMOUNT_COLUMNS {
-                if board[r][c].is_some() && board[r + 1][c].is_none() {
-                    holes += 1.;
+        for c in 0..BOARD_AMOUNT_COLUMNS {
+            let mut found_block = false;
+            for r in (0..BOARD_AMOUNT_ROWS).rev() {
+                if board[r][c].is_some() {
+                    found_block = true;
+                } else if found_block {
+                    holes += 1.0;
                 }
             }
         }
 
-        holes / 180.
+        holes
     }
 
     pub fn count_bumpiness(
@@ -47,10 +50,10 @@ impl Game {
         let mut heights = [0; 10];
         let mut found_height: HashSet<usize> = HashSet::new();
 
-        for r in 0..BOARD_AMOUNT_ROWS {
+        for r in 0..19 {
             for c in 0..BOARD_AMOUNT_COLUMNS {
-                if board[r][c].is_some() && !found_height.contains(&c) {
-                    heights[c] = r;
+                if board[19 - r][c].is_some() && !found_height.contains(&c) {
+                    heights[c] = 20 - r;
                     found_height.insert(c);
                 }
             }
@@ -61,7 +64,8 @@ impl Game {
         for i in 1..heights.len() as usize {
             bumpiness += heights[i - 1].abs_diff(heights[i]) as f32;
         }
-        bumpiness / 180.
+
+        bumpiness
     }
 
     pub fn count_lines_cleared(
@@ -69,24 +73,20 @@ impl Game {
     ) -> f32 {
         let mut lines: usize = 0;
         for row in 0..BOARD_AMOUNT_ROWS {
-            // CHECK IF ROW IS FULL
-            if board[row as usize].iter().all(|b| match b {
-                Some(_) => true,
-                None => false,
-            }) {
+            if board[row].iter().all(|b| b.is_some()) {
                 lines += 1;
             }
         }
-        lines as f32 / 4.
+        lines as f32
     }
 
     pub fn simulate_place_piece(&mut self) -> bool {
         let piece = &self.active_piece;
         let (mr, mc) = piece.midpoint;
         piece.block_positions.iter().for_each(|(dr, dc)| {
-            self.board[(mr+dr) as usize][(mc+dc) as usize] = Some(piece.piece_type);
+            self.board[(mr + dr) as usize][(mc + dc) as usize] = Some(piece.piece_type);
         });
-        
+
         true
     }
 }
