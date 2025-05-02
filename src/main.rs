@@ -54,7 +54,7 @@ impl AppState {
     fn new(ctx: &mut Context, args : Option<Vec<HashMap<GameAction, KeyCode>>>) -> GameResult<AppState> {
         let mut state = AppState {
             animation_state: AnimationState::new(),
-            screen_state: ScreenState::StartScreen,
+            screen_state: ScreenState::VsBots,
 
             piece_assets: AppState::preload_piece_assets(ctx),
             board_assets: AppState::preload_board_assets(ctx),
@@ -75,6 +75,8 @@ impl AppState {
         }
 
         state.bot.game.reset_game();
+
+        state.bot.weights =[-0.7301756626462232, -0.07878889017051716, 0.9923397580894662, 0.6407879005891134];
 
         Ok(state)
     }

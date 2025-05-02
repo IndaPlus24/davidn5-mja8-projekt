@@ -179,10 +179,11 @@ impl Bot{
         final_states
     }
 
-    pub fn random_weights() -> [f64 ; 4] {
+    pub fn random_weights() -> [f64; 4] {
         let mut rng = rand::rng();
-        [rng.random_range(-1.0..1.0);4 ]
+        [(); 4].map(|_| rng.random_range(-1.0..1.0))
     }
+    
 
     pub fn crossover(parent1: &Bot, parent2: &Bot) -> Bot {
         let mut child = Bot::new();
@@ -197,7 +198,7 @@ impl Bot{
         child
     }
 
-    pub fn mutate(&mut self) {
+    pub fn mutate(&mut self, MUTATION_RATE : f32) {
         let mut rng = rand::rng();
         for weight in &mut self.weights.iter_mut() {
             if rng.random::<f32>() < MUTATION_RATE {
@@ -207,7 +208,10 @@ impl Bot{
     }
     
     pub fn compute_fitness(&self) -> f64 {
-        self.game.score as f64
+        let line_clear_bonus = self.game.lines as f64 * 10.0;
+        let hole_penalty = Game::count_holes(&self.game.board) as f64 * -5.0;
+        let bumpiness_penalty = Game::count_bumpiness(&self.game.board) as f64 * -2.0;
+        line_clear_bonus + hole_penalty + bumpiness_penalty
     }
 
     pub fn render_bot_game(&mut self, ctx: &mut Context) {
@@ -219,12 +223,10 @@ impl Bot{
             return;
         }
 
-
-        // IF THE TICK COUNT MATCHES THE CURRENT LEVELS TICK COUNT
         if self.game.last_drop.elapsed() >= self.game.fall_timing{
             self.game.last_drop += self.game.fall_timing;
 
-            while let Some(input) = self.inputs.pop() {
+            if let Some(input) = self.inputs.pop() {
                 match input {
                     BotInput::MoveLeft => {
                         self.game.move_piece(-1, 0);
@@ -298,4 +300,3 @@ impl Bot{
         
     }
 }
-const MUTATION_RATE: f32 = 0.05;
