@@ -16,6 +16,7 @@ impl Game {
             if c >= BOARD_AMOUNT_COLUMNS as isize
                 || c < 0
                 || r < 0
+                || r >= BOARD_AMOUNT_ROWS as isize
             {
                 return false;
             }
@@ -28,6 +29,7 @@ impl Game {
         if c >= BOARD_AMOUNT_COLUMNS as isize
         || c < 0
         || r < 0
+        || r >= BOARD_AMOUNT_ROWS as isize
         {return true;}
 
         self.board[r as usize][c as usize].is_some()

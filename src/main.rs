@@ -1,5 +1,6 @@
 mod animation_state;
 mod board;
+mod bots;
 mod config;
 mod consts;
 mod game;
@@ -7,10 +8,12 @@ mod game_inputs;
 mod menu_inputs;
 mod piece;
 mod rotation;
-mod ui_components;
 mod scoring;
+mod ui_components;
 
 use animation_state::AnimationState;
+use bots::bot::Bot;
+use bots::train_bot::train_ai;
 use consts::{ScreenState, GAME_1_POS, GAME_1_SCL, WINDOW_HEIGHT, WINDOW_WIDTH};
 use csv::{Reader, Writer};
 use menu_inputs::*;
@@ -42,13 +45,19 @@ struct AppState {
     // Games
     game_one: Game,
     game_two: Game,
+
+    // Bots,
+    bot: Bot,
 }
 
 impl AppState {
-    fn new(ctx: &mut Context) -> GameResult<AppState> {
+    fn new(
+        ctx: &mut Context,
+        args: Option<Vec<HashMap<GameAction, KeyCode>>>,
+    ) -> GameResult<AppState> {
         let mut state = AppState {
             animation_state: AnimationState::new(),
-            screen_state: ScreenState::Singleplayer,
+            screen_state: ScreenState::VsBots,
 
             piece_assets: AppState::preload_piece_assets(ctx),
             board_assets: AppState::preload_board_assets(ctx),
@@ -56,12 +65,20 @@ impl AppState {
 
             game_one: Game::new(),
             game_two: Game::new(),
+
+            bot: Bot::new(),
         };
 
         state.game_one.reset_game();
         state.game_two.reset_game();
 
-        state.check_args();
+        if let Some(keybinds) = args {
+            state.game_one.controls = keybinds[0].clone();
+            state.game_two.controls = keybinds[1].clone();
+        }
+
+        state.bot.game.reset_game();
+
         Ok(state)
     }
 
@@ -116,24 +133,8 @@ impl AppState {
         image_map
     }
 
-    pub fn check_args(&mut self) {
-        let args: Vec<String> = std::env::args().collect();
-
-        //Sets controls to that of --drifarkaden
-        if args.contains(&"--drifarkaden".to_string()) {
-            let drifar_keybinds: Vec<HashMap<GameAction, KeyCode>> =
-                default_drivarkaden_keybindings();
-            self.game_one.controls = drifar_keybinds[0].clone();
-            self.game_two.controls = drifar_keybinds[1].clone();
-        }
-        //Runs the program in train ai mode.
-        else if args.contains(&"--train".to_string()) {
-            //TODO -- train AI
-        }
-    }
-
     fn save_score(name: String, score: usize) -> Result<(), Box<dyn Error>> {
-        println!("Saving score to file ...");
+        //println!("Saving score to file ...");
         let path = "res/highscore.csv";
 
         //Get previous scores and add new score
@@ -145,7 +146,7 @@ impl AppState {
 
         //Write top 10 to file
         if save_scores_to_file(path, scores) {
-            println!("Succesfully saved score to file ...");
+            //println!("Succesfully saved score to file ...");
         }
         Ok(())
     }
@@ -198,17 +199,23 @@ impl event::EventHandler<ggez::GameError> for AppState {
                 handle_main_menu_inputs(ctx, &mut self.screen_state, &mut self.animation_state);
             }
             ScreenState::GameModeSelector => {
-                handle_gamemode_selector_inputs(ctx, &mut self.screen_state, &mut self.animation_state);
+                handle_gamemode_selector_inputs(
+                    ctx,
+                    &mut self.screen_state,
+                    &mut self.animation_state,
+                );
             }
             ScreenState::BotSelector => {
                 handle_bot_selector_inputs(ctx, &mut self.screen_state, &mut self.animation_state);
+            }
+            ScreenState::VsBots => {
+                self.bot.render_bot_game(ctx);
             }
             _ => {}
         }
 
         Ok(())
     }
-
 
     fn draw(&mut self, ctx: &mut Context) -> GameResult {
         let mut canvas =
@@ -217,23 +224,16 @@ impl event::EventHandler<ggez::GameError> for AppState {
         match self.screen_state {
             ScreenState::Singleplayer => {
                 //Render game
-                self.game_one.render_board(
-                    &self.board_assets,
-                    &mut canvas,
-                    GAME_1_POS,
-                    GAME_1_SCL
-                );
+                self.game_one
+                    .render_board(&self.board_assets, &mut canvas, GAME_1_POS, GAME_1_SCL);
                 self.game_one.render_pieces(
                     &self.piece_assets,
                     &mut canvas,
                     GAME_1_POS,
                     GAME_1_SCL,
                 );
-                self.game_one.render_stats(
-                    &mut canvas,
-                    GAME_1_POS,
-                    GAME_1_SCL
-                );
+                self.game_one
+                    .render_stats(&mut canvas, GAME_1_POS, GAME_1_SCL);
             }
             ScreenState::StartScreen => {
                 start_screen::render_start_screen(
@@ -272,7 +272,19 @@ impl event::EventHandler<ggez::GameError> for AppState {
                 // since inputs for menus will be weird using multiplayer settings.
             }
             ScreenState::VsBots => {
-                //Render 1v1 board but only load single player inputs that work on one of the boards.
+                //Render game
+                self.bot
+                    .game
+                    .render_board(&self.board_assets, &mut canvas, GAME_1_POS, GAME_1_SCL);
+                self.bot.game.render_pieces(
+                    &self.piece_assets,
+                    &mut canvas,
+                    GAME_1_POS,
+                    GAME_1_SCL,
+                );
+                self.bot
+                    .game
+                    .render_stats(&mut canvas, GAME_1_POS, GAME_1_SCL);
             }
             _ => {}
         }
@@ -280,6 +292,20 @@ impl event::EventHandler<ggez::GameError> for AppState {
         canvas.finish(ctx)?;
         Ok(())
     }
+}
+
+pub fn check_args() -> Option<Vec<HashMap<GameAction, KeyCode>>> {
+    let args: Vec<String> = std::env::args().collect();
+
+    //Sets controls to that of --drifarkaden
+    if args.contains(&"--drifarkaden".to_string()) {
+        return Some(default_drivarkaden_keybindings());
+    }
+    //Runs the program in train ai mode.
+    else if args.contains(&"--train".to_string()) {
+        train_ai();
+    }
+    None
 }
 
 pub fn main() -> GameResult {
@@ -294,14 +320,16 @@ pub fn main() -> GameResult {
                 .dimensions(WINDOW_WIDTH, WINDOW_HEIGHT),
         );
 
+    let args = check_args();
+
     let (mut context, event_loop) = context_builder.build().expect("Failed to build context.");
-    let state = AppState::new(&mut context).expect("Failed to create state.");
+    let state = AppState::new(&mut context, args).expect("Failed to create state.");
 
     context.gfx.add_font(
         "Tetris font",
         graphics::FontData::from_path(&context, "/PressStart2P-Regular.ttf")?,
     );
 
-    println!("Opened Window...");
+    //println!("Opened Window...");
     event::run(context, event_loop, state) // Run window event loop
 }

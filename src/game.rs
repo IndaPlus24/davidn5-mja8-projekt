@@ -8,6 +8,7 @@ use crate::board::{BOARD_AMOUNT_COLUMNS, BOARD_AMOUNT_ROWS};
 use crate::consts::{BoardRenderType, LEVEL_GRAVITIES};
 use crate::{default_keyboard_keybindings, GameAction, KeyCode, Piece, PieceType};
 
+#[derive(Clone)]
 pub struct Game {
     pub board: [[Option<PieceType>; BOARD_AMOUNT_COLUMNS]; BOARD_AMOUNT_ROWS],
     pub render_type: BoardRenderType,
@@ -143,14 +144,14 @@ impl Game {
             }
         }
 
-        println!("Spawning new piece...");
+        //println!("Spawning new piece...");
         self.active_piece = self.piece_queue.pop_front().unwrap();
         self.can_hold = true;
         self.on_ground = false;
 
         // Check if spawn location is valid
         if !self.is_valid_position(0, 0) {
-            println!("Game Over!");
+            //println!("Game Over!");
             self.game_over = true;
         }
 

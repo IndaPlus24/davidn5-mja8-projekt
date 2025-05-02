@@ -62,17 +62,17 @@ impl Game {
 
         // Rotation handling
         if keyboard.is_key_just_pressed(*self.controls.get(&GameAction::RotateCw).unwrap()) {
-            println!("Rotating CW...");
+            //println!("Rotating CW...");
             self.rotate(ROTATION_CW);
         }
 
         if keyboard.is_key_just_pressed(*self.controls.get(&GameAction::RotateCcw).unwrap()) {
-            println!("Rotating CCW...");
+            //println!("Rotating CCW...");
             self.rotate(ROTATION_CCW);
         }
 
         if keyboard.is_key_just_pressed(*self.controls.get(&GameAction::Rotate180).unwrap()) {
-            println!("Rotating 180...");
+            //println!("Rotating 180...");
             self.rotate(ROTATION_180);
         }
 
@@ -80,7 +80,7 @@ impl Game {
         if keyboard.is_key_just_pressed(*self.controls.get(&GameAction::Hold).unwrap())
             && self.can_hold
         {
-            println!("Holding Piece");
+            //println!("Holding Piece");
 
             let mut held_piece = self.active_piece.clone();
             held_piece.midpoint = (20, 4);

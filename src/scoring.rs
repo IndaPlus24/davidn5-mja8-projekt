@@ -18,16 +18,26 @@ impl Game {
         let mut points = 0.;
         if let Some(s) = score_type {
             match s {
-                ScoreType::Single          => {points += 100.; println!("Single!")},
-                ScoreType::Double          => {points += 300.; println!("Double!")},
-                ScoreType::Triple          => {points += 500.; println!("Triple!")},
-                ScoreType::Tetris          => {points += 800.; println!("Tetris!")},
-                ScoreType::TSpinMini       => {points += 100.; println!("T-Spin Mini!")},
-                ScoreType::TSpin           => {points += 400.; println!("T-Spin!")},
-                ScoreType::TSpinMiniSingle => {points += 200.; println!("T-Spin Mini Single!")},
-                ScoreType::TSpinSingle     => {points += 800.; println!("T-Spin Single!")},
-                ScoreType::TspinDouble     => {points += 1200.; println!("T-Spin Double!")},
-                ScoreType::TSpinTriple     => {points += 1600.; println!("T-Spin Triple!")},
+                ScoreType::Single          => {points += 100.; //println!("Single!")
+                },
+                ScoreType::Double          => {points += 300.; //println!("Double!")
+            },
+                ScoreType::Triple          => {points += 500.; //println!("Triple!")
+            },
+                ScoreType::Tetris          => {points += 800.; //println!("Tetris!")
+            },
+                ScoreType::TSpinMini       => {points += 100.; //println!("T-Spin Mini!")
+                },
+                ScoreType::TSpin           => {points += 400.; //println!("T-Spin!")
+            },
+                ScoreType::TSpinMiniSingle => {points += 200.; //println!("T-Spin Mini Single!")
+                },
+                ScoreType::TSpinSingle     => {points += 800.; //println!("T-Spin Single!")
+                },
+                ScoreType::TspinDouble     => {points += 1200.; //println!("T-Spin Double!")
+                },
+                ScoreType::TSpinTriple     => {points += 1600.; //println!("T-Spin Triple!")
+                },
             };
 
             // Combo check
@@ -43,7 +53,7 @@ impl Game {
                     if self.prev_clear {
                         self.combo += 1;
                         points += 50. * self.combo as f32;
-                        println!("Combo {}!", self.combo);
+                        //println!("Combo {}!", self.combo);
                     }
                     self.prev_clear = true;
                 }
@@ -62,7 +72,7 @@ impl Game {
                 _ => {
                     if self.back_to_back {
                         points *= 1.5;
-                        println!("B2B!");
+                        //println!("B2B!");
                     }
                     self.back_to_back = true;
                 }
@@ -70,7 +80,7 @@ impl Game {
 
             // Perfect clear check
             if self.board[0].iter().all(|c| c.is_none()) {
-                println!("Perfect clear!");
+                //println!("Perfect clear!");
                 points += match s {
                     ScoreType::Single => 800.,
                     ScoreType::Double => 1200.,
