@@ -30,7 +30,12 @@ impl Bot {
             game: Game::new(),
             inputs: Vec::new(),
             fitness: 0.,
-            weights: [-0.510066, 0.760666, -0.35663, -0.184483],
+            weights: [
+                -0.16244859388150262,
+                0.719497309353562,
+                -0.5702062220465524,
+                -0.36166136166074625,
+            ],
             game_steps: 0,
         }
     }
@@ -105,11 +110,12 @@ impl Bot {
         let mut visited_board_states: HashSet<
             [[Option<PieceType>; BOARD_AMOUNT_COLUMNS]; BOARD_AMOUNT_ROWS],
         > = HashSet::new();
-        let moves: Vec<(i32, i32)> = vec![(0, -1), (0, 1), (-1, 0)]; //left right down
+        let moves: Vec<(i32, i32)> = vec![(-1, 0), (0, -1), (0, 1)]; // down, left, right
 
         let start_state = MovementState {
             game: self.game.clone(),
             moves_so_far: Vec::new(),
+            rotations: 0,
         };
 
         queue.push_back(start_state.clone());
@@ -134,6 +140,7 @@ impl Bot {
                     let new_state = MovementState {
                         game: game_clone,
                         moves_so_far: new_moves,
+                        rotations: 0,
                     };
 
                     let p = &new_state.game.active_piece;
@@ -180,8 +187,7 @@ impl Bot {
 
             // Rotations
             if current_state.game.active_piece.piece_type != PieceType::O
-                && !current_state.moves_so_far.contains(&BotInput::RotateCW)
-                && !current_state.moves_so_far.contains(&BotInput::RotateCCW)
+                && current_state.rotations < 2
             {
                 let rotations = vec![
                     (ROTATION_CW, BotInput::RotateCW),
@@ -199,6 +205,7 @@ impl Bot {
                             let new_state = MovementState {
                                 game: game_clone,
                                 moves_so_far: new_moves,
+                                rotations: current_state.rotations + 1,
                             };
 
                             let p = &new_state.game.active_piece;
@@ -239,20 +246,17 @@ impl Bot {
     }
 
     pub fn compute_fitness(&self) -> f64 {
-        self.game.score as f64
+        self.game.lines as f64
     }
 
     pub fn render_bot_game(&mut self, _ctx: &mut Context) {
-        // Get a new move sequence if needed
         if self.inputs.is_empty() {
             self.inputs = self.get_best_move_sequence();
 
-            // If no moves available, we can't continue
             if self.inputs.is_empty() {
                 return;
             }
 
-            // Reverse the inputs so we can pop from the end
             self.inputs.reverse();
         }
 
@@ -293,10 +297,10 @@ impl Bot {
 
     pub fn run_game_without_ui(&mut self, max_game_steps: i32) -> f64 {
         while self.game_steps < max_game_steps {
-            self.game_steps += 1;
-
             if self.inputs.len() == 0 {
                 self.inputs = self.get_best_move_sequence();
+                self.game_steps += 1;
+                self.inputs.reverse();
             }
 
             if self.game.game_over {
@@ -332,6 +336,6 @@ impl Bot {
         }
 
         self.fitness = self.compute_fitness();
-        self.fitness
+        self.game.lines as f64
     }
 }

@@ -304,10 +304,6 @@ pub fn check_args() -> Option<Vec<HashMap<GameAction, KeyCode>>> {
     //Runs the program in train ai mode.
     else if args.contains(&"--train".to_string()) {
         train_ai();
-        loop {
-            println!("Trainging AI...");
-            train_ai();
-        }
     }
     None
 }
