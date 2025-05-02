@@ -59,13 +59,16 @@ impl Bot {
         }
     }
 
-    pub fn weighted_crossover(p1: &Bot, p2: &Bot) -> Self {
-        let mut w = [
-            p1.weights[0] * p1.fitness + p2.weights[0] * p2.fitness,
-            p1.weights[1] * p1.fitness + p2.weights[1] * p2.fitness,
-            p1.weights[2] * p1.fitness + p2.weights[2] * p2.fitness,
-            p1.weights[3] * p1.fitness + p2.weights[3] * p2.fitness,
-        ];
+    pub fn random_crossover(p1: &Bot, p2: &Bot) -> Bot {
+        let mut rng = rand::rng();
+        let mut w = [0.0; 4];
+        for i in 0..4 {
+            w[i] = if rng.random_bool(0.5) {
+                p1.weights[i]
+            } else {
+                p2.weights[i]
+            };
+        }
         Self::normalize(&mut w);
         Self {
             weights: w,
@@ -187,7 +190,7 @@ impl Bot {
 
             // Rotations
             if current_state.game.active_piece.piece_type != PieceType::O
-                && current_state.rotations < 2
+                && current_state.rotations < 5
             {
                 let rotations = vec![
                     (ROTATION_CW, BotInput::RotateCW),
@@ -200,7 +203,6 @@ impl Bot {
                         if game_clone.rotate(r) {
                             let mut new_moves = current_state.moves_so_far.clone();
                             new_moves.push(b);
-                            new_moves.push(BotInput::MoveDown);
 
                             let new_state = MovementState {
                                 game: game_clone,
@@ -237,11 +239,13 @@ impl Bot {
         [(); 4].map(|_| rng.random::<f64>() * if rng.random_bool(0.5) { -1. } else { 1.0 })
     }
 
-    pub fn mutate(&mut self) {
+    pub fn mutate(&mut self, mutation_rate: f64) {
         let mut rng = rand::rng();
-        let i = rng.random_range(0..4);
-        let delta: f64 = rng.random_range(-0.2..0.2);
-        self.weights[i] += delta;
+        for i in 0..4 {
+            if rng.random_bool(mutation_rate) {
+                self.weights[i] += rng.random_range(-0.2..0.2);
+            }
+        }
         Self::normalize(&mut self.weights);
     }
 

@@ -50,9 +50,9 @@ pub fn train_ai() {
             let parent1 = selected[0];
             let parent2 = selected[1];
 
-            let mut child = Bot::weighted_crossover(parent1, parent2);
+            let mut child = Bot::random_crossover(parent1, parent2);
             if rng.random_bool(0.05) {
-                child.mutate();
+                child.mutate(0.1);
             }
 
             offspring.push(child);
