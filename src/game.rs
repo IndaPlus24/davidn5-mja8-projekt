@@ -5,13 +5,13 @@ use std::time::{Duration, Instant};
 use ggez::Context;
 
 use crate::board::{BOARD_AMOUNT_COLUMNS, BOARD_AMOUNT_ROWS};
-use crate::consts::{BoardRenderType, DEFAULT_GRAVITY};
+use crate::consts::{GameMode, DEFAULT_GRAVITY};
 use crate::{default_keyboard_keybindings, GameAction, KeyCode, Piece, PieceType};
 
 #[derive(Clone)]
 pub struct Game {
     pub board: [[Option<PieceType>; BOARD_AMOUNT_COLUMNS]; BOARD_AMOUNT_ROWS],
-    pub render_type: BoardRenderType,
+    pub gamemode: GameMode,
 
     pub game_over: bool,
     pub battle_mode: bool,
@@ -60,7 +60,7 @@ impl Game {
     pub fn new() -> Self {
         Game {
             board: [[None; BOARD_AMOUNT_COLUMNS]; BOARD_AMOUNT_ROWS],
-            render_type: BoardRenderType::Marathon,
+            gamemode: GameMode::Marathon,
 
             game_over: false,
             battle_mode: false,
@@ -113,12 +113,11 @@ impl Game {
 
         self.moving_right = false;
         self.moving_left = false;
-        self.set_gravity_hard(DEFAULT_GRAVITY);
         self.last_drop = Instant::now();
 
         self.score = 0;
         self.lines = 0;
-        self.level = 1;
+        self.set_level(1);
         self.pieces = 0;
         self.start_time = Instant::now();
 

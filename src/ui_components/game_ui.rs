@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use ggez::{glam, graphics::{self, Canvas, Image}};
 
-use crate::{consts::BoardRenderType, Game, Piece, PieceType};
+use crate::{consts::GameMode, Game, Piece, PieceType};
 use crate::consts::{BOARD_AMOUNT_COLUMNS, BOARD_AMOUNT_ROWS};
 
 
@@ -151,14 +151,14 @@ impl Game {
 
     // Render different stats depending on gamemode
     pub fn render_stats(&mut self, canvas: &mut Canvas, pos: (f32, f32), scl: f32) {
-        match self.render_type {
-            BoardRenderType::Marathon => {
+        match self.gamemode {
+            GameMode::Marathon => {
                 self.render_marathon_stats(canvas, pos, scl);
             },
-            BoardRenderType::FourtyLines => {
+            GameMode::FourtyLines => {
 
             },
-            BoardRenderType::Versus => {
+            GameMode::Versus => {
 
             },
         }

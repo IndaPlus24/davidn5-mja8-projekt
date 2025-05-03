@@ -25,8 +25,8 @@ pub enum ScreenState {
     BotSelector,
 }
 
-#[derive(Clone)]
-pub enum BoardRenderType {
+#[derive(Clone, PartialEq)]
+pub enum GameMode {
     Marathon,
     FourtyLines,
     Versus,

@@ -3,6 +3,25 @@ use ggez::{glam, graphics::{self, Canvas, Color, PxScale, Text, TextAlign, TextF
 use crate::Game;
 
 impl Game {
+    pub fn level_up(&mut self) {
+        if self.level < 15 {
+             self.set_level(self.level + 1);
+        } else {
+            self.game_over = true;
+        }
+    }
+
+    pub fn set_level(&mut self, level: usize) {
+        // Gravity formula from Tetris Worlds
+        self.level = level;
+
+        let b = 0.8 - ((level-1) as f32 * 0.007);
+        let p = (level - 1) as f32;
+        let new_gravity = 1. / b.powf(p);
+
+        self.set_gravity_hard(new_gravity);
+    }
+
     pub fn render_marathon_stats(&mut self, canvas: &mut Canvas, pos: (f32, f32), scl: f32) {
         // Score
         let formatted_score = get_formatted_score(self.score);

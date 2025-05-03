@@ -1,5 +1,6 @@
 use std::time::Instant;
 
+use crate::consts::GameMode;
 use crate::scoring::ScoreType;
 use crate::Game;
 use crate::Piece;
@@ -113,6 +114,13 @@ impl Game {
         }
 
         self.lines += lines_cleared;
+        // Check marathon leveling
+        if self.gamemode == GameMode::Marathon {
+            if self.lines / 10 == self.level {
+                self.level_up();
+            }
+        }
+
         match lines_cleared {
             0 => {
                 if self.t_spin_mini {Some(ScoreType::TSpinMini)}
