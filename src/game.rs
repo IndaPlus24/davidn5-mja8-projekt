@@ -17,8 +17,8 @@ pub struct Game {
     pub battle_mode: bool,
     pub garbage_queue: VecDeque<(usize, usize)>, // (amount, column of garbage hole)
     pub active_piece: Piece,
-    pub held_piece: Option<Piece>,
-    pub piece_queue: VecDeque<Piece>,
+    pub held_piece: Option<PieceType>,
+    pub piece_queue: VecDeque<PieceType>,
     pub can_hold: bool,
     pub controls: HashMap<GameAction, KeyCode>,
 
@@ -156,13 +156,11 @@ impl Game {
     pub fn spawn_piece_from_queue(&mut self) {
         // Generate new bag if piece queue is shorter than 7 pieces
         if self.piece_queue.len() < 7 {
-            let l = PieceType::get_random_as_list();
-            for p in l {
-                self.piece_queue.push_back(Piece::new(p, 0));
-            }
+            let mut l = PieceType::get_random_as_list();
+            self.piece_queue.append(&mut l);
         }
 
-        let next_piece_type = self.piece_queue.pop_front().unwrap().piece_type;
+        let next_piece_type = self.piece_queue.pop_front().unwrap();
         self.spawn_piece(next_piece_type);
         self.can_hold = true;
     }

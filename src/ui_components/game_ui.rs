@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use ggez::{glam, graphics::{self, Canvas, Color, Image, PxScale, Text, TextAlign, TextFragment, TextLayout}};
 
-use crate::{consts::BoardRenderType, Game, PieceType};
+use crate::{consts::BoardRenderType, Game, Piece, PieceType};
 use crate::consts::{BOARD_AMOUNT_COLUMNS, BOARD_AMOUNT_ROWS};
 
 
@@ -98,16 +98,16 @@ impl Game {
         });
 
         //Hold piece
-        if let Some(hold_piece) = &self.held_piece {
-            let piece_type = if self.can_hold {hold_piece.piece_type} else {PieceType::X};
-            let image = assets.get(&piece_type).unwrap();
+        if let Some(piece_type) = self.held_piece {
+            let piece_texture = if self.can_hold {piece_type} else {PieceType::X};
+            let image = assets.get(&piece_texture).unwrap();
 
             let (mut x, mut y) = (pos.0 + 68. * scl, pos.1 + 80. * scl);
-            let (x_offset, y_offset) = get_piece_offset(hold_piece.piece_type, scl);
+            let (x_offset, y_offset) = get_piece_offset(piece_type, scl);
             x += x_offset;
             y += y_offset;
 
-            hold_piece.block_positions.iter().for_each(|(dr, dc)| {
+            Piece::get_block_positions(piece_type, 0).iter().for_each(|(dr, dc)| {
                 canvas.draw(
                     image,
                     graphics::DrawParam::new()
@@ -125,13 +125,13 @@ impl Game {
         if self.battle_mode {x += 36. * scl};
         
         for i in 0..5 {
-            let next_piece = &self.piece_queue[i];
-            let (x_offset, y_offset) = get_piece_offset(next_piece.piece_type, scl);
+            let piece_type = self.piece_queue[i];
+            let (x_offset, y_offset) = get_piece_offset(piece_type, scl);
             x += x_offset;
             y += y_offset;
 
-            let image = assets.get(&next_piece.piece_type).unwrap();
-            next_piece.block_positions.iter().for_each(|(dr, dc)| {
+            let image = assets.get(&piece_type).unwrap();
+            Piece::get_block_positions(piece_type, 0).iter().for_each(|(dr, dc)| {
                 canvas.draw(
                     image,
                     graphics::DrawParam::new()

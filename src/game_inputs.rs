@@ -1,6 +1,6 @@
 use std::time::Instant;
 
-use crate::{Game, Piece, ROTATION_180, ROTATION_CCW, ROTATION_CW};
+use crate::{Game, ROTATION_180, ROTATION_CCW, ROTATION_CW};
 
 use crate::config::input_config::*;
 
@@ -62,17 +62,14 @@ impl Game {
 
         // Rotation handling
         if keyboard.is_key_just_pressed(*self.controls.get(&GameAction::RotateCw).unwrap()) {
-            //println!("Rotating CW...");
             self.rotate(ROTATION_CW);
         }
 
         if keyboard.is_key_just_pressed(*self.controls.get(&GameAction::RotateCcw).unwrap()) {
-            //println!("Rotating CCW...");
             self.rotate(ROTATION_CCW);
         }
 
         if keyboard.is_key_just_pressed(*self.controls.get(&GameAction::Rotate180).unwrap()) {
-            //println!("Rotating 180...");
             self.rotate(ROTATION_180);
         }
 
@@ -80,22 +77,12 @@ impl Game {
         if keyboard.is_key_just_pressed(*self.controls.get(&GameAction::Hold).unwrap())
             && self.can_hold
         {
-            //println!("Holding Piece");
+            let held_piece = self.active_piece.piece_type;
 
-            let mut held_piece = self.active_piece.clone();
-            held_piece.midpoint = (20, 4);
-            held_piece.rotation = 0;
-            let blocks: Vec<(isize, isize)> =
-                Piece::get_block_positions(self.active_piece.piece_type, 0);
-            held_piece.block_positions = blocks;
-
-            match self.held_piece.take() {
-                Some(previous_held) => {
-                    self.active_piece = previous_held;
-                }
-                None => {
-                    self.spawn_piece_from_queue();
-                }
+            if let Some(current_held) = self.held_piece {
+                self.spawn_piece(current_held);
+            } else {
+                self.spawn_piece_from_queue();
             }
 
             self.held_piece = Some(held_piece);
