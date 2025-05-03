@@ -204,6 +204,7 @@ impl event::EventHandler<ggez::GameError> for AppState {
                     ctx,
                     &mut self.screen_state,
                     &mut self.animation_state,
+                    &mut self.game_one,
                 );
             }
             ScreenState::BotSelector => {
