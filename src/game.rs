@@ -174,9 +174,6 @@ impl Game {
             return;
         }
 
-        //Handle inputs
-        self.handle_game_inputs(ctx);
-
         // Downward movement (soft drop or natural fall)
         while !self.on_ground && self.last_drop.elapsed() >= self.fall_timing {
             self.last_drop += self.fall_timing;
@@ -191,6 +188,9 @@ impl Game {
 
             self.on_ground_check();
         }
+
+        //Handle inputs
+        self.handle_game_inputs(ctx);
 
         // Horizontal movement
         if let Some(das_start) = self.das_start {

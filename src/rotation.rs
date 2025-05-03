@@ -1,3 +1,5 @@
+use std::time::Instant;
+
 use crate::{Game, Piece, PieceType};
 
 pub const ROTATION_CW:  usize = 1;
@@ -145,6 +147,7 @@ impl Game {
                     }
                 }
 
+                if self.on_ground {self.last_drop = Instant::now()}
                 self.add_action();
                 return true;
             }
