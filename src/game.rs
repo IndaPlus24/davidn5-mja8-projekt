@@ -5,7 +5,7 @@ use std::time::{Duration, Instant};
 use ggez::Context;
 
 use crate::board::{BOARD_AMOUNT_COLUMNS, BOARD_AMOUNT_ROWS};
-use crate::consts::{BoardRenderType, LEVEL_GRAVITIES};
+use crate::consts::{BoardRenderType, DEFAULT_GRAVITY};
 use crate::{default_keyboard_keybindings, GameAction, KeyCode, Piece, PieceType};
 
 #[derive(Clone)]
@@ -81,9 +81,9 @@ impl Game {
             arr: Duration::from_millis(0),
             arr_start: None,
             sds: INFINITY,
-            gravity: LEVEL_GRAVITIES[0],
+            gravity: DEFAULT_GRAVITY,
             last_drop: Instant::now(),
-            fall_timing: Duration::from_millis((1000. / LEVEL_GRAVITIES[0]) as u64),
+            fall_timing: Duration::from_millis((1000. / DEFAULT_GRAVITY) as u64),
             on_ground: false,
             on_ground_start: None,
             actions_from_ground: 0,
@@ -113,6 +113,7 @@ impl Game {
 
         self.moving_right = false;
         self.moving_left = false;
+        self.set_gravity_hard(DEFAULT_GRAVITY);
         self.last_drop = Instant::now();
 
         self.score = 0;

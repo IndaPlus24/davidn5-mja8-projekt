@@ -9,7 +9,7 @@ pub const BOARD_AMOUNT_COLUMNS: usize = 10;
 pub const BOARD_AMOUNT_ROWS: usize = 40;
 
 //Delays (seconds)
-pub const LEVEL_GRAVITIES: [f32; 1] = [40.]; // Cells per second
+pub const DEFAULT_GRAVITY: f32 = 1.; // Cells per second
 
 #[derive(PartialEq)]
 pub enum ScreenState {

@@ -10,6 +10,7 @@ mod piece;
 mod rotation;
 mod scoring;
 mod ui_components;
+mod gamemodes;
 
 use animation_state::AnimationState;
 use bots::bot::Bot;
