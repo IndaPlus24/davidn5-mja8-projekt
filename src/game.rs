@@ -109,7 +109,7 @@ impl Game {
         self.held_piece = None;
         self.garbage_queue = VecDeque::new();
         self.piece_queue = VecDeque::new();
-        self.spawn_new_piece();
+        self.spawn_piece_from_queue();
 
         self.moving_right = false;
         self.moving_left = false;
@@ -135,28 +135,36 @@ impl Game {
         self.fall_timing = Duration::from_millis((1000. / gravity) as u64);
     }
 
-    pub fn spawn_new_piece(&mut self) {
-        if self.piece_queue.len() < 7 {
-            // 7-bag
-            let l = PieceType::get_random_as_list();
-            for p in l {
-                self.piece_queue.push_back(Piece::new(p, 0));
-            }
-        }
 
-        self.active_piece = self.piece_queue.pop_front().unwrap();
-        self.can_hold = true;
-        self.on_ground = false;
+    pub fn spawn_piece(&mut self, piece_type: PieceType) {
+        self.active_piece = Piece::new(piece_type, 0);
+        self.last_drop = Instant::now();
 
         // Check if spawn location is valid
         if !self.is_valid_position(0, 0) {
             self.game_over = true;
         }
 
+        // On ground check
+        self.on_ground = false;
         if !self.is_valid_position(0, -1) {
             self.on_ground = true;
             self.on_ground_start = Some(Instant::now());
         }
+    }
+
+    pub fn spawn_piece_from_queue(&mut self) {
+        // Generate new bag if piece queue is shorter than 7 pieces
+        if self.piece_queue.len() < 7 {
+            let l = PieceType::get_random_as_list();
+            for p in l {
+                self.piece_queue.push_back(Piece::new(p, 0));
+            }
+        }
+
+        let next_piece_type = self.piece_queue.pop_front().unwrap().piece_type;
+        self.spawn_piece(next_piece_type);
+        self.can_hold = true;
     }
 
 

@@ -61,7 +61,7 @@ impl Game {
         let score_type = self.get_score_type();
         self.add_score(score_type);
 
-        self.spawn_new_piece();
+        self.spawn_piece_from_queue();
         self.last_drop = Instant::now();
         true
     }

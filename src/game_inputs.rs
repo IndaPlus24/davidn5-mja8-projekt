@@ -94,7 +94,7 @@ impl Game {
                     self.active_piece = previous_held;
                 }
                 None => {
-                    self.spawn_new_piece();
+                    self.spawn_piece_from_queue();
                 }
             }
 
