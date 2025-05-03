@@ -38,7 +38,8 @@ pub struct Game {
     pub fall_timing: Duration, // (time per cell)
     pub on_ground: bool,
     pub on_ground_start: Option<Instant>, // Timer for lock delay
-    pub actions_from_ground: usize, // Action counter. If it reaches 15, the piece will automatically lock in place
+    pub lowest_row: isize, // Lowest row that piece has touched
+    pub action_count: usize, // Action counter. If it reaches 15, the piece will automatically lock in place
 
     // Stats
     pub score: usize,
@@ -86,7 +87,8 @@ impl Game {
             fall_timing: Duration::from_millis((1000. / DEFAULT_GRAVITY) as u64),
             on_ground: false,
             on_ground_start: None,
-            actions_from_ground: 0,
+            lowest_row: 21,
+            action_count: 0,
 
             score: 0,
             lines: 0,
@@ -181,6 +183,8 @@ impl Game {
             if self.move_piece(0, -1) && self.soft_dropping {
                 self.score += 1;
             }
+
+            self.on_ground_check();
         }
 
         // Horizontal movement
@@ -196,9 +200,11 @@ impl Game {
                 while arr_start.elapsed() >= self.arr {
                     if self.moving_left {
                         if !self.move_piece(-1, 0) {break}
+                        else {self.add_action()}
                     }
                     else if self.moving_right {
                         if !self.move_piece(1, 0) {break}
+                        else {self.add_action()}
                     }
                     arr_start += self.arr;
                 }
@@ -210,6 +216,36 @@ impl Game {
             if self.on_ground && t.elapsed() >= Duration::from_millis(500) {
                 self.place_piece();
             }
+        }
+    }
+
+    pub fn on_ground_check(&mut self) {
+        if !self.is_valid_position(0, -1) {
+            self.on_ground = true;
+            self.on_ground_start = Some(Instant::now());
+        } else {
+            self.on_ground = false;
+            self.on_ground_start = None;
+        }
+    }
+
+    pub fn add_action(&mut self) {
+        self.action_count += 1;
+
+        self.on_ground_check();
+        // Check if piece has reached a new lowest row
+        for (dr, _) in &self.active_piece.block_positions {
+            let r = self.active_piece.midpoint.0 + dr;
+            if r < self.lowest_row {
+                self.lowest_row = r;
+                if !self.on_ground {
+                    self.action_count = 0;
+                }
+            }
+        }
+
+        if self.action_count >= 15 && self.on_ground {
+            self.place_piece();
         }
     }
 }

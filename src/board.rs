@@ -46,9 +46,6 @@ impl Game {
         self.t_spin = false;
         self.t_spin_mini = false;
 
-        self.on_ground = !self.is_valid_position(0, -1);
-        self.on_ground_start = Some(Instant::now());
-
         true
     }
 
@@ -64,6 +61,10 @@ impl Game {
 
         self.spawn_piece_from_queue();
         self.last_drop = Instant::now();
+
+        self.lowest_row = 21;
+        self.action_count = 0;
+
         true
     }
 

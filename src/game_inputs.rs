@@ -10,7 +10,7 @@ impl Game {
 
         // Move left
         if keyboard.is_key_just_pressed(*self.controls.get(&GameAction::MoveLeft).unwrap()) {
-            self.move_piece(-1, 0);
+            if self.move_piece(-1, 0) {self.add_action()}
             self.moving_left = true;
             self.moving_right = false;
             self.das_charged = false;
@@ -28,7 +28,7 @@ impl Game {
 
         // Move right
         if keyboard.is_key_just_pressed(*self.controls.get(&GameAction::MoveRight).unwrap()) {
-            self.move_piece(1, 0);
+            if self.move_piece(1, 0) {self.add_action()}
             self.moving_right = true;
             self.moving_left = false;
             self.das_charged = false;
