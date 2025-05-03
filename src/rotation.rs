@@ -146,7 +146,6 @@ impl Game {
                 }
 
                 self.add_action();
-                println!("added action");
                 return true;
             }
         }

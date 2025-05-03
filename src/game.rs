@@ -180,8 +180,13 @@ impl Game {
         // Downward movement (soft drop or natural fall)
         while !self.on_ground && self.last_drop.elapsed() >= self.fall_timing {
             self.last_drop += self.fall_timing;
-            if self.move_piece(0, -1) && self.soft_dropping {
-                self.score += 1;
+            if self.move_piece(0, -1) {
+                if self.soft_dropping {
+                    self.score += 1;
+                }
+                if self.is_new_lowest() {
+                    self.action_count = 0;
+                }
             }
 
             self.on_ground_check();
@@ -234,18 +239,26 @@ impl Game {
 
         self.on_ground_check();
         // Check if piece has reached a new lowest row
-        for (dr, _) in &self.active_piece.block_positions {
-            let r = self.active_piece.midpoint.0 + dr;
-            if r < self.lowest_row {
-                self.lowest_row = r;
-                if !self.on_ground {
-                    self.action_count = 0;
-                }
+        if self.is_new_lowest() {
+            if !self.on_ground {
+                self.action_count = 0;
             }
         }
 
         if self.action_count >= 15 && self.on_ground {
             self.place_piece();
         }
+    }
+
+    pub fn is_new_lowest(&mut self) -> bool {
+        let prev_lowest = self.lowest_row;
+        for (dr, _) in &self.active_piece.block_positions {
+            let r = self.active_piece.midpoint.0 + dr;
+            if r < self.lowest_row {
+                self.lowest_row = r;
+            }
+        }
+
+        prev_lowest != self.lowest_row
     }
 }
