@@ -9,7 +9,7 @@ mod tests {
     #[test]
     #[allow(non_snake_case)]
     fn test_find_all_move_outcomes_piece_O() {
-        let mut bot = Bot::new();
+        let mut bot = Bot::new(0);
 
         bot.game.board = [[None; BOARD_AMOUNT_COLUMNS]; BOARD_AMOUNT_ROWS];
         bot.game.active_piece = Piece::new(PieceType::O, 0);
@@ -27,7 +27,7 @@ mod tests {
     #[test]
     #[allow(non_snake_case)]
     fn test_find_all_move_outcomes_piece_I() {
-        let mut bot = Bot::new();
+        let mut bot = Bot::new(0);
 
         bot.game.board = [[None; BOARD_AMOUNT_COLUMNS]; BOARD_AMOUNT_ROWS];
         bot.game.active_piece = Piece::new(PieceType::I, 0);
@@ -45,7 +45,7 @@ mod tests {
     #[test]
     #[allow(non_snake_case)]
     fn test_find_all_move_outcomes_piece_L() {
-        let mut bot = Bot::new();
+        let mut bot = Bot::new(0);
 
         bot.game.board = [[None; BOARD_AMOUNT_COLUMNS]; BOARD_AMOUNT_ROWS];
         bot.game.active_piece = Piece::new(PieceType::L, 0);
@@ -63,7 +63,7 @@ mod tests {
     #[test]
     #[allow(non_snake_case)]
     fn test_find_best_move() {
-        let mut bot = Bot::new();
+        let mut bot = Bot::new(0);
 
         bot.game.board = [[None; BOARD_AMOUNT_COLUMNS]; BOARD_AMOUNT_ROWS];
         bot.game.board[0] = [
@@ -125,7 +125,7 @@ mod tests {
     #[test]
     #[allow(non_snake_case)]
     pub fn test_aggregate_height() {
-        let mut bot = Bot::new();
+        let mut bot = Bot::new(0);
 
         bot.game.board = [[None; BOARD_AMOUNT_COLUMNS]; BOARD_AMOUNT_ROWS];
         bot.game.board[0] = [
@@ -185,7 +185,7 @@ mod tests {
     #[test]
     #[allow(non_snake_case)]
     pub fn test_holes() {
-        let mut bot = Bot::new();
+        let mut bot = Bot::new(0);
 
         bot.game.board = [[None; BOARD_AMOUNT_COLUMNS]; BOARD_AMOUNT_ROWS];
         bot.game.board[0] = [
@@ -245,7 +245,7 @@ mod tests {
     #[test]
     #[allow(non_snake_case)]
     pub fn test_get_bumpiness() {
-        let mut bot = Bot::new();
+        let mut bot = Bot::new(0);
 
         bot.game.board = [[None; BOARD_AMOUNT_COLUMNS]; BOARD_AMOUNT_ROWS];
         bot.game.board[0] = [
@@ -305,7 +305,7 @@ mod tests {
     #[test]
     #[allow(non_snake_case)]
     pub fn test_best_move_piece_L() {
-        let mut bot = Bot::new();
+        let mut bot = Bot::new(0);
         
 
         bot.game.board = [[None; BOARD_AMOUNT_COLUMNS]; BOARD_AMOUNT_ROWS];
@@ -345,7 +345,7 @@ mod tests {
     #[test]
     #[allow(non_snake_case)]
     pub fn test_best_move_piece_T() {
-        let mut bot = Bot::new();
+        let mut bot = Bot::new(0);
         bot.game.board = [[None; BOARD_AMOUNT_COLUMNS]; BOARD_AMOUNT_ROWS];
         bot.game.board[0] = [
             Some(PieceType::I),

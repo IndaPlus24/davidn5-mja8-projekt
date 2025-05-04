@@ -10,7 +10,7 @@ use super::{
     move_outcome::{MoveOutcome, MovementState},
 };
 use crate::{
-    board::{BOARD_AMOUNT_COLUMNS, BOARD_AMOUNT_ROWS}, Game, PieceType, ROTATION_CCW, ROTATION_CW
+    board::{BOARD_AMOUNT_COLUMNS, BOARD_AMOUNT_ROWS}, consts::BOT_DIFFICULTY_SPEEDS, Game, PieceType, ROTATION_CCW, ROTATION_CW
 };
 
 #[derive(Clone)]
@@ -20,10 +20,11 @@ pub struct Bot {
     pub fitness: f64,
     pub weights: [f64; 4],
     pub game_steps: i32,
+    pub difficulty : usize, // ranges for 0 - 2
 }
 
 impl Bot {
-    pub fn new() -> Self {
+    pub fn new(difficulty : usize) -> Self {
 
         let mut g = Game::new();
         g.reset_game();
@@ -70,6 +71,7 @@ impl Bot {
                 -0.184483
             ],
             game_steps: 0,
+            difficulty,
         }
     }
 
@@ -82,6 +84,7 @@ impl Bot {
             game: Game::new(),
             inputs: vec![],
             game_steps: 0,
+            difficulty : 0
         }
     }
 
@@ -109,6 +112,7 @@ impl Bot {
             game: Game::new(),
             inputs: vec![],
             game_steps: 0,
+            difficulty : 0,
         }
     }
 
@@ -174,6 +178,7 @@ impl Bot {
         (outcomes[best_index].clone(), evaluation[best_index])
     }
 
+    #[allow(unused)]
     pub fn get_all_move_outcomes(&mut self) -> Vec<MoveOutcome> {
         let mut final_states: Vec<MoveOutcome> = Vec::new();
         let mut visited: HashSet<((isize, isize), usize)> = HashSet::new();
@@ -337,7 +342,7 @@ impl Bot {
         }   
         
 
-        if self.game.last_drop.elapsed() >= Duration::from_millis((1000. / 1000.) as u64) {
+        if self.game.last_drop.elapsed() >= Duration::from_millis((1000. / BOT_DIFFICULTY_SPEEDS[self.difficulty]) as u64) {
             self.game.last_drop += Duration::from_millis((1000. / 120.) as u64);
 
             if let Some(input) = self.inputs.pop() {
@@ -462,7 +467,7 @@ impl Bot {
     
                 // Drop the piece all the way down
                 while game_cc.move_piece(0, -1) {}
-                moves.push(BotInput::HardDrop);
+                moves.push(BotInput::HardDrop);            
                 game_cc.place_piece();
     
                 move_outcomes.push(MoveOutcome {

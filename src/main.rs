@@ -67,7 +67,7 @@ impl AppState {
             game_one: Game::new(),
             game_two: Game::new(),
 
-            bot: Bot::new(),
+            bot: Bot::new(0),
         };
 
         state.game_one.reset_game();
