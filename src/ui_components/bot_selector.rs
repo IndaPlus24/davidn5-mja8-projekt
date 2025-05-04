@@ -57,7 +57,7 @@ pub fn render_bot_selector(
         graphics::DrawParam::new()
             .dest(glam::Vec2::new(
                 center.0 - image_half_size.0 + 200.,
-                center.1 - 170.,
+                center.1 - 225.,
             ))
             .scale(glam::Vec2::new(scl, scl)),
     );
@@ -74,7 +74,7 @@ pub fn render_bot_selector(
         graphics::DrawParam::new()
             .dest(glam::Vec2::new(
                 center.0 - image_half_size.0 + 200.,
-                center.1,
+                center.1 - 75.,
             ))
             .scale(glam::Vec2::new(scl, scl)),
     );
@@ -91,7 +91,24 @@ pub fn render_bot_selector(
         graphics::DrawParam::new()
             .dest(glam::Vec2::new(
                 center.0 - image_half_size.0 + 200.,
-                center.1 + 170.,
+                center.1 + 75.,
+            ))
+            .scale(glam::Vec2::new(scl, scl)),
+    );
+
+    let back = Text::new(TextFragment {
+        text: "Back".to_string(),
+        font: Some("Tetris font".to_string()),
+        color: Some(Color::WHITE),
+        scale: Some(PxScale::from(60.0)),
+    });
+
+    canvas.draw(
+        &back,
+        graphics::DrawParam::new()
+            .dest(glam::Vec2::new(
+                center.0 - image_half_size.0 + 200.,
+                center.1 + 225.,
             ))
             .scale(glam::Vec2::new(scl, scl)),
     );
@@ -104,9 +121,10 @@ pub fn render_bot_selector(
     });
 
     let arrow_y = match animation_state.selected_item_bot_selector {
-        0 => center.1 - 170.,
-        1 => center.1,
-        _ => center.1 + 170.,
+        0 => center.1 - 225.,
+        1 => center.1 - 75.,
+        2 => center.1 + 75.,
+        _ => center.1 + 225.,
     };
 
     canvas.draw(

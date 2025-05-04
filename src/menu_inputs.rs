@@ -31,9 +31,9 @@ pub fn handle_main_menu_inputs(ctx: &ggez::Context, screen_state: &mut ScreenSta
 pub fn handle_gamemode_selector_inputs(ctx: &ggez::Context, screen_state: &mut ScreenState, animation_state: &mut AnimationState, game: &mut Game) {
     let keyboard = &ctx.keyboard;
     if keyboard.is_key_just_pressed(DOWN) {
-        animation_state.selected_item_gamemode_selector = (animation_state.selected_item_gamemode_selector + 1) % 3;
+        animation_state.selected_item_gamemode_selector = (animation_state.selected_item_gamemode_selector + 1) % 4;
     } else if keyboard.is_key_just_pressed(UP) {
-        animation_state.selected_item_gamemode_selector = (animation_state.selected_item_gamemode_selector + 2) % 3;
+        animation_state.selected_item_gamemode_selector = (animation_state.selected_item_gamemode_selector + 3) % 4;
     } else if keyboard.is_key_just_pressed(SELECT) {
         match animation_state.selected_item_gamemode_selector {
             0 => {
@@ -43,9 +43,12 @@ pub fn handle_gamemode_selector_inputs(ctx: &ggez::Context, screen_state: &mut S
                 *screen_state = ScreenState::Singleplayer;
                 game.reset_game();
             },
-            _ => {
+            2 => {
                 *screen_state = ScreenState::BotSelector;
             },
+            _=> {
+                *screen_state = ScreenState::MainMenu;
+            }
         }
     }
 }
@@ -53,14 +56,15 @@ pub fn handle_gamemode_selector_inputs(ctx: &ggez::Context, screen_state: &mut S
 pub fn handle_bot_selector_inputs(ctx: &ggez::Context, screen_state: &mut ScreenState, animation_state: &mut AnimationState) {
     let keyboard = &ctx.keyboard;
     if keyboard.is_key_just_pressed(DOWN) {
-        animation_state.selected_item_bot_selector = (animation_state.selected_item_bot_selector + 1) % 3;
+        animation_state.selected_item_bot_selector = (animation_state.selected_item_bot_selector + 1) % 4;
     } else if keyboard.is_key_just_pressed(UP) {
-        animation_state.selected_item_bot_selector = (animation_state.selected_item_bot_selector + 2) % 3;
+        animation_state.selected_item_bot_selector = (animation_state.selected_item_bot_selector + 3) % 4;
     } else if keyboard.is_key_just_pressed(SELECT) {
         *screen_state = match animation_state.selected_item_bot_selector {
             0 => ScreenState::Multiplayer,
             1 => ScreenState::Singleplayer,
-            _ => ScreenState::VsBots,
+            2 => ScreenState::VsBots,
+            _ => ScreenState::GameModeSelector
         }
     }
 }

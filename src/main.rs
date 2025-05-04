@@ -58,7 +58,7 @@ impl AppState {
     ) -> GameResult<AppState> {
         let mut state = AppState {
             animation_state: AnimationState::new(),
-            screen_state: ScreenState::Singleplayer,
+            screen_state: ScreenState::StartScreen,
 
             piece_assets: AppState::preload_piece_assets(ctx),
             board_assets: AppState::preload_board_assets(ctx),
