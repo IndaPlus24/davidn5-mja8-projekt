@@ -28,31 +28,6 @@ impl Bot {
 
         let mut g = Game::new();
         g.reset_game();
-        // g.spawn_piece(PieceType::T);
-        // g.board[0] = [
-        //     Some(PieceType::I),
-        //     Some(PieceType::I),
-        //     None,
-        //     Some(PieceType::I),
-        //     Some(PieceType::I),
-        //     Some(PieceType::I),
-        //     Some(PieceType::I),
-        //     Some(PieceType::I),
-        //     Some(PieceType::I),
-        //     Some(PieceType::I),
-        // ];
-        // g.board[1] = [
-        //     Some(PieceType::I),
-        //     Some(PieceType::I),
-        //     None,
-        //     None,
-        //     Some(PieceType::I),
-        //     Some(PieceType::I),
-        //     Some(PieceType::I),
-        //     Some(PieceType::I),
-        //     Some(PieceType::I),
-        //     Some(PieceType::I),
-        // ];
 
         Self {
             game: g,
@@ -178,6 +153,7 @@ impl Bot {
         (outcomes[best_index].clone(), evaluation[best_index])
     }
 
+    // LEGACY FUNCTION wasnt able to use this!
     #[allow(unused)]
     pub fn get_all_move_outcomes(&mut self) -> Vec<MoveOutcome> {
         let mut final_states: Vec<MoveOutcome> = Vec::new();
@@ -253,7 +229,6 @@ impl Bot {
                                 ),
                                 holes: Game::count_holes(&current_state.game.board),
                                 bumpiness: Game::count_bumpiness(&current_state.game.board),
-                                is_t_spin: false, // TODO CHECK IF MOVE IS A T SPIN,
                                 move_sequence: moves,
                             });
                         }
@@ -448,7 +423,6 @@ impl Bot {
             let mut base_game = self.game.clone();
             let mut base_moves: Vec<BotInput> = Vec::new();
     
-            // Apply rotation
             for _ in 0..rotation {
                 if base_game.rotate(ROTATION_CW) {
                     base_moves.push(BotInput::RotateCW);
@@ -460,7 +434,6 @@ impl Bot {
                 base_moves.push(BotInput::MoveLeft);
             }
     
-            // For each valid horizontal position
             loop {
                 let mut game_cc = base_game.clone();
                 let mut moves = base_moves.clone();
@@ -475,7 +448,6 @@ impl Bot {
                     aggregate_height: Game::get_aggregate_height(&game_cc.board),
                     holes: Game::count_holes(&game_cc.board),
                     bumpiness: Game::count_bumpiness(&game_cc.board),
-                    is_t_spin: false, // TODO: implement T-spin detection
                     move_sequence: moves,
                 });
     
