@@ -8,7 +8,6 @@ pub struct MoveOutcome {
     pub aggregate_height: f32,
     pub holes: f32,
     pub bumpiness: f32,
-    pub is_t_spin: bool,
 }
 
 #[derive(Clone)]

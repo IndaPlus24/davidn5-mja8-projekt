@@ -1,6 +1,5 @@
 use std::{
-    collections::{HashSet, VecDeque},
-    f64::{INFINITY, NEG_INFINITY},
+    collections::{HashSet, VecDeque}, time::Duration
 };
 
 use ggez::Context;
@@ -11,8 +10,7 @@ use super::{
     move_outcome::{MoveOutcome, MovementState},
 };
 use crate::{
-    board::{BOARD_AMOUNT_COLUMNS, BOARD_AMOUNT_ROWS},
-    Game, PieceType, ROTATION_CCW, ROTATION_CW,
+    board::{BOARD_AMOUNT_COLUMNS, BOARD_AMOUNT_ROWS}, consts::BOT_DIFFICULTY_SPEEDS, Game, PieceType, ROTATION_CCW, ROTATION_CW
 };
 
 #[derive(Clone)]
@@ -22,21 +20,33 @@ pub struct Bot {
     pub fitness: f64,
     pub weights: [f64; 4],
     pub game_steps: i32,
+    pub difficulty : usize, // ranges for 0 - 2
 }
 
 impl Bot {
-    pub fn new() -> Self {
+    pub fn new(difficulty : usize) -> Self {
+
+        let mut g = Game::new();
+        g.reset_game();
+
         Self {
-            game: Game::new(),
+            game: g,
             inputs: Vec::new(),
             fitness: 0.,
+            /*
+                aggregate height 
+                lines cleared
+                holes 
+                bumpiness
+            */
             weights: [
-                -0.16244859388150262,
-                0.719497309353562,
-                -0.5702062220465524,
-                -0.36166136166074625,
+                -0.610066,
+                0.760666,
+                -0.35663,
+                -0.184483
             ],
             game_steps: 0,
+            difficulty,
         }
     }
 
@@ -49,6 +59,7 @@ impl Bot {
             game: Game::new(),
             inputs: vec![],
             game_steps: 0,
+            difficulty : 0
         }
     }
 
@@ -76,15 +87,42 @@ impl Bot {
             game: Game::new(),
             inputs: vec![],
             game_steps: 0,
+            difficulty : 0,
         }
     }
 
     pub fn get_best_move_sequence(&mut self) -> Vec<BotInput> {
-        let all_outcomes = self.get_all_move_outcomes();
-        self.evaluate_move_outcomes(all_outcomes).move_sequence
+        let mut bot_clone = self.clone(); 
+
+        let held_piece = bot_clone.game.active_piece.piece_type;
+
+        if let Some(current_held) = self.game.held_piece {
+            bot_clone.game.spawn_piece(current_held);
+        } else {
+            bot_clone.game.spawn_piece_from_queue();
+        }
+
+        bot_clone.game.held_piece = Some(held_piece);
+        bot_clone.game.can_hold = false;
+        
+        let alternative_outcomes = bot_clone.get_all_move_outcomes_by_horizontal_drop(); 
+        let all_outcomes = self.get_all_move_outcomes_by_horizontal_drop();
+
+        let active_piece_evaluation = self.evaluate_move_outcomes(all_outcomes);
+        let alternative_piece_evalution = bot_clone.evaluate_move_outcomes(alternative_outcomes);
+
+        if active_piece_evaluation.1 > alternative_piece_evalution.1 {
+            return active_piece_evaluation.0.move_sequence
+        }
+
+        let mut moves = alternative_piece_evalution.0.move_sequence; 
+        moves.insert(0,BotInput::Hold);
+
+        moves
+
     }
 
-    pub fn evaluate_move_outcomes(&self, outcomes: Vec<MoveOutcome>) -> MoveOutcome {
+    pub fn evaluate_move_outcomes(&self, outcomes: Vec<MoveOutcome>) -> (MoveOutcome, f64) {
         let mut evaluation: Vec<f64> = Vec::new();
 
         let weights = self.weights;
@@ -95,6 +133,15 @@ impl Bot {
                     + outcome.holes as f64 * weights[2]
                     + outcome.bumpiness as f64 * weights[3],
             );
+            
+            // println!(
+            //     "lines: {}, height: {}, holes: {}, bump: {}, score: {}",
+            //     outcome.lines_cleared,
+            //     outcome.aggregate_height,
+            //     outcome.holes,
+            //     outcome.bumpiness,
+            //     evaluation[evaluation.len() -1 ]
+            // );
         }
         let best_index = evaluation
             .iter()
@@ -103,9 +150,11 @@ impl Bot {
             .map(|(index, _)| index)
             .unwrap_or(0);
 
-        outcomes[best_index].clone()
+        (outcomes[best_index].clone(), evaluation[best_index])
     }
 
+    // LEGACY FUNCTION wasnt able to use this!
+    #[allow(unused)]
     pub fn get_all_move_outcomes(&mut self) -> Vec<MoveOutcome> {
         let mut final_states: Vec<MoveOutcome> = Vec::new();
         let mut visited: HashSet<((isize, isize), usize)> = HashSet::new();
@@ -180,7 +229,6 @@ impl Bot {
                                 ),
                                 holes: Game::count_holes(&current_state.game.board),
                                 bumpiness: Game::count_bumpiness(&current_state.game.board),
-                                is_t_spin: false, // TODO CHECK IF MOVE IS A T SPIN,
                                 move_sequence: moves,
                             });
                         }
@@ -266,10 +314,11 @@ impl Bot {
 
         if self.game.game_over {
             return;
-        }
+        }   
+        
 
-        if self.game.last_drop.elapsed() >= self.game.fall_timing {
-            self.game.last_drop += self.game.fall_timing;
+        if self.game.last_drop.elapsed() >= Duration::from_millis((1000. / BOT_DIFFICULTY_SPEEDS[self.difficulty]) as u64) {
+            self.game.last_drop += Duration::from_millis((1000. / 120.) as u64);
 
             if let Some(input) = self.inputs.pop() {
                 match input {
@@ -293,6 +342,18 @@ impl Bot {
                         while self.game.move_piece(0, -1) {}
                         self.game.score += 2;
                         self.game.place_piece();
+                    }
+                    BotInput::Hold => {
+                        let held_piece = self.game.active_piece.piece_type;
+
+                        if let Some(current_held) = self.game.held_piece {
+                            self.game.spawn_piece(current_held);
+                        } else {
+                            self.game.spawn_piece_from_queue();
+                        }
+
+                        self.game.held_piece = Some(held_piece);
+                        self.game.can_hold = false;
                     }
                 }
             }
@@ -335,6 +396,18 @@ impl Bot {
                         self.game.score += 2;
                         self.game.place_piece();
                     }
+                    BotInput::Hold => {
+                        let held_piece = self.game.active_piece.piece_type;
+
+                        if let Some(current_held) = self.game.held_piece {
+                            self.game.spawn_piece(current_held);
+                        } else {
+                            self.game.spawn_piece_from_queue();
+                        }
+
+                        self.game.held_piece = Some(held_piece);
+                        self.game.can_hold = false;
+                    }
                 }
             }
         }
@@ -342,4 +415,52 @@ impl Bot {
         self.fitness = self.compute_fitness();
         self.game.lines as f64
     }
+
+    pub fn get_all_move_outcomes_by_horizontal_drop(&mut self) -> Vec<MoveOutcome> {
+        let mut move_outcomes: Vec<MoveOutcome> = Vec::new();
+    
+        for rotation in 0..4 {
+            let mut base_game = self.game.clone();
+            let mut base_moves: Vec<BotInput> = Vec::new();
+    
+            for _ in 0..rotation {
+                if base_game.rotate(ROTATION_CW) {
+                    base_moves.push(BotInput::RotateCW);
+                }
+            }
+    
+            // Move piece all the way to the left
+            while base_game.move_piece(-1, 0) {
+                base_moves.push(BotInput::MoveLeft);
+            }
+    
+            loop {
+                let mut game_cc = base_game.clone();
+                let mut moves = base_moves.clone();
+    
+                // Drop the piece all the way down
+                while game_cc.move_piece(0, -1) {}
+                moves.push(BotInput::HardDrop);            
+                game_cc.place_piece();
+    
+                move_outcomes.push(MoveOutcome {
+                    lines_cleared: Game::count_lines_cleared(&game_cc.board),
+                    aggregate_height: Game::get_aggregate_height(&game_cc.board),
+                    holes: Game::count_holes(&game_cc.board),
+                    bumpiness: Game::count_bumpiness(&game_cc.board),
+                    move_sequence: moves,
+                });
+    
+                // Try moving the base piece one column to the right
+                if !base_game.move_piece(1, 0) {
+                    break;
+                }
+    
+                base_moves.push(BotInput::MoveRight);
+            }
+        }
+    
+        move_outcomes
+    }
+    
 }
