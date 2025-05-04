@@ -10,7 +10,7 @@ use super::{
     move_outcome::{MoveOutcome, MovementState},
 };
 use crate::{
-    board::{BOARD_AMOUNT_COLUMNS, BOARD_AMOUNT_ROWS}, consts::BOT_DIFFICULTY_SPEEDS, Game, PieceType, ROTATION_CCW, ROTATION_CW
+    board::{BOARD_AMOUNT_COLUMNS, BOARD_AMOUNT_ROWS}, consts::{BOT_DIFFICULTY_SPEEDS, GAME_1_POS, GAME_1_SCL}, Game, PieceType, ROTATION_CCW, ROTATION_CW
 };
 
 #[derive(Clone)]
@@ -26,7 +26,7 @@ pub struct Bot {
 impl Bot {
     pub fn new(difficulty : usize) -> Self {
 
-        let mut g = Game::new();
+        let mut g = Game::new(GAME_1_POS, GAME_1_SCL);
         g.reset_game();
 
         Self {
@@ -56,7 +56,7 @@ impl Bot {
         Self {
             weights: w,
             fitness: 0.0,
-            game: Game::new(),
+            game: Game::new(GAME_1_POS, GAME_1_SCL),
             inputs: vec![],
             game_steps: 0,
             difficulty : 0
@@ -84,7 +84,7 @@ impl Bot {
         Self {
             weights: w,
             fitness: 0.0,
-            game: Game::new(),
+            game: Game::new(GAME_1_POS, GAME_1_SCL),
             inputs: vec![],
             game_steps: 0,
             difficulty : 0,

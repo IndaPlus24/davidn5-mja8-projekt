@@ -43,6 +43,7 @@ struct AppState {
     piece_assets: HashMap<PieceType, Image>,
     board_assets: HashMap<String, Image>,
     menu_assets: HashMap<String, Image>,
+    misc_assets: HashMap<String, Image>,
 
     // Games
     game_one: Game,
@@ -65,9 +66,10 @@ impl AppState {
             piece_assets: AppState::preload_piece_assets(ctx),
             board_assets: AppState::preload_board_assets(ctx),
             menu_assets: AppState::preload_menu_assets(ctx),
+            misc_assets: AppState::preload_misc_assets(ctx),
 
-            game_one: Game::new(),
-            game_two: Game::new(),
+            game_one: Game::new(GAME_1_POS, GAME_1_SCL),
+            game_two: Game::new(GAME_1_POS, GAME_1_SCL),
 
             bot: Bot::new(0),
         };
@@ -134,6 +136,21 @@ impl AppState {
         image_map.insert(
             "empty_box".to_string(),
             Image::from_path(ctx, "/ui_assets/empty_box.png").unwrap(),
+        );
+
+        image_map
+    }
+
+    pub fn preload_misc_assets(ctx: &Context) -> HashMap<String, Image> {
+        let mut image_map: HashMap<String, Image> = HashMap::new();
+
+        image_map.insert(
+            "finish".to_string(),
+            Image::from_path(ctx, "/misc/finish.png").unwrap(),
+        );
+        image_map.insert(
+            "game_over".to_string(),
+            Image::from_path(ctx, "/misc/game_over.png").unwrap(),
         );
 
         image_map
@@ -232,15 +249,9 @@ impl event::EventHandler<ggez::GameError> for AppState {
             ScreenState::Singleplayer => {
                 //Render game
                 self.game_one
-                    .render_board(&self.board_assets, &mut canvas, GAME_1_POS, GAME_1_SCL);
-                self.game_one.render_pieces(
-                    &self.piece_assets,
-                    &mut canvas,
-                    GAME_1_POS,
-                    GAME_1_SCL,
-                );
-                self.game_one
-                    .render_stats(&mut canvas, GAME_1_POS, GAME_1_SCL);
+                    .render_board(&self.board_assets, &mut canvas)
+                    .render_pieces(&self.piece_assets, &mut canvas)
+                    .render_stats(&mut canvas);
             }
             ScreenState::StartScreen => {
                 start_screen::render_start_screen(
@@ -281,18 +292,10 @@ impl event::EventHandler<ggez::GameError> for AppState {
             }
             ScreenState::VsBots => {
                 //Render game
-                self.bot
-                    .game
-                    .render_board(&self.board_assets, &mut canvas, GAME_1_POS, GAME_1_SCL);
-                self.bot.game.render_pieces(
-                    &self.piece_assets,
-                    &mut canvas,
-                    GAME_1_POS,
-                    GAME_1_SCL,
-                );
-                self.bot
-                    .game
-                    .render_stats(&mut canvas, GAME_1_POS, GAME_1_SCL);
+                self.bot.game
+                    .render_board(&self.board_assets, &mut canvas)
+                    .render_pieces(&self.piece_assets,&mut canvas)
+                    .render_stats(&mut canvas);
             }
             _ => {}
         }

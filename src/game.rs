@@ -10,6 +10,11 @@ use crate::{default_keyboard_keybindings, GameAction, KeyCode, Piece, PieceType}
 
 #[derive(Clone)]
 pub struct Game {
+    // Canvas info
+    pub canvas_pos: (f32, f32),
+    pub canvas_scale: f32,
+
+    // General
     pub board: [[Option<PieceType>; BOARD_AMOUNT_COLUMNS]; BOARD_AMOUNT_ROWS],
     pub gamemode: GameMode,
 
@@ -59,8 +64,11 @@ pub struct Game {
 }
 
 impl Game {
-    pub fn new() -> Self {
+    pub fn new(pos: (f32, f32), scl: f32) -> Self {
         Game {
+            canvas_pos: pos,
+            canvas_scale: scl,
+
             board: [[None; BOARD_AMOUNT_COLUMNS]; BOARD_AMOUNT_ROWS],
             gamemode: GameMode::FourtyLines,
 
