@@ -78,8 +78,6 @@ impl AppState {
             state.game_two.controls = keybinds[1].clone();
         }
 
-        state.bot.game.reset_game();
-
         Ok(state)
     }
 

@@ -1,29 +1,15 @@
-use std::collections::HashSet;
-
 use crate::{
     board::{BOARD_AMOUNT_COLUMNS, BOARD_AMOUNT_ROWS},
     Game, PieceType,
 };
 
 impl Game {
-    pub fn get_aggregate_height(
-        board: &[[Option<PieceType>; BOARD_AMOUNT_COLUMNS]; BOARD_AMOUNT_ROWS],
-    ) -> f32 {
-        let mut height: f32 = 0.;
-
-        let mut found_height: HashSet<usize> = HashSet::new();
-
-        for r in 0..19 {
-            for c in 0..BOARD_AMOUNT_COLUMNS {
-                if board[19 - r][c].is_some() && !found_height.contains(&c) {
-                    height += (20 - r) as f32;
-                    found_height.insert(c);
-                }
-            }
-        }
-
-        height
+    pub fn get_aggregate_height(board: &[[Option<PieceType>; BOARD_AMOUNT_COLUMNS]; BOARD_AMOUNT_ROWS]) -> f32 {
+        (0..BOARD_AMOUNT_COLUMNS)
+            .map(|c| column_height(board, c) as f32)
+            .sum()
     }
+    
 
     pub fn count_holes(
         board: &[[Option<PieceType>; BOARD_AMOUNT_COLUMNS]; BOARD_AMOUNT_ROWS],
@@ -44,29 +30,17 @@ impl Game {
         holes
     }
 
-    pub fn count_bumpiness(
-        board: &[[Option<PieceType>; BOARD_AMOUNT_COLUMNS]; BOARD_AMOUNT_ROWS],
-    ) -> f32 {
-        let mut heights = [0; 10];
-        let mut found_height: HashSet<usize> = HashSet::new();
-
-        for r in 0..19 {
-            for c in 0..BOARD_AMOUNT_COLUMNS {
-                if board[19 - r][c].is_some() && !found_height.contains(&c) {
-                    heights[c] = 20 - r;
-                    found_height.insert(c);
-                }
-            }
-        }
-
-        let mut bumpiness: f32 = 0.;
-
-        for i in 1..heights.len() as usize {
-            bumpiness += heights[i - 1].abs_diff(heights[i]) as f32;
-        }
-
-        bumpiness
+    pub fn count_bumpiness(board: &[[Option<PieceType>; BOARD_AMOUNT_COLUMNS]; BOARD_AMOUNT_ROWS]) -> f32 {
+        let heights: Vec<usize> = (0..BOARD_AMOUNT_COLUMNS)
+            .map(|c| column_height(board, c))
+            .collect();
+    
+        heights
+            .windows(2)
+            .map(|w| (w[0] as i32 - w[1] as i32).abs() as f32)
+            .sum()
     }
+    
 
     pub fn count_lines_cleared(
         board: &[[Option<PieceType>; BOARD_AMOUNT_COLUMNS]; BOARD_AMOUNT_ROWS],
@@ -89,4 +63,34 @@ impl Game {
 
         true
     }
+
+    pub fn compute_well_depth(board: &[[Option<PieceType>; BOARD_AMOUNT_COLUMNS]; BOARD_AMOUNT_ROWS]) -> i32 {
+        let mut total_depth = 0;
+        for col in 0..BOARD_AMOUNT_COLUMNS {
+            let mut depth = 0;
+            for row in 0..BOARD_AMOUNT_ROWS {
+                let cell = board[row][col];
+                let left = if col == 0 { Some(PieceType::I) } else { board[row][col - 1] };
+                let right = if col == BOARD_AMOUNT_COLUMNS - 1 { Some(PieceType::I) } else { board[row][col + 1] };
+    
+                if cell.is_none() && left.is_some() && right.is_some() {
+                    depth += 1;
+                    total_depth += depth;
+                } else {
+                    depth = 0;
+                }
+            }
+        }
+        total_depth
+    }
+    
+}
+
+pub fn column_height(board: &[[Option<PieceType>; BOARD_AMOUNT_COLUMNS]; BOARD_AMOUNT_ROWS], col: usize) -> usize {
+    for row in (0..BOARD_AMOUNT_ROWS).rev() {
+        if board[row][col].is_some() {
+            return row + 1;
+        }
+    }
+    0
 }

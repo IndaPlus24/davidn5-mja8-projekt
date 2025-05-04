@@ -5,16 +5,16 @@ use rayon::ThreadPoolBuilder;
 
 use super::bot::Bot;
 
-const POP_SIZE: usize = 1000;
-const ITERATIONS: usize = 100;
+const POP_SIZE: usize = 100;
+const ITERATIONS: usize = 10;
 const TOURNAMENT_SIZE: usize = 100;
 const OFFSPRING_COUNT: usize = (POP_SIZE as f64 * 0.3) as usize;
-const GAMES_PER_EVALUATION: usize = 100;
-const STEPS_PER_GAME: i32 = 500;
+const GAMES_PER_EVALUATION: usize = 25;
+const STEPS_PER_GAME: i32 = 800;
 
 pub fn train_ai() {
     let _ = ThreadPoolBuilder::new()
-        .num_threads(8)
+        .num_threads(4)
         .build_global()
         .expect("Failed to build thread pool");
 
@@ -35,6 +35,7 @@ pub fn train_ai() {
 
         println!("Top fitness: {}", population[0].fitness);
         println!("Best weights: {:?}", population[0].weights);
+        println!("Amount of steps : {}", population[0].game_steps);
 
         let mut rng = rand::rng();
         let mut offspring: Vec<Bot> = vec![];
