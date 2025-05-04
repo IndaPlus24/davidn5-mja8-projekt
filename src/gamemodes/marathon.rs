@@ -7,7 +7,7 @@ impl Game {
         if self.level < 15 {
              self.set_level(self.level + 1);
         } else {
-            self.game_over = true;
+            self.end_game(true);
         }
     }
 

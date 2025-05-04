@@ -6,7 +6,11 @@ use crate::Game;
 
 impl Game {
     pub fn render_40l_stats(&mut self, canvas: &mut Canvas, pos: (f32, f32), scl: f32) {
-        let elapsed = self.start_time.elapsed();
+        let elapsed = if self.game_over {
+            self.final_time
+        } else {
+            self.start_time.elapsed()
+        };
 
         // Pieces
         let mut pieces = Text::new(TextFragment{

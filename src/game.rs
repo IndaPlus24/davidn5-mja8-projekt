@@ -14,6 +14,7 @@ pub struct Game {
     pub gamemode: GameMode,
 
     pub game_over: bool,
+    pub objective_completed: bool,
     pub battle_mode: bool,
     pub garbage_queue: VecDeque<(usize, usize)>, // (amount, column of garbage hole)
     pub active_piece: Piece,
@@ -47,6 +48,7 @@ pub struct Game {
     pub level: usize,
     pub pieces: usize,
     pub start_time: Instant,
+    pub final_time: Duration,
 
     // Scoring checks
     pub t_spin: bool,
@@ -64,6 +66,7 @@ impl Game {
             gamemode: GameMode::FourtyLines,
 
             game_over: false,
+            objective_completed: false,
             battle_mode: false,
             garbage_queue: VecDeque::new(),
             active_piece: Piece::new(PieceType::Z, 0),
@@ -95,6 +98,7 @@ impl Game {
             level: 1,
             pieces: 0,
             start_time: Instant::now(),
+            final_time: Duration::from_secs(0),
 
             t_spin: false,
             t_spin_mini: false,
@@ -127,6 +131,12 @@ impl Game {
         self.back_to_back = false;
     }
 
+    pub fn end_game(&mut self, objective_completed: bool) {
+        self.game_over = true;
+        self.final_time = self.start_time.elapsed();
+        self.objective_completed = objective_completed;
+    }
+
     // Used for leveling and regular gravity increase 
     pub fn set_gravity_hard(&mut self, gravity: f32) {
         self.gravity = gravity;
@@ -144,7 +154,7 @@ impl Game {
 
         // Check if spawn location is valid
         if !self.is_valid_position(0, 0) {
-            self.game_over = true;
+            self.end_game(false);
         }
 
         // On ground check
