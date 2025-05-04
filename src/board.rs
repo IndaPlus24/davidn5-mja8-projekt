@@ -1,5 +1,6 @@
 use std::time::Instant;
 
+use crate::consts::GameMode;
 use crate::scoring::ScoreType;
 use crate::Game;
 use crate::Piece;
@@ -45,9 +46,6 @@ impl Game {
         self.t_spin = false;
         self.t_spin_mini = false;
 
-        self.on_ground = !self.is_valid_position(0, -1);
-        self.on_ground_start = Some(Instant::now());
-
         true
     }
 
@@ -61,8 +59,12 @@ impl Game {
         let score_type = self.get_score_type();
         self.add_score(score_type);
 
-        self.spawn_new_piece();
+        self.spawn_piece_from_queue();
         self.last_drop = Instant::now();
+
+        self.lowest_row = 21;
+        self.action_count = 0;
+
         true
     }
 
@@ -113,6 +115,13 @@ impl Game {
         }
 
         self.lines += lines_cleared;
+        // Check marathon leveling
+        if self.gamemode == GameMode::Marathon {
+            if self.lines / 10 == self.level {
+                self.level_up();
+            }
+        }
+
         match lines_cleared {
             0 => {
                 if self.t_spin_mini {Some(ScoreType::TSpinMini)}

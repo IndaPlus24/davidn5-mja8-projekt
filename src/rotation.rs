@@ -1,3 +1,5 @@
+use std::time::Instant;
+
 use crate::{Game, Piece, PieceType};
 
 pub const ROTATION_CW:  usize = 1;
@@ -90,10 +92,13 @@ pub const KICK_TABLE_180: [[(isize, isize); 6]; 4] = [
 
 impl Game {
     pub fn rotate(&mut self, rotation_type: usize) -> bool {
-        let piece = self.active_piece.clone();
-        let new_rotation: usize = (piece.rotation + rotation_type) % 4;
+        // Save old ground state
+        let on_ground = self.on_ground;
+        let on_ground_start = self.on_ground_start;
 
         // Set up rotated piece for kick table checks
+        let piece = self.active_piece.clone();
+        let new_rotation: usize = (piece.rotation + rotation_type) % 4;
         let mut rotated_piece = Piece::new(piece.piece_type, new_rotation);
         rotated_piece.midpoint = piece.midpoint;
         self.active_piece = rotated_piece;
@@ -142,10 +147,15 @@ impl Game {
                     }
                 }
 
+                if self.on_ground {self.last_drop = Instant::now()}
+                self.add_action();
                 return true;
             }
         }
 
+        // Failed rotation
+        self.on_ground = on_ground;
+        self.on_ground_start = on_ground_start;
         self.active_piece = piece;
         false
     }

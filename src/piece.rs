@@ -1,5 +1,5 @@
 use rand::{seq::SliceRandom, Rng};
-use std::vec;
+use std::{collections::VecDeque, vec};
 
 use crate::rotation::{
     RELATIVE_MINOS_I, RELATIVE_MINOS_J, RELATIVE_MINOS_L, RELATIVE_MINOS_O, RELATIVE_MINOS_S,
@@ -50,14 +50,14 @@ impl PieceType {
         }
     }
 
-    pub fn get_random_as_list() -> Vec<PieceType> {
+    pub fn get_random_as_list() -> VecDeque<PieceType> {
         let mut rng = rand::rng();
         let mut nums: Vec<i32> = vec![0, 1, 2, 3, 4, 5, 6];
         nums.shuffle(&mut rng);
 
-        let mut out: Vec<PieceType> = Vec::new();
+        let mut out: VecDeque<PieceType> = VecDeque::new();
         for n in nums {
-            out.push(PieceType::get_piecetype_from_num(n));
+            out.push_back(PieceType::get_piecetype_from_num(n));
         }
         out
     }

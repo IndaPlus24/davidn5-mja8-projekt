@@ -1,8 +1,8 @@
 use std::collections::HashMap;
 
-use ggez::{glam, graphics::{self, Canvas, Color, Image, PxScale, Text, TextAlign, TextFragment, TextLayout}};
+use ggez::{glam, graphics::{self, Canvas, Image}};
 
-use crate::{consts::BoardRenderType, Game, PieceType};
+use crate::{consts::GameMode, Game, Piece, PieceType};
 use crate::consts::{BOARD_AMOUNT_COLUMNS, BOARD_AMOUNT_ROWS};
 
 
@@ -98,16 +98,16 @@ impl Game {
         });
 
         //Hold piece
-        if let Some(hold_piece) = &self.held_piece {
-            let piece_type = if self.can_hold {hold_piece.piece_type} else {PieceType::X};
-            let image = assets.get(&piece_type).unwrap();
+        if let Some(piece_type) = self.held_piece {
+            let piece_texture = if self.can_hold {piece_type} else {PieceType::X};
+            let image = assets.get(&piece_texture).unwrap();
 
             let (mut x, mut y) = (pos.0 + 68. * scl, pos.1 + 80. * scl);
-            let (x_offset, y_offset) = get_piece_offset(hold_piece.piece_type, scl);
+            let (x_offset, y_offset) = get_piece_offset(piece_type, scl);
             x += x_offset;
             y += y_offset;
 
-            hold_piece.block_positions.iter().for_each(|(dr, dc)| {
+            Piece::get_block_positions(piece_type, 0).iter().for_each(|(dr, dc)| {
                 canvas.draw(
                     image,
                     graphics::DrawParam::new()
@@ -125,13 +125,13 @@ impl Game {
         if self.battle_mode {x += 36. * scl};
         
         for i in 0..5 {
-            let next_piece = &self.piece_queue[i];
-            let (x_offset, y_offset) = get_piece_offset(next_piece.piece_type, scl);
+            let piece_type = self.piece_queue[i];
+            let (x_offset, y_offset) = get_piece_offset(piece_type, scl);
             x += x_offset;
             y += y_offset;
 
-            let image = assets.get(&next_piece.piece_type).unwrap();
-            next_piece.block_positions.iter().for_each(|(dr, dc)| {
+            let image = assets.get(&piece_type).unwrap();
+            Piece::get_block_positions(piece_type, 0).iter().for_each(|(dr, dc)| {
                 canvas.draw(
                     image,
                     graphics::DrawParam::new()
@@ -151,93 +151,14 @@ impl Game {
 
     // Render different stats depending on gamemode
     pub fn render_stats(&mut self, canvas: &mut Canvas, pos: (f32, f32), scl: f32) {
-        match self.render_type {
-            BoardRenderType::Marathon => {
-                // Score
-                let formatted_score = get_formatted_score(self.score);
-                let mut score = Text::new(TextFragment{
-                    text: formatted_score,
-                    font: Some("Tetris font".to_string()),
-                    color: Some(Color::WHITE), 
-                    scale: Some(PxScale::from(24.))
-                });
-                score.set_layout(TextLayout::center());
-                canvas.draw(&score,
-                    graphics::DrawParam::new()
-                        .dest(glam::Vec2::new(pos.0 + 328. * scl, pos.1 + 668. * scl))
-                        .scale(glam::Vec2::new(scl, scl))
-                );
-
-                // Level
-                let mut level = Text::new(TextFragment{
-                    text: "Level".to_string(),
-                    font: Some("Tetris font".to_string()),
-                    color: Some(Color::WHITE), 
-                    scale: Some(PxScale::from(24.))
-                });
-                level.set_layout(TextLayout{
-                    h_align: TextAlign::End,
-                    v_align: TextAlign::Middle
-                });
-                canvas.draw(&level,
-                    graphics::DrawParam::new()
-                        .dest(glam::Vec2::new(pos.0 + 156. * scl, pos.1 + 496. * scl))
-                        .scale(glam::Vec2::new(scl, scl))
-                );
-
-                let mut level_count = Text::new(TextFragment{
-                    text: self.level.to_string(),
-                    font: Some("Tetris font".to_string()),
-                    color: Some(Color::WHITE), 
-                    scale: Some(PxScale::from(16.))
-                });
-                level_count.set_layout(TextLayout{
-                    h_align: TextAlign::End,
-                    v_align: TextAlign::Middle
-                });
-                canvas.draw(&level_count,
-                    graphics::DrawParam::new()
-                        .dest(glam::Vec2::new(pos.0 + 156. * scl, pos.1 + 528. * scl))
-                        .scale(glam::Vec2::new(scl, scl))
-                );
-
-                // Lines
-                let mut lines = Text::new(TextFragment{
-                    text: "Lines".to_string(),
-                    font: Some("Tetris font".to_string()),
-                    color: Some(Color::WHITE), 
-                    scale: Some(PxScale::from(24.))
-                });
-                lines.set_layout(TextLayout{
-                    h_align: TextAlign::End,
-                    v_align: TextAlign::Middle
-                });
-                canvas.draw(&lines,
-                    graphics::DrawParam::new()
-                        .dest(glam::Vec2::new(pos.0 + 156. * scl, pos.1 + 592. * scl))
-                        .scale(glam::Vec2::new(scl, scl))
-                );
-
-                let mut line_count = Text::new(TextFragment{
-                    text: format!("{}/150", self.lines),
-                    font: Some("Tetris font".to_string()),
-                    color: Some(Color::WHITE), 
-                    scale: Some(PxScale::from(16.))
-                });
-                line_count.set_layout(TextLayout{
-                    h_align: TextAlign::End,
-                    v_align: TextAlign::Middle
-                });
-                canvas.draw(&line_count,
-                    graphics::DrawParam::new()
-                        .dest(glam::Vec2::new(pos.0 + 156. * scl, pos.1 + 624. * scl))
-                        .scale(glam::Vec2::new(scl, scl))
-                );
+        match self.gamemode {
+            GameMode::Marathon => {
+                self.render_marathon_stats(canvas, pos, scl);
             },
-            BoardRenderType::FourtyLines => {
+            GameMode::FourtyLines => {
 
             },
-            BoardRenderType::Versus => {
+            GameMode::Versus => {
 
             },
         }
@@ -250,20 +171,4 @@ fn get_piece_offset(piece_type: PieceType, scl: f32) -> (f32, f32) {
         PieceType::O => (-16. * scl, 0.),
         _ => (0., 0.),
     }
-}
-
-fn get_formatted_score(score: usize) -> String {
-    let mut s = score;
-    let mega = s / 1_000_000;
-    s %= 1_000_000;
-    let kilo = s / 1_000;
-    s %= 1_000;
-
-    if mega == 0 {
-        if kilo == 0 {
-            return s.to_string();
-        }
-        return format!("{},{:0>3}", kilo, s);
-    }
-    return format!("{},{:0>3},{:0>3}", mega, kilo, s);
 }

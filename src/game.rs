@@ -5,20 +5,20 @@ use std::time::{Duration, Instant};
 use ggez::Context;
 
 use crate::board::{BOARD_AMOUNT_COLUMNS, BOARD_AMOUNT_ROWS};
-use crate::consts::{BoardRenderType, LEVEL_GRAVITIES};
+use crate::consts::{GameMode, DEFAULT_GRAVITY};
 use crate::{default_keyboard_keybindings, GameAction, KeyCode, Piece, PieceType};
 
 #[derive(Clone)]
 pub struct Game {
     pub board: [[Option<PieceType>; BOARD_AMOUNT_COLUMNS]; BOARD_AMOUNT_ROWS],
-    pub render_type: BoardRenderType,
+    pub gamemode: GameMode,
 
     pub game_over: bool,
     pub battle_mode: bool,
     pub garbage_queue: VecDeque<(usize, usize)>, // (amount, column of garbage hole)
     pub active_piece: Piece,
-    pub held_piece: Option<Piece>,
-    pub piece_queue: VecDeque<Piece>,
+    pub held_piece: Option<PieceType>,
+    pub piece_queue: VecDeque<PieceType>,
     pub can_hold: bool,
     pub controls: HashMap<GameAction, KeyCode>,
 
@@ -38,7 +38,8 @@ pub struct Game {
     pub fall_timing: Duration, // (time per cell)
     pub on_ground: bool,
     pub on_ground_start: Option<Instant>, // Timer for lock delay
-    pub actions_from_ground: usize, // Action counter. If it reaches 15, the piece will automatically lock in place
+    pub lowest_row: isize, // Lowest row that piece has touched
+    pub action_count: usize, // Action counter. If it reaches 15, the piece will automatically lock in place
 
     // Stats
     pub score: usize,
@@ -60,7 +61,7 @@ impl Game {
     pub fn new() -> Self {
         Game {
             board: [[None; BOARD_AMOUNT_COLUMNS]; BOARD_AMOUNT_ROWS],
-            render_type: BoardRenderType::Marathon,
+            gamemode: GameMode::Marathon,
 
             game_over: false,
             battle_mode: false,
@@ -81,12 +82,13 @@ impl Game {
             arr: Duration::from_millis(0),
             arr_start: None,
             sds: INFINITY,
-            gravity: LEVEL_GRAVITIES[0],
+            gravity: DEFAULT_GRAVITY,
             last_drop: Instant::now(),
-            fall_timing: Duration::from_millis((1000. / LEVEL_GRAVITIES[0]) as u64),
+            fall_timing: Duration::from_millis((1000. / DEFAULT_GRAVITY) as u64),
             on_ground: false,
             on_ground_start: None,
-            actions_from_ground: 0,
+            lowest_row: 21,
+            action_count: 0,
 
             score: 0,
             lines: 0,
@@ -109,7 +111,7 @@ impl Game {
         self.held_piece = None;
         self.garbage_queue = VecDeque::new();
         self.piece_queue = VecDeque::new();
-        self.spawn_new_piece();
+        self.spawn_piece_from_queue();
 
         self.moving_right = false;
         self.moving_left = false;
@@ -117,7 +119,7 @@ impl Game {
 
         self.score = 0;
         self.lines = 0;
-        self.level = 1;
+        self.set_level(1);
         self.pieces = 0;
         self.start_time = Instant::now();
 
@@ -135,30 +137,34 @@ impl Game {
         self.fall_timing = Duration::from_millis((1000. / gravity) as u64);
     }
 
-    pub fn spawn_new_piece(&mut self) {
-        if self.piece_queue.len() < 7 {
-            // 7-bag
-            let l = PieceType::get_random_as_list();
-            for p in l {
-                self.piece_queue.push_back(Piece::new(p, 0));
-            }
-        }
 
-        //println!("Spawning new piece...");
-        self.active_piece = self.piece_queue.pop_front().unwrap();
-        self.can_hold = true;
-        self.on_ground = false;
+    pub fn spawn_piece(&mut self, piece_type: PieceType) {
+        self.active_piece = Piece::new(piece_type, 0);
+        self.last_drop = Instant::now();
 
         // Check if spawn location is valid
         if !self.is_valid_position(0, 0) {
-            //println!("Game Over!");
             self.game_over = true;
         }
 
+        // On ground check
+        self.on_ground = false;
         if !self.is_valid_position(0, -1) {
             self.on_ground = true;
             self.on_ground_start = Some(Instant::now());
         }
+    }
+
+    pub fn spawn_piece_from_queue(&mut self) {
+        // Generate new bag if piece queue is shorter than 7 pieces
+        if self.piece_queue.len() < 7 {
+            let mut l = PieceType::get_random_as_list();
+            self.piece_queue.append(&mut l);
+        }
+
+        let next_piece_type = self.piece_queue.pop_front().unwrap();
+        self.spawn_piece(next_piece_type);
+        self.can_hold = true;
     }
 
 
@@ -168,16 +174,23 @@ impl Game {
             return;
         }
 
-        //Handle inputs
-        self.handle_game_inputs(ctx);
-
         // Downward movement (soft drop or natural fall)
         while !self.on_ground && self.last_drop.elapsed() >= self.fall_timing {
             self.last_drop += self.fall_timing;
-            if self.move_piece(0, -1) && self.soft_dropping {
-                self.score += 1;
+            if self.move_piece(0, -1) {
+                if self.soft_dropping {
+                    self.score += 1;
+                }
+                if self.is_new_lowest() {
+                    self.action_count = 0;
+                }
             }
+
+            self.on_ground_check();
         }
+
+        //Handle inputs
+        self.handle_game_inputs(ctx);
 
         // Horizontal movement
         if let Some(das_start) = self.das_start {
@@ -192,9 +205,11 @@ impl Game {
                 while arr_start.elapsed() >= self.arr {
                     if self.moving_left {
                         if !self.move_piece(-1, 0) {break}
+                        else {self.add_action()}
                     }
                     else if self.moving_right {
                         if !self.move_piece(1, 0) {break}
+                        else {self.add_action()}
                     }
                     arr_start += self.arr;
                 }
@@ -207,5 +222,43 @@ impl Game {
                 self.place_piece();
             }
         }
+    }
+
+    pub fn on_ground_check(&mut self) {
+        if !self.is_valid_position(0, -1) {
+            self.on_ground = true;
+            self.on_ground_start = Some(Instant::now());
+        } else {
+            self.on_ground = false;
+            self.on_ground_start = None;
+        }
+    }
+
+    pub fn add_action(&mut self) {
+        self.action_count += 1;
+
+        self.on_ground_check();
+        // Check if piece has reached a new lowest row
+        if self.is_new_lowest() {
+            if !self.on_ground {
+                self.action_count = 0;
+            }
+        }
+
+        if self.action_count >= 15 && self.on_ground {
+            self.place_piece();
+        }
+    }
+
+    pub fn is_new_lowest(&mut self) -> bool {
+        let prev_lowest = self.lowest_row;
+        for (dr, _) in &self.active_piece.block_positions {
+            let r = self.active_piece.midpoint.0 + dr;
+            if r < self.lowest_row {
+                self.lowest_row = r;
+            }
+        }
+
+        prev_lowest != self.lowest_row
     }
 }
