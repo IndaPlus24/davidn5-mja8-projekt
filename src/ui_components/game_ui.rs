@@ -174,6 +174,34 @@ impl Game {
         self
     }
 
+    pub fn render_misc(&mut self, assets: &HashMap<String, Image>, canvas: &mut Canvas) -> &mut Self {
+        let pos = self.canvas_pos;
+        let scl = self.canvas_scale;
+
+        let (mut x, y) = (pos.0 + 168. * scl, pos.1 + 160. * scl);
+        if self.gamemode == GameMode::Versus {x += 36. * scl}
+
+        if self.game_over {
+            if self.objective_completed {
+                canvas.draw(
+                    assets.get("finish").unwrap(),
+                    graphics::DrawParam::new()
+                        .dest(glam::Vec2::new(x, y))
+                        .scale(glam::Vec2::new(scl, scl))
+                );
+            } else {
+                canvas.draw(
+                    assets.get("game_over").unwrap(),
+                    graphics::DrawParam::new()
+                        .dest(glam::Vec2::new(x, y))
+                        .scale(glam::Vec2::new(scl, scl))
+                );
+            }
+        }
+
+        self
+    }
+
     // Render different stats depending on gamemode
     pub fn render_stats(&mut self, canvas: &mut Canvas) -> &mut Self {
         let pos = self.canvas_pos;

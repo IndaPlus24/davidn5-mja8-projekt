@@ -251,7 +251,8 @@ impl event::EventHandler<ggez::GameError> for AppState {
                 self.game_one
                     .render_board(&self.board_assets, &mut canvas)
                     .render_pieces(&self.piece_assets, &mut canvas)
-                    .render_stats(&mut canvas);
+                    .render_stats(&mut canvas)
+                    .render_misc(&self.misc_assets, &mut canvas);
             }
             ScreenState::StartScreen => {
                 start_screen::render_start_screen(
