@@ -37,6 +37,7 @@ struct AppState {
     //Screen states and info
     animation_state: AnimationState,
     screen_state: ScreenState,
+    drifarkaden : bool,
 
     // Assets
     piece_assets: HashMap<PieceType, Image>,
@@ -59,6 +60,7 @@ impl AppState {
         let mut state = AppState {
             animation_state: AnimationState::new(),
             screen_state: ScreenState::StartScreen,
+            drifarkaden : false,
 
             piece_assets: AppState::preload_piece_assets(ctx),
             board_assets: AppState::preload_board_assets(ctx),
@@ -76,6 +78,7 @@ impl AppState {
         if let Some(keybinds) = args {
             state.game_one.controls = keybinds[0].clone();
             state.game_two.controls = keybinds[1].clone();
+            state.drifarkaden = true;
         }
 
         Ok(state)
@@ -206,7 +209,7 @@ impl event::EventHandler<ggez::GameError> for AppState {
                 );
             }
             ScreenState::BotSelector => {
-                handle_bot_selector_inputs(ctx, &mut self.screen_state, &mut self.animation_state);
+                handle_bot_selector_inputs(ctx, &mut self.screen_state, &mut self.animation_state, &mut self.bot);
             }
             ScreenState::VsBots => {
                 self.bot.render_bot_game(ctx);
@@ -241,6 +244,7 @@ impl event::EventHandler<ggez::GameError> for AppState {
                     &mut canvas,
                     1.,
                     &mut self.animation_state,
+                    self.drifarkaden
                 );
             }
             ScreenState::MainMenu => {

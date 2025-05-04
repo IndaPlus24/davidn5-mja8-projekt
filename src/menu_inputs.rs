@@ -1,4 +1,4 @@
-use crate::{animation_state::AnimationState, Game, KeyCode, ScreenState};
+use crate::{animation_state::AnimationState, bots::bot::Bot, Game, KeyCode, ScreenState};
 
 // TODO: change key codes according to launch type
 const UP: KeyCode = KeyCode::Up;
@@ -53,7 +53,7 @@ pub fn handle_gamemode_selector_inputs(ctx: &ggez::Context, screen_state: &mut S
     }
 }
 
-pub fn handle_bot_selector_inputs(ctx: &ggez::Context, screen_state: &mut ScreenState, animation_state: &mut AnimationState) {
+pub fn handle_bot_selector_inputs(ctx: &ggez::Context, screen_state: &mut ScreenState, animation_state: &mut AnimationState, bot : &mut Bot) {
     let keyboard = &ctx.keyboard;
     if keyboard.is_key_just_pressed(DOWN) {
         animation_state.selected_item_bot_selector = (animation_state.selected_item_bot_selector + 1) % 4;
@@ -61,9 +61,18 @@ pub fn handle_bot_selector_inputs(ctx: &ggez::Context, screen_state: &mut Screen
         animation_state.selected_item_bot_selector = (animation_state.selected_item_bot_selector + 3) % 4;
     } else if keyboard.is_key_just_pressed(SELECT) {
         *screen_state = match animation_state.selected_item_bot_selector {
-            0 => ScreenState::Multiplayer,
-            1 => ScreenState::Singleplayer,
-            2 => ScreenState::VsBots,
+            0 => {
+                bot.difficulty = 0;
+                ScreenState::VsBots
+            },
+            1 => {
+                bot.difficulty = 1;
+                ScreenState::VsBots
+            },
+            2 => {
+                bot.difficulty = 2;
+                ScreenState::VsBots
+            },
             _ => ScreenState::GameModeSelector
         }
     }
