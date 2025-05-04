@@ -1,5 +1,6 @@
 use std::{
     collections::{HashSet, VecDeque}, time::Duration
+    collections::{HashSet, VecDeque}, time::Duration
 };
 
 use ggez::Context;
