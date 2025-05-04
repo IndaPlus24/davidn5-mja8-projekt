@@ -22,7 +22,7 @@ use std::collections::HashMap;
 use std::error::Error;
 use std::path;
 use std::str::FromStr;
-use ui_components::{bot_selector, gamemode_selector, main_menu, start_screen};
+use ui_components::{bot_selector, gamemode_selector, main_menu, singleplayer_selector, start_screen};
 
 pub use crate::config::input_config::*;
 pub use crate::game::Game;
@@ -206,7 +206,9 @@ fn save_scores_to_file(path: &str, scores: Vec<(String, usize)>) -> bool {
 impl event::EventHandler<ggez::GameError> for AppState {
     fn update(&mut self, ctx: &mut Context) -> GameResult {
         match self.screen_state {
-            ScreenState::Singleplayer => {
+            ScreenState::Marathon    |
+            ScreenState::FourtyLines |
+            ScreenState::Survival => {
                 self.game_one.update(ctx);
             }
             ScreenState::GameOver => {
@@ -222,12 +224,10 @@ impl event::EventHandler<ggez::GameError> for AppState {
                 handle_main_menu_inputs(ctx, &mut self.screen_state, &mut self.animation_state);
             }
             ScreenState::GameModeSelector => {
-                handle_gamemode_selector_inputs(
-                    ctx,
-                    &mut self.screen_state,
-                    &mut self.animation_state,
-                    &mut self.game_one,
-                );
+                handle_gamemode_selector_inputs(ctx, &mut self.screen_state, &mut self.animation_state);
+            }
+            ScreenState::SingleplayerSelector => {
+                handle_singleplayer_selector_inputs(ctx, &mut self.screen_state, &mut self.animation_state, &mut self.game_one);
             }
             ScreenState::BotSelector => {
                 handle_bot_selector_inputs(ctx, &mut self.screen_state, &mut self.animation_state, &mut self.bot);
@@ -246,7 +246,9 @@ impl event::EventHandler<ggez::GameError> for AppState {
             graphics::Canvas::from_frame(ctx, graphics::Color::from([0.1, 0.2, 0.3, 1.0]));
 
         match self.screen_state {
-            ScreenState::Singleplayer => {
+            ScreenState::Marathon |
+            ScreenState::FourtyLines |
+            ScreenState::Survival => {
                 //Render game
                 self.game_one
                     .render_board(&self.board_assets, &mut canvas)
@@ -279,6 +281,14 @@ impl event::EventHandler<ggez::GameError> for AppState {
                     &mut self.animation_state,
                 );
             }
+            ScreenState::SingleplayerSelector => {
+                singleplayer_selector::render_gamemode_selector(
+                    &self.menu_assets,
+                    &mut canvas,
+                    1.,
+                    &mut self.animation_state,
+                );
+            }
             ScreenState::BotSelector => {
                 bot_selector::render_bot_selector(
                     &self.menu_assets,
@@ -287,7 +297,7 @@ impl event::EventHandler<ggez::GameError> for AppState {
                     &mut self.animation_state,
                 );
             }
-            ScreenState::Multiplayer => {
+            ScreenState::Versus => {
                 // If on keyboard switch controlls during the game and then switch back ...
                 // since inputs for menus will be weird using multiplayer settings.
             }

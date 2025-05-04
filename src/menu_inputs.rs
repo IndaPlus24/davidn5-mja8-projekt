@@ -1,4 +1,4 @@
-use crate::{animation_state::AnimationState, bots::bot::Bot, Game, KeyCode, ScreenState};
+use crate::{animation_state::AnimationState, bots::bot::Bot, consts::GameMode, Game, KeyCode, ScreenState};
 
 // TODO: change key codes according to launch type
 const UP: KeyCode = KeyCode::Up;
@@ -28,26 +28,47 @@ pub fn handle_main_menu_inputs(ctx: &ggez::Context, screen_state: &mut ScreenSta
     }
 }
 
-pub fn handle_gamemode_selector_inputs(ctx: &ggez::Context, screen_state: &mut ScreenState, animation_state: &mut AnimationState, game: &mut Game) {
+pub fn handle_gamemode_selector_inputs(ctx: &ggez::Context, screen_state: &mut ScreenState, animation_state: &mut AnimationState) {
     let keyboard = &ctx.keyboard;
     if keyboard.is_key_just_pressed(DOWN) {
         animation_state.selected_item_gamemode_selector = (animation_state.selected_item_gamemode_selector + 1) % 4;
     } else if keyboard.is_key_just_pressed(UP) {
         animation_state.selected_item_gamemode_selector = (animation_state.selected_item_gamemode_selector + 3) % 4;
     } else if keyboard.is_key_just_pressed(SELECT) {
-        match animation_state.selected_item_gamemode_selector {
+        *screen_state = match animation_state.selected_item_gamemode_selector {
+            0 => ScreenState::Versus,
+            1 => ScreenState::SingleplayerSelector,
+            2 => ScreenState::BotSelector,
+            _ => ScreenState::MainMenu
+        }
+    }
+}
+
+pub fn handle_singleplayer_selector_inputs(ctx: &ggez::Context, screen_state: &mut ScreenState, animation_state: &mut AnimationState, game: &mut Game) {
+    let keyboard = &ctx.keyboard;
+    if keyboard.is_key_just_pressed(DOWN) {
+        animation_state.selected_item_singleplayer_selector = (animation_state.selected_item_singleplayer_selector + 1) % 4;
+    } else if keyboard.is_key_just_pressed(UP) {
+        animation_state.selected_item_singleplayer_selector = (animation_state.selected_item_singleplayer_selector + 3) % 4;
+    } else if keyboard.is_key_just_pressed(SELECT) {
+        match animation_state.selected_item_singleplayer_selector {
             0 => {
-                *screen_state = ScreenState::Multiplayer;
+                *screen_state = ScreenState::Marathon;
+                game.reset_game();
+                game.gamemode = GameMode::Marathon;
+                game.set_level(1);
             },
             1 => {
-                *screen_state = ScreenState::Singleplayer;
+                *screen_state = ScreenState::FourtyLines;
                 game.reset_game();
+                game.gamemode = GameMode::FourtyLines;
             },
             2 => {
-                *screen_state = ScreenState::BotSelector;
+                *screen_state = ScreenState::Survival;
+                game.reset_game();
             },
             _=> {
-                *screen_state = ScreenState::MainMenu;
+                *screen_state = ScreenState::GameModeSelector;
             }
         }
     }

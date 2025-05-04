@@ -17,8 +17,11 @@ pub enum ScreenState {
     StartScreen,
     MainMenu,
     GameModeSelector,
-    Singleplayer,
-    Multiplayer,
+    SingleplayerSelector,
+    Marathon,
+    FourtyLines,
+    Survival, // Low priority. Might add if we have time
+    Versus,
     VsBots,
     GameOver,
     HighscoreInput,
