@@ -15,7 +15,6 @@ pub struct Game {
 
     pub game_over: bool,
     pub objective_completed: bool,
-    pub battle_mode: bool,
     pub garbage_queue: VecDeque<(usize, usize)>, // (amount, column of garbage hole)
     pub active_piece: Piece,
     pub held_piece: Option<PieceType>,
@@ -67,7 +66,6 @@ impl Game {
 
             game_over: false,
             objective_completed: false,
-            battle_mode: false,
             garbage_queue: VecDeque::new(),
             active_piece: Piece::new(PieceType::Z, 0),
             held_piece: None,

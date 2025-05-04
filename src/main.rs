@@ -116,6 +116,10 @@ impl AppState {
             "hold".to_string(),
             Image::from_path(ctx, "/board/hold.png").unwrap(),
         );
+        image_map.insert(
+            "40l_marker".to_string(),
+            Image::from_path(ctx, "/board/fourty_lines_marker.png").unwrap(),
+        );
 
         image_map
     }
