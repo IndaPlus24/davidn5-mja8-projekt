@@ -305,7 +305,7 @@ mod tests {
     #[test]
     #[allow(non_snake_case)]
     pub fn test_best_move_piece_L() {
-        let mut bot = Bot::new();
+        let mut bot = Bot::new(0);
         
 
         bot.game.board = [[None; BOARD_AMOUNT_COLUMNS]; BOARD_AMOUNT_ROWS];
@@ -345,7 +345,7 @@ mod tests {
     #[test]
     #[allow(non_snake_case)]
     pub fn test_best_move_piece_T() {
-        let mut bot = Bot::new();
+        let mut bot = Bot::new(0);
         bot.game.board = [[None; BOARD_AMOUNT_COLUMNS]; BOARD_AMOUNT_ROWS];
         bot.game.board[0] = [
             Some(PieceType::I),
