@@ -61,7 +61,7 @@ impl Game {
     pub fn new() -> Self {
         Game {
             board: [[None; BOARD_AMOUNT_COLUMNS]; BOARD_AMOUNT_ROWS],
-            gamemode: GameMode::Marathon,
+            gamemode: GameMode::FourtyLines,
 
             game_over: false,
             battle_mode: false,

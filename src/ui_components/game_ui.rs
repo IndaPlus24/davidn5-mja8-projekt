@@ -156,7 +156,7 @@ impl Game {
                 self.render_marathon_stats(canvas, pos, scl);
             },
             GameMode::FourtyLines => {
-
+                self.render_40l_stats(canvas, pos, scl);
             },
             GameMode::Versus => {
 
