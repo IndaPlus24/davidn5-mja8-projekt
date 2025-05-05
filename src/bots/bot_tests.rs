@@ -379,4 +379,5 @@ mod tests {
         println!("{:?}", best_outcome.0.move_sequence);
         assert_eq!(best_outcome.0.lines_cleared, 2.0);
     }
+
 }

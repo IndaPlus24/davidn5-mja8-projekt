@@ -8,10 +8,12 @@ pub struct AnimationState {
     pub selected_item_bot_selector: i32,
 
     pub players_ready: (bool, bool),
+    pub selected_item_high_score : (i32,i32),
+    pub highscore_list : Vec<(String, usize)>
 }
 
 impl AnimationState {
-    pub fn new() -> Self {
+    pub fn new(highscore_list : Vec<(String, usize)>) -> Self {
         Self {
             // Bouncing text in start_screen.rs
             start_screen_y: -50.,
@@ -31,6 +33,10 @@ impl AnimationState {
 
             // Ready checks for player one and two. Used in both rematch prompt and initial ready check
             players_ready: (false, false),
+
+            // Arrow High Score
+            selected_item_high_score : (0,0),
+            highscore_list,
         }
     }
 }

@@ -41,7 +41,21 @@ pub fn render_main_menu(assets: &HashMap<String, Image>, canvas: &mut Canvas, sc
 
     canvas.draw(&start_game,
         graphics::DrawParam::new()
-            .dest(glam::Vec2::new(center.0 - image_half_size.0 + 200., center.1 - 100.))
+            .dest(glam::Vec2::new(center.0 - image_half_size.0 + 200., center.1 - 175.))
+            .scale(glam::Vec2::new(scl, scl))
+    );
+
+    let highscores = Text::new(TextFragment{
+        text : "HIGH SCORES".to_string(),
+        font : Some("Tetris font".to_string()),
+        color: Some(Color::WHITE), 
+        scale : Some(PxScale::from(60.0))
+
+    });
+
+    canvas.draw(&highscores,
+        graphics::DrawParam::new()
+            .dest(glam::Vec2::new(center.0 - image_half_size.0 + 200., center.1))
             .scale(glam::Vec2::new(scl, scl))
     );
 
@@ -55,7 +69,7 @@ pub fn render_main_menu(assets: &HashMap<String, Image>, canvas: &mut Canvas, sc
 
     canvas.draw(&settings,
         graphics::DrawParam::new()
-            .dest(glam::Vec2::new(center.0 - image_half_size.0 + 200., center.1 + 100.))
+            .dest(glam::Vec2::new(center.0 - image_half_size.0 + 200., center.1 + 175.))
             .scale(glam::Vec2::new(scl, scl))
     );
 
@@ -67,7 +81,11 @@ pub fn render_main_menu(assets: &HashMap<String, Image>, canvas: &mut Canvas, sc
 
     });
 
-    let arrow_y = if animation_state.selected_item_main_menu == 0 {center.1 - 100.}else {center.1 + 100.};
+    let arrow_y = match animation_state.selected_item_main_menu {
+        0 => center.1 - 175., 
+        1 => center.1,
+        _ => center.1 + 175.
+    }; 
 
     canvas.draw(&arrow,
         graphics::DrawParam::new()
