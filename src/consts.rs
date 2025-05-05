@@ -21,7 +21,9 @@ pub enum ScreenState {
     Marathon,
     FourtyLines,
     Survival, // Low priority. Might add if we have time
+    VersusReady,
     Versus,
+    VersusRematch,
     VsBots,
     GameOver,
     HighscoreInput,

@@ -1,4 +1,6 @@
-use crate::{animation_state::AnimationState, bots::bot::Bot, consts::GameMode, Game, KeyCode, ScreenState};
+use ggez::input::keyboard::{self, KeyboardContext};
+
+use crate::{animation_state::AnimationState, bots::bot::Bot, consts::GameMode, Game, GameAction, KeyCode, ScreenState};
 
 // TODO: change key codes according to launch type
 const UP: KeyCode = KeyCode::Up;
@@ -36,7 +38,7 @@ pub fn handle_gamemode_selector_inputs(ctx: &ggez::Context, screen_state: &mut S
         animation_state.selected_item_gamemode_selector = (animation_state.selected_item_gamemode_selector + 3) % 4;
     } else if keyboard.is_key_just_pressed(SELECT) {
         *screen_state = match animation_state.selected_item_gamemode_selector {
-            0 => ScreenState::Versus,
+            0 => ScreenState::VersusReady,
             1 => ScreenState::SingleplayerSelector,
             2 => ScreenState::BotSelector,
             _ => ScreenState::MainMenu
@@ -71,6 +73,28 @@ pub fn handle_singleplayer_selector_inputs(ctx: &ggez::Context, screen_state: &m
                 *screen_state = ScreenState::GameModeSelector;
             }
         }
+    }
+}
+
+pub fn handle_versus_ready_inputs(
+    ctx: &ggez::Context,
+    screen_state: &mut ScreenState,
+    animation_state: &mut AnimationState,
+    game_one: &mut Game,
+    game_two: &mut Game
+) {
+    let keyboard = &ctx.keyboard;
+    if keyboard.is_key_just_pressed(*game_one.controls.get(&GameAction::HardDrop).unwrap()) {
+        animation_state.players_ready.0 = !animation_state.players_ready.0;
+    }
+    if keyboard.is_key_just_pressed(*game_two.controls.get(&GameAction::HardDrop).unwrap()) {
+        animation_state.players_ready.1 = !animation_state.players_ready.1;
+    }
+
+    if animation_state.players_ready.0 && animation_state.players_ready.1 {
+        game_one.reset_game();
+        game_two.reset_game();
+        *screen_state = ScreenState::Versus;
     }
 }
 

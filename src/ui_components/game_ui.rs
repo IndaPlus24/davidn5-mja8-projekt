@@ -222,7 +222,7 @@ impl Game {
                 self.render_40l_stats(canvas, pos, scl);
             },
             GameMode::Versus => {
-
+                self.render_vs_stats(canvas, pos, scl);
             },
         }
 

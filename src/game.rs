@@ -51,6 +51,7 @@ pub struct Game {
     pub lines: usize,
     pub level: usize,
     pub pieces: usize,
+    pub attack: usize,
     pub start_time: Instant,
     pub final_time: Duration,
 
@@ -104,6 +105,7 @@ impl Game {
             lines: 0,
             level: 1,
             pieces: 0,
+            attack: 0,
             start_time: Instant::now(),
             final_time: Duration::from_secs(0),
 

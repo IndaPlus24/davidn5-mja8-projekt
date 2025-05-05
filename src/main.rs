@@ -15,14 +15,14 @@ mod gamemodes;
 use animation_state::AnimationState;
 use bots::bot::Bot;
 use bots::train_bot::train_ai;
-use consts::{ScreenState, GAME_1_POS, GAME_1_SCL, WINDOW_HEIGHT, WINDOW_WIDTH};
+use consts::{GameMode, ScreenState, GAME_1_POS, GAME_1_SCL, WINDOW_HEIGHT, WINDOW_WIDTH};
 use csv::{Reader, Writer};
 use menu_inputs::*;
 use std::collections::HashMap;
 use std::error::Error;
 use std::path;
 use std::str::FromStr;
-use ui_components::{bot_selector, gamemode_selector, main_menu, singleplayer_selector, start_screen};
+use ui_components::{bot_selector, gamemode_selector, main_menu, singleplayer_selector, start_screen, versus_ready};
 
 pub use crate::config::input_config::*;
 pub use crate::game::Game;
@@ -61,7 +61,7 @@ impl AppState {
         let mut state = AppState {
             animation_state: AnimationState::new(),
             screen_state: ScreenState::StartScreen,
-            drifarkaden : false,
+            drifarkaden: false,
 
             piece_assets: AppState::preload_piece_assets(ctx),
             board_assets: AppState::preload_board_assets(ctx),
@@ -150,7 +150,7 @@ impl AppState {
         );
         image_map.insert(
             "line_marker".to_string(),
-            Image::from_path(ctx, "/board/line_goal_marker.png").unwrap(),
+            Image::from_path(ctx, "/misc/line_goal_marker.png").unwrap(),
         );
 
         image_map
@@ -229,6 +229,25 @@ impl event::EventHandler<ggez::GameError> for AppState {
             ScreenState::SingleplayerSelector => {
                 handle_singleplayer_selector_inputs(ctx, &mut self.screen_state, &mut self.animation_state, &mut self.game_one);
             }
+            ScreenState::VersusReady => {
+                if self.game_one.gamemode != GameMode::Versus
+                || self.game_one.gamemode != GameMode::Versus {
+                    let vs_controls = multi_controller_keyboard_keybindings();
+                    self.game_one.controls = vs_controls[0].clone();
+                    self.game_two.controls = vs_controls[1].clone();
+
+                    self.game_one.gamemode = GameMode::Versus;
+                    self.game_two.gamemode = GameMode::Versus;
+                }
+
+                handle_versus_ready_inputs(
+                    ctx,
+                    &mut self.screen_state,
+                    &mut self.animation_state,
+                    &mut self.game_one,
+                    &mut self.game_two,
+                )
+            }
             ScreenState::BotSelector => {
                 handle_bot_selector_inputs(ctx, &mut self.screen_state, &mut self.animation_state, &mut self.bot);
             }
@@ -283,6 +302,14 @@ impl event::EventHandler<ggez::GameError> for AppState {
             }
             ScreenState::SingleplayerSelector => {
                 singleplayer_selector::render_gamemode_selector(
+                    &self.menu_assets,
+                    &mut canvas,
+                    1.,
+                    &mut self.animation_state,
+                );
+            }
+            ScreenState::VersusReady => {
+                versus_ready::render_versus_ready(
                     &self.menu_assets,
                     &mut canvas,
                     1.,
