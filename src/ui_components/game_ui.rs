@@ -7,45 +7,75 @@ use crate::consts::{BOARD_AMOUNT_COLUMNS, BOARD_AMOUNT_ROWS};
 
 
 impl Game {
-    pub fn render_board(&mut self, assets: &HashMap<String, Image>, canvas: &mut Canvas, pos: (f32, f32), scl: f32) {
+    pub fn render_board(&mut self, assets: &HashMap<String, Image>, canvas: &mut Canvas) -> &mut Self {
+        let pos = self.canvas_pos;
+        let scl = self.canvas_scale;
+
+        let (mut x, y) = (pos.0, pos.1);
         canvas.draw(
             assets.get("hold").unwrap(),
             graphics::DrawParam::new()
-                .dest(glam::Vec2::new(pos.0, pos.1))
+                .dest(glam::Vec2::new(x, y))
                 .scale(glam::Vec2::new(scl, scl))
         );
 
-        let mut x_offset = 164. * scl;
-        if self.battle_mode {
+        x += 164. * scl;
+        if self.gamemode == GameMode::Versus {
             canvas.draw(
                 assets.get("garb_bar").unwrap(),
                 graphics::DrawParam::new()
-                    .dest(glam::Vec2::new(pos.0 + x_offset, pos.1))
+                    .dest(glam::Vec2::new(x, y))
                     .scale(glam::Vec2::new(scl, scl))
             );
             // TODO: add garbage meter
             canvas.draw(
                 assets.get("garb_sep").unwrap(),
                 graphics::DrawParam::new()
-                    .dest(glam::Vec2::new(pos.0 + x_offset + 6. * scl, pos.1 + 383. * scl))
+                    .dest(glam::Vec2::new(x + 6. * scl, y + 383. * scl))
                     .scale(glam::Vec2::new(scl, scl))
             );
             
-            x_offset += 36. * scl;
+            x += 36. * scl;
         }
 
         canvas.draw(
             assets.get("main").unwrap(),
             graphics::DrawParam::new()
-                .dest(glam::Vec2::new(pos.0 + x_offset, pos.1))
+                .dest(glam::Vec2::new(x, y))
                 .scale(glam::Vec2::new(scl, scl))
         );
+
+        // Line marker
+        match self.gamemode {
+            GameMode::FourtyLines |
+            GameMode::Marathon => {
+                let mut lines_left = -(self.lines as isize);
+                if self.gamemode == GameMode::Marathon {lines_left += 150}
+                else {lines_left += 40}
+                
+                if lines_left <= 20 && lines_left > 0 {
+                    let y_offset = 632. - (lines_left as f32 * 32.);
+                    canvas.draw(
+                        assets.get("line_marker").unwrap(),
+                        graphics::DrawParam::new()
+                            .dest(glam::Vec2::new(x + 4. * scl, y + y_offset * scl))
+                            .scale(glam::Vec2::new(scl, scl))
+                    );
+                }
+            }
+            _ => ()
+        }
+
+        self
     }
 
-    pub fn render_pieces(&mut self, assets: &HashMap<PieceType, Image>, canvas: &mut Canvas, pos: (f32, f32), scl: f32) {
+    pub fn render_pieces(&mut self, assets: &HashMap<PieceType, Image>, canvas: &mut Canvas) -> &mut Self {
+        let pos = self.canvas_pos;
+        let scl = self.canvas_scale;
+
         //Board cells
-        let x = pos.0 + if self.battle_mode {204. * scl} else {168. * scl};
-        let y = pos.1 + 608. * scl;
+        let (mut x, y) = (pos.0 + 168. * scl, pos.1 + 608. * scl);
+        if self.gamemode == GameMode::Versus {x += 36. * scl};
 
         for r in 0..BOARD_AMOUNT_ROWS {
             for c in 0..BOARD_AMOUNT_COLUMNS {
@@ -122,7 +152,7 @@ impl Game {
 
         //Next queue
         let (mut x, mut y) = (pos.0 + 556. * scl, pos.1 + 80. * scl);
-        if self.battle_mode {x += 36. * scl};
+        if self.gamemode == GameMode::Versus {x += 36. * scl};
         
         for i in 0..5 {
             let piece_type = self.piece_queue[i];
@@ -147,21 +177,56 @@ impl Game {
             y -= y_offset;
             y += 96.;
         }
+
+        self
+    }
+
+    pub fn render_misc(&mut self, assets: &HashMap<String, Image>, canvas: &mut Canvas) -> &mut Self {
+        let pos = self.canvas_pos;
+        let scl = self.canvas_scale;
+
+        let (mut x, y) = (pos.0 + 168. * scl, pos.1 + 160. * scl);
+        if self.gamemode == GameMode::Versus {x += 36. * scl}
+
+        if self.game_over {
+            if self.objective_completed {
+                canvas.draw(
+                    assets.get("finish").unwrap(),
+                    graphics::DrawParam::new()
+                        .dest(glam::Vec2::new(x, y))
+                        .scale(glam::Vec2::new(scl, scl))
+                );
+            } else {
+                canvas.draw(
+                    assets.get("game_over").unwrap(),
+                    graphics::DrawParam::new()
+                        .dest(glam::Vec2::new(x, y))
+                        .scale(glam::Vec2::new(scl, scl))
+                );
+            }
+        }
+
+        self
     }
 
     // Render different stats depending on gamemode
-    pub fn render_stats(&mut self, canvas: &mut Canvas, pos: (f32, f32), scl: f32) {
+    pub fn render_stats(&mut self, canvas: &mut Canvas) -> &mut Self {
+        let pos = self.canvas_pos;
+        let scl = self.canvas_scale;
+
         match self.gamemode {
             GameMode::Marathon => {
                 self.render_marathon_stats(canvas, pos, scl);
             },
             GameMode::FourtyLines => {
-
+                self.render_40l_stats(canvas, pos, scl);
             },
             GameMode::Versus => {
 
             },
         }
+
+        self
     }
 }
 

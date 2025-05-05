@@ -4,6 +4,7 @@ pub struct AnimationState {
     pub velocity: f32,
     pub selected_item_main_menu: i32,
     pub selected_item_gamemode_selector: i32,
+    pub selected_item_singleplayer_selector: i32,
     pub selected_item_bot_selector: i32,
 }
 
@@ -18,7 +19,10 @@ impl AnimationState {
             selected_item_main_menu: 0, // (0 - START GAME)....(1 - SETTINGS)
 
             // Arrow GameMode Selector
-            selected_item_gamemode_selector: 0, // (0 - 1v1)....(1 - default) .....(2 - vs bots)
+            selected_item_gamemode_selector: 0, // (0 - 1v1)....(1 - singleplayer) .....(2 - vs bots)
+
+            // Arrow Singleplayer Selector
+            selected_item_singleplayer_selector: 0, // (0 - Marathon)....(1 - 40L) .....(2 - Survival?)
 
             // Arrow Bot Selector
             selected_item_bot_selector: 0,

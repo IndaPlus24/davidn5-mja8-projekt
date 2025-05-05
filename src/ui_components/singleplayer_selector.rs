@@ -18,7 +18,7 @@ pub fn render_gamemode_selector(assets: &HashMap<String, Image>, canvas: &mut Ca
     );
 
     let start_game = Text::new(TextFragment{
-        text : "START GAME".to_string(),
+        text : "   SOLO".to_string(),
         font : Some("Tetris font".to_string()),
         color: Some(Color::WHITE), 
         scale : Some(PxScale::from(80.0))
@@ -32,7 +32,7 @@ pub fn render_gamemode_selector(assets: &HashMap<String, Image>, canvas: &mut Ca
     );
 
     let multiplayer = Text::new(TextFragment{
-        text : "1V1".to_string(),
+        text : "Marathon".to_string(),
         font : Some("Tetris font".to_string()),
         color: Some(Color::WHITE), 
         scale : Some(PxScale::from(60.0))
@@ -46,7 +46,7 @@ pub fn render_gamemode_selector(assets: &HashMap<String, Image>, canvas: &mut Ca
     );
 
     let default = Text::new(TextFragment{
-        text : "SOLO".to_string(),
+        text : "40 Lines".to_string(),
         font : Some("Tetris font".to_string()),
         color: Some(Color::WHITE), 
         scale : Some(PxScale::from(60.0))
@@ -60,7 +60,7 @@ pub fn render_gamemode_selector(assets: &HashMap<String, Image>, canvas: &mut Ca
     );
 
     let vs_bots = Text::new(TextFragment{
-        text : "VS BOTS".to_string(),
+        text : "Survival".to_string(),
         font : Some("Tetris font".to_string()),
         color: Some(Color::WHITE), 
         scale : Some(PxScale::from(60.0))
@@ -96,7 +96,7 @@ pub fn render_gamemode_selector(assets: &HashMap<String, Image>, canvas: &mut Ca
 
     });
 
-    let arrow_y = match animation_state.selected_item_gamemode_selector {
+    let arrow_y = match animation_state.selected_item_singleplayer_selector {
         0 => {center.1 - 225.},
         1 => {center.1 - 75.},
         2 => {center.1 + 75.},

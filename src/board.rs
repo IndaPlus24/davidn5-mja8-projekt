@@ -1,4 +1,5 @@
 use std::time::Instant;
+use crate::consts::GameMode;
 use crate::scoring::ScoreType;
 use crate::Game;
 use crate::Piece;
@@ -57,6 +58,8 @@ impl Game {
         let score_type = self.get_score_type();
         self.add_score(score_type);
 
+        self.pieces += 1;
+
         self.spawn_piece_from_queue();
         self.last_drop = Instant::now();
 
@@ -113,12 +116,22 @@ impl Game {
         }
 
         self.lines += lines_cleared;
-        // Check marathon leveling
-        // if self.gamemode == GameMode::Marathon {
-        //     if self.lines / 10 == self.level {
-        //         self.level_up();
-        //     }
-        // }
+
+        // Check gamemode specific conditions
+        match self.gamemode {
+            GameMode::Marathon => {
+                if self.lines / 10 == self.level {
+                    self.level_up();
+                }
+            },
+            GameMode::FourtyLines => {
+                if self.lines >= 40 {
+                    self.end_game(true);
+                }
+            },
+            _ => (),
+        }
+
 
         match lines_cleared {
             0 => {

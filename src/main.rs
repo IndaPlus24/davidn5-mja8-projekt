@@ -22,7 +22,7 @@ use std::collections::HashMap;
 use std::error::Error;
 use std::path;
 use std::str::FromStr;
-use ui_components::{bot_selector, gamemode_selector, main_menu, start_screen};
+use ui_components::{bot_selector, gamemode_selector, main_menu, singleplayer_selector, start_screen};
 
 pub use crate::config::input_config::*;
 pub use crate::game::Game;
@@ -43,6 +43,7 @@ struct AppState {
     piece_assets: HashMap<PieceType, Image>,
     board_assets: HashMap<String, Image>,
     menu_assets: HashMap<String, Image>,
+    misc_assets: HashMap<String, Image>,
 
     // Games
     game_one: Game,
@@ -65,9 +66,10 @@ impl AppState {
             piece_assets: AppState::preload_piece_assets(ctx),
             board_assets: AppState::preload_board_assets(ctx),
             menu_assets: AppState::preload_menu_assets(ctx),
+            misc_assets: AppState::preload_misc_assets(ctx),
 
-            game_one: Game::new(),
-            game_two: Game::new(),
+            game_one: Game::new(GAME_1_POS, GAME_1_SCL),
+            game_two: Game::new(GAME_1_POS, GAME_1_SCL),
 
             bot: Bot::new(0),
         };
@@ -116,6 +118,10 @@ impl AppState {
             "hold".to_string(),
             Image::from_path(ctx, "/board/hold.png").unwrap(),
         );
+        image_map.insert(
+            "line_marker".to_string(),
+            Image::from_path(ctx, "/board/line_goal_marker.png").unwrap(),
+        );
 
         image_map
     }
@@ -130,6 +136,21 @@ impl AppState {
         image_map.insert(
             "empty_box".to_string(),
             Image::from_path(ctx, "/ui_assets/empty_box.png").unwrap(),
+        );
+
+        image_map
+    }
+
+    pub fn preload_misc_assets(ctx: &Context) -> HashMap<String, Image> {
+        let mut image_map: HashMap<String, Image> = HashMap::new();
+
+        image_map.insert(
+            "finish".to_string(),
+            Image::from_path(ctx, "/misc/finish.png").unwrap(),
+        );
+        image_map.insert(
+            "game_over".to_string(),
+            Image::from_path(ctx, "/misc/game_over.png").unwrap(),
         );
 
         image_map
@@ -185,7 +206,9 @@ fn save_scores_to_file(path: &str, scores: Vec<(String, usize)>) -> bool {
 impl event::EventHandler<ggez::GameError> for AppState {
     fn update(&mut self, ctx: &mut Context) -> GameResult {
         match self.screen_state {
-            ScreenState::Singleplayer => {
+            ScreenState::Marathon    |
+            ScreenState::FourtyLines |
+            ScreenState::Survival => {
                 self.game_one.update(ctx);
             }
             ScreenState::GameOver => {
@@ -201,12 +224,10 @@ impl event::EventHandler<ggez::GameError> for AppState {
                 handle_main_menu_inputs(ctx, &mut self.screen_state, &mut self.animation_state);
             }
             ScreenState::GameModeSelector => {
-                handle_gamemode_selector_inputs(
-                    ctx,
-                    &mut self.screen_state,
-                    &mut self.animation_state,
-                    &mut self.game_one,
-                );
+                handle_gamemode_selector_inputs(ctx, &mut self.screen_state, &mut self.animation_state);
+            }
+            ScreenState::SingleplayerSelector => {
+                handle_singleplayer_selector_inputs(ctx, &mut self.screen_state, &mut self.animation_state, &mut self.game_one);
             }
             ScreenState::BotSelector => {
                 handle_bot_selector_inputs(ctx, &mut self.screen_state, &mut self.animation_state, &mut self.bot);
@@ -225,18 +246,15 @@ impl event::EventHandler<ggez::GameError> for AppState {
             graphics::Canvas::from_frame(ctx, graphics::Color::from([0.1, 0.2, 0.3, 1.0]));
 
         match self.screen_state {
-            ScreenState::Singleplayer => {
+            ScreenState::Marathon |
+            ScreenState::FourtyLines |
+            ScreenState::Survival => {
                 //Render game
                 self.game_one
-                    .render_board(&self.board_assets, &mut canvas, GAME_1_POS, GAME_1_SCL);
-                self.game_one.render_pieces(
-                    &self.piece_assets,
-                    &mut canvas,
-                    GAME_1_POS,
-                    GAME_1_SCL,
-                );
-                self.game_one
-                    .render_stats(&mut canvas, GAME_1_POS, GAME_1_SCL);
+                    .render_board(&self.board_assets, &mut canvas)
+                    .render_pieces(&self.piece_assets, &mut canvas)
+                    .render_stats(&mut canvas)
+                    .render_misc(&self.misc_assets, &mut canvas);
             }
             ScreenState::StartScreen => {
                 start_screen::render_start_screen(
@@ -263,6 +281,14 @@ impl event::EventHandler<ggez::GameError> for AppState {
                     &mut self.animation_state,
                 );
             }
+            ScreenState::SingleplayerSelector => {
+                singleplayer_selector::render_gamemode_selector(
+                    &self.menu_assets,
+                    &mut canvas,
+                    1.,
+                    &mut self.animation_state,
+                );
+            }
             ScreenState::BotSelector => {
                 bot_selector::render_bot_selector(
                     &self.menu_assets,
@@ -271,24 +297,16 @@ impl event::EventHandler<ggez::GameError> for AppState {
                     &mut self.animation_state,
                 );
             }
-            ScreenState::Multiplayer => {
+            ScreenState::Versus => {
                 // If on keyboard switch controlls during the game and then switch back ...
                 // since inputs for menus will be weird using multiplayer settings.
             }
             ScreenState::VsBots => {
                 //Render game
-                self.bot
-                    .game
-                    .render_board(&self.board_assets, &mut canvas, GAME_1_POS, GAME_1_SCL);
-                self.bot.game.render_pieces(
-                    &self.piece_assets,
-                    &mut canvas,
-                    GAME_1_POS,
-                    GAME_1_SCL,
-                );
-                self.bot
-                    .game
-                    .render_stats(&mut canvas, GAME_1_POS, GAME_1_SCL);
+                self.bot.game
+                    .render_board(&self.board_assets, &mut canvas)
+                    .render_pieces(&self.piece_assets,&mut canvas)
+                    .render_stats(&mut canvas);
             }
             _ => {}
         }

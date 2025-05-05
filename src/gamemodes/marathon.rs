@@ -7,7 +7,7 @@ impl Game {
         if self.level < 15 {
              self.set_level(self.level + 1);
         } else {
-            self.game_over = true;
+            self.end_game(true);
         }
     }
 
@@ -43,7 +43,7 @@ impl Game {
             text: "Level".to_string(),
             font: Some("Tetris font".to_string()),
             color: Some(Color::WHITE), 
-            scale: Some(PxScale::from(24.))
+            scale: Some(PxScale::from(16.))
         });
         level.set_layout(TextLayout{
             h_align: TextAlign::End,
@@ -59,7 +59,7 @@ impl Game {
             text: self.level.to_string(),
             font: Some("Tetris font".to_string()),
             color: Some(Color::WHITE), 
-            scale: Some(PxScale::from(16.))
+            scale: Some(PxScale::from(24.))
         });
         level_count.set_layout(TextLayout{
             h_align: TextAlign::End,
@@ -76,7 +76,7 @@ impl Game {
             text: "Lines".to_string(),
             font: Some("Tetris font".to_string()),
             color: Some(Color::WHITE), 
-            scale: Some(PxScale::from(24.))
+            scale: Some(PxScale::from(16.))
         });
         lines.set_layout(TextLayout{
             h_align: TextAlign::End,
@@ -92,7 +92,7 @@ impl Game {
             text: format!("{}/150", self.lines),
             font: Some("Tetris font".to_string()),
             color: Some(Color::WHITE), 
-            scale: Some(PxScale::from(16.))
+            scale: Some(PxScale::from(24.))
         });
         line_count.set_layout(TextLayout{
             h_align: TextAlign::End,

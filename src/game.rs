@@ -10,11 +10,16 @@ use crate::{default_keyboard_keybindings, GameAction, KeyCode, Piece, PieceType}
 
 #[derive(Clone)]
 pub struct Game {
+    // Canvas info
+    pub canvas_pos: (f32, f32),
+    pub canvas_scale: f32,
+
+    // General
     pub board: [[Option<PieceType>; BOARD_AMOUNT_COLUMNS]; BOARD_AMOUNT_ROWS],
     pub gamemode: GameMode,
 
     pub game_over: bool,
-    pub battle_mode: bool,
+    pub objective_completed: bool,
     pub garbage_queue: VecDeque<(usize, usize)>, // (amount, column of garbage hole)
     pub active_piece: Piece,
     pub held_piece: Option<PieceType>,
@@ -47,6 +52,7 @@ pub struct Game {
     pub level: usize,
     pub pieces: usize,
     pub start_time: Instant,
+    pub final_time: Duration,
 
     // Scoring checks
     pub t_spin: bool,
@@ -58,13 +64,16 @@ pub struct Game {
 }
 
 impl Game {
-    pub fn new() -> Self {
+    pub fn new(pos: (f32, f32), scl: f32) -> Self {
         Game {
+            canvas_pos: pos,
+            canvas_scale: scl,
+
             board: [[None; BOARD_AMOUNT_COLUMNS]; BOARD_AMOUNT_ROWS],
-            gamemode: GameMode::Marathon,
+            gamemode: GameMode::FourtyLines,
 
             game_over: false,
-            battle_mode: false,
+            objective_completed: false,
             garbage_queue: VecDeque::new(),
             active_piece: Piece::new(PieceType::Z, 0),
             held_piece: None,
@@ -95,6 +104,7 @@ impl Game {
             level: 1,
             pieces: 0,
             start_time: Instant::now(),
+            final_time: Duration::from_secs(0),
 
             t_spin: false,
             t_spin_mini: false,
@@ -127,6 +137,12 @@ impl Game {
         self.back_to_back = false;
     }
 
+    pub fn end_game(&mut self, objective_completed: bool) {
+        self.game_over = true;
+        self.final_time = self.start_time.elapsed();
+        self.objective_completed = objective_completed;
+    }
+
     // Used for leveling and regular gravity increase 
     pub fn set_gravity_hard(&mut self, gravity: f32) {
         self.gravity = gravity;
@@ -144,7 +160,7 @@ impl Game {
 
         // Check if spawn location is valid
         if !self.is_valid_position(0, 0) {
-            self.game_over = true;
+            self.end_game(false);
         }
 
         // On ground check
