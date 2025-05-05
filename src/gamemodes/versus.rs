@@ -73,7 +73,7 @@ impl Game {
 
         // Pieces
         let mut pieces = Text::new(TextFragment{
-            text: "Attack".to_string(),
+            text: "Pieces".to_string(),
             font: Some("Tetris font".to_string()),
             color: Some(Color::WHITE), 
             scale: Some(PxScale::from(16.))
@@ -104,7 +104,7 @@ impl Game {
                 .scale(glam::Vec2::new(scl, scl))
         );
 
-        let formatted_pps = get_formatted_pps(self.attack, elapsed);
+        let formatted_pps = get_formatted_pps(self.pieces, elapsed);
         let mut pps = Text::new(TextFragment{
             text: formatted_pps,
             font: Some("Tetris font".to_string()),

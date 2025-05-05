@@ -60,7 +60,10 @@ impl Game {
         self.add_score(&score_type);
 
         let attack = get_attack_value(&score_type, self.back_to_back, self.combo);
+        // TODO: send 10 extra attack if all clear  
         if attack > 0 {println!("Attack: {}, b2b: {}", attack, self.back_to_back)}
+        self.attack += attack;
+        if self.all_clear {self.attack += 10}
 
         self.pieces += 1;
 

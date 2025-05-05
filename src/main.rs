@@ -15,7 +15,7 @@ mod gamemodes;
 use animation_state::AnimationState;
 use bots::bot::Bot;
 use bots::train_bot::train_ai;
-use consts::{GameMode, ScreenState, GAME_1_POS, GAME_1_SCL, WINDOW_HEIGHT, WINDOW_WIDTH};
+use consts::{GameMode, ScreenState, GAME_1_POS, GAME_1_SCL, GAME_2_POS, GAME_2_SCL, WINDOW_HEIGHT, WINDOW_WIDTH};
 use csv::{Reader, Writer};
 use menu_inputs::*;
 use std::collections::HashMap;
@@ -69,7 +69,7 @@ impl AppState {
             misc_assets: AppState::preload_misc_assets(ctx),
 
             game_one: Game::new(GAME_1_POS, GAME_1_SCL),
-            game_two: Game::new(GAME_1_POS, GAME_1_SCL),
+            game_two: Game::new(GAME_2_POS, GAME_2_SCL),
 
             bot: Bot::new(0),
         };
@@ -248,6 +248,10 @@ impl event::EventHandler<ggez::GameError> for AppState {
                     &mut self.game_two,
                 )
             }
+            ScreenState::Versus => {
+                self.game_one.update(ctx);
+                self.game_two.update(ctx);
+            }
             ScreenState::BotSelector => {
                 handle_bot_selector_inputs(ctx, &mut self.screen_state, &mut self.animation_state, &mut self.bot);
             }
@@ -316,6 +320,19 @@ impl event::EventHandler<ggez::GameError> for AppState {
                     &mut self.animation_state,
                 );
             }
+            ScreenState::Versus => {
+                self.game_one
+                    .render_board(&self.board_assets, &mut canvas)
+                    .render_pieces(&self.piece_assets, &mut canvas)
+                    .render_stats(&mut canvas)
+                    .render_misc(&self.misc_assets, &mut canvas);
+                
+                self.game_two
+                    .render_board(&self.board_assets, &mut canvas)
+                    .render_pieces(&self.piece_assets, &mut canvas)
+                    .render_stats(&mut canvas)
+                    .render_misc(&self.misc_assets, &mut canvas);
+            }
             ScreenState::BotSelector => {
                 bot_selector::render_bot_selector(
                     &self.menu_assets,
@@ -323,10 +340,6 @@ impl event::EventHandler<ggez::GameError> for AppState {
                     1.,
                     &mut self.animation_state,
                 );
-            }
-            ScreenState::Versus => {
-                // If on keyboard switch controlls during the game and then switch back ...
-                // since inputs for menus will be weird using multiplayer settings.
             }
             ScreenState::VsBots => {
                 //Render game

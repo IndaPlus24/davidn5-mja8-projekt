@@ -135,6 +135,7 @@ impl Game {
         self.lines = 0;
         self.set_level(1);
         self.pieces = 0;
+        self.attack = 0;
         self.start_time = Instant::now();
 
         self.latest_clear_difficult = false;
