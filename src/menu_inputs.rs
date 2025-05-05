@@ -1,6 +1,6 @@
 use ggez::input::keyboard::{self, KeyboardContext};
 
-use crate::{animation_state::AnimationState, bots::bot::Bot, consts::GameMode, Game, GameAction, KeyCode, ScreenState};
+use crate::{animation_state::AnimationState, bots::bot::Bot, consts::GameMode, Game, GameAction, KeyCode, ScreenState, get_scores_from_file};
 
 // TODO: change key codes according to launch type
 const UP: KeyCode = KeyCode::Up;
@@ -120,5 +120,32 @@ pub fn handle_bot_selector_inputs(ctx: &ggez::Context, screen_state: &mut Screen
             },
             _ => ScreenState::GameModeSelector
         }
+    }
+}
+
+pub fn handle_highscore_inputs(ctx: &ggez::Context, screen_state: &mut ScreenState, animation_state: &mut AnimationState){
+
+    let keyboard = &ctx.keyboard;
+    if keyboard.is_key_just_pressed(DOWN) || keyboard.is_key_just_pressed(UP){
+        animation_state.selected_item_high_score.1 = (animation_state.selected_item_high_score.1 + 1) % 2;
+    } else if keyboard.is_key_just_pressed(RIGHT) {
+        animation_state.selected_item_high_score.0 = (animation_state.selected_item_high_score.0 + 1) % 3;
+        animation_state.highscore_list = get_highscore_list(animation_state)
+    }else if keyboard.is_key_just_pressed(LEFT) {
+        animation_state.selected_item_high_score.0 = (animation_state.selected_item_high_score.0 + 2) % 3;
+        animation_state.highscore_list = get_highscore_list(animation_state);
+    }else if keyboard.is_key_just_pressed(SELECT){
+        if animation_state.selected_item_high_score.1  == 1{
+            *screen_state = ScreenState::MainMenu;
+        }
+    }
+}
+
+pub fn get_highscore_list(animation_state: &mut AnimationState) -> Vec<(String, usize)>{
+    match animation_state.selected_item_high_score.0 {
+        0 => get_scores_from_file("res/highscores/highscore_marathon.csv"),
+        1 => get_scores_from_file("res/highscores/highscore_fourty_lines.csv"),
+        2 => get_scores_from_file("res/highscores/highscore_survival.csv"),
+        _ => Vec::new(),
     }
 }

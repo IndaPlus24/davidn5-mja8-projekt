@@ -28,10 +28,10 @@ pub enum ScreenState {
     Versus,
     VersusRematch,
     VsBots,
-    GameOver,
     HighscoreInput,
     Settings,
     BotSelector,
+    HighScore,
 }
 
 #[derive(Clone, PartialEq)]

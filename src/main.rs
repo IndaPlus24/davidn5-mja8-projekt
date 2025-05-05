@@ -16,13 +16,14 @@ use animation_state::AnimationState;
 use bots::bot::Bot;
 use bots::train_bot::train_ai;
 use consts::{GameMode, ScreenState, GAME_1_POS, GAME_1_SCL, GAME_2_POS, GAME_2_SCL, WINDOW_HEIGHT, WINDOW_WIDTH};
+use consts::{GameMode, ScreenState, GAME_1_POS, GAME_1_SCL, WINDOW_HEIGHT, WINDOW_WIDTH};
 use csv::{Reader, Writer};
 use menu_inputs::*;
 use std::collections::HashMap;
 use std::error::Error;
 use std::path;
 use std::str::FromStr;
-use ui_components::{bot_selector, gamemode_selector, main_menu, singleplayer_selector, start_screen, versus_ready};
+use ui_components::{bot_selector, gamemode_selector, high_score, main_menu, singleplayer_selector, start_screen, versus_ready};
 
 pub use crate::config::input_config::*;
 pub use crate::game::Game;
@@ -59,9 +60,9 @@ impl AppState {
         args: Option<Vec<HashMap<GameAction, KeyCode>>>,
     ) -> GameResult<AppState> {
         let mut state = AppState {
-            animation_state: AnimationState::new(),
-            screen_state: ScreenState::StartScreen,
-            drifarkaden: false,
+            animation_state: AnimationState::new(get_scores_from_file("res/highscores/highscore_marathon.csv")),
+            screen_state: ScreenState::HighScore,
+            drifarkaden : false,
 
             piece_assets: AppState::preload_piece_assets(ctx),
             board_assets: AppState::preload_board_assets(ctx),
@@ -156,10 +157,7 @@ impl AppState {
         image_map
     }
 
-    fn save_score(name: String, score: usize) -> Result<(), Box<dyn Error>> {
-        //println!("Saving score to file ...");
-        let path = "res/highscore.csv";
-
+    fn save_score(name: String, score: usize, path : &str) -> Result<(), Box<dyn Error>> {
         //Get previous scores and add new score
         let mut scores = get_scores_from_file(path);
         scores.push((name, score));
@@ -167,7 +165,7 @@ impl AppState {
         //Sort scores and reverse
         scores.sort_by(|a, b| b.1.cmp(&a.1));
 
-        //Write top 10 to file
+        //Write top 5 to file
         if save_scores_to_file(path, scores) {
             //println!("Succesfully saved score to file ...");
         }
@@ -175,7 +173,7 @@ impl AppState {
     }
 }
 
-fn get_scores_from_file(path: &str) -> Vec<(String, usize)> {
+pub fn get_scores_from_file(path: &str) -> Vec<(String, usize)> {
     let mut rdr = Reader::from_path(path).expect("Couldn't open file");
     let mut scores: Vec<(String, usize)> = Vec::new();
 
@@ -186,16 +184,19 @@ fn get_scores_from_file(path: &str) -> Vec<(String, usize)> {
             FromStr::from_str(record.get(1).unwrap()).expect("Score is not of type usize"),
         ));
     }
+    while scores.len() < 5 {
+        scores.push(("empty".to_string(),0));
+    }
     scores
 }
 
-fn save_scores_to_file(path: &str, scores: Vec<(String, usize)>) -> bool {
+pub fn save_scores_to_file(path: &str, scores: Vec<(String, usize)>) -> bool {
     let mut wtr = Writer::from_path(path).expect("Couldn't open file");
     wtr.write_record(&["name", "score"])
         .expect("Couldnt write to file");
 
     for (i, (n, s)) in scores.iter().enumerate() {
-        if i == 10 {
+        if i == 5 {
             break;
         }
         let _ = wtr.write_record(&[n, &s.to_string()]);
@@ -205,17 +206,25 @@ fn save_scores_to_file(path: &str, scores: Vec<(String, usize)>) -> bool {
 
 impl event::EventHandler<ggez::GameError> for AppState {
     fn update(&mut self, ctx: &mut Context) -> GameResult {
+
+        if self.game_one.game_over {
+            //TODO Prompt name
+            let name = "test";
+            let path = match self.game_one.gamemode {
+                GameMode::Marathon => "res/highscores/highscore_marathon.csv",
+                GameMode::FourtyLines => "res/highscores/highscore_fourty_lines.csv",
+                _ => "res/highscores/highscore_survival.csv"
+            };
+            let _ = Self::save_score(name.to_string(), self.game_one.score, path);
+            self.screen_state = ScreenState::HighscoreInput;
+            self.game_one.game_over = false;
+            self.screen_state = ScreenState::HighScore;
+        }
         match self.screen_state {
             ScreenState::Marathon    |
             ScreenState::FourtyLines |
             ScreenState::Survival => {
                 self.game_one.update(ctx);
-            }
-            ScreenState::GameOver => {
-                //TODO Prompt name
-                let name = "";
-                let _ = Self::save_score(name.to_string(), self.game_one.score);
-                self.screen_state = ScreenState::HighscoreInput;
             }
             ScreenState::StartScreen => {
                 handle_start_screen_inputs(ctx, &mut self.screen_state);
@@ -257,6 +266,9 @@ impl event::EventHandler<ggez::GameError> for AppState {
             }
             ScreenState::VsBots => {
                 self.bot.render_bot_game(ctx);
+            }
+            ScreenState::HighScore => {
+                handle_highscore_inputs(ctx, &mut self.screen_state, &mut self.animation_state);
             }
             _ => {}
         }
@@ -340,6 +352,14 @@ impl event::EventHandler<ggez::GameError> for AppState {
                     1.,
                     &mut self.animation_state,
                 );
+            }
+            ScreenState::HighScore => {
+                high_score::render_high_score(
+                    &self,
+                    &self.menu_assets,
+                    &mut canvas,
+                    1.,
+                    );
             }
             ScreenState::VsBots => {
                 //Render game
