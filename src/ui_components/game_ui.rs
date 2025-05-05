@@ -45,27 +45,6 @@ impl Game {
                 .scale(glam::Vec2::new(scl, scl))
         );
 
-        // Line marker
-        match self.gamemode {
-            GameMode::FourtyLines |
-            GameMode::Marathon => {
-                let mut lines_left = -(self.lines as isize);
-                if self.gamemode == GameMode::Marathon {lines_left += 150}
-                else {lines_left += 40}
-                
-                if lines_left <= 20 && lines_left > 0 {
-                    let y_offset = 632. - (lines_left as f32 * 32.);
-                    canvas.draw(
-                        assets.get("line_marker").unwrap(),
-                        graphics::DrawParam::new()
-                            .dest(glam::Vec2::new(x + 4. * scl, y + y_offset * scl))
-                            .scale(glam::Vec2::new(scl, scl))
-                    );
-                }
-            }
-            _ => ()
-        }
-
         self
     }
 
@@ -187,6 +166,27 @@ impl Game {
 
         let (mut x, y) = (pos.0 + 168. * scl, pos.1 + 160. * scl);
         if self.gamemode == GameMode::Versus {x += 36. * scl}
+
+        // Line marker
+        match self.gamemode {
+            GameMode::FourtyLines |
+            GameMode::Marathon => {
+                let mut lines_left = -(self.lines as isize);
+                if self.gamemode == GameMode::Marathon {lines_left += 150}
+                else {lines_left += 40}
+                
+                if lines_left <= 20 && lines_left > 0 {
+                    let y_offset = 632. - (lines_left as f32 * 32.);
+                    canvas.draw(
+                        assets.get("line_marker").unwrap(),
+                        graphics::DrawParam::new()
+                            .dest(glam::Vec2::new(x + 4. * scl, y + y_offset * scl))
+                            .scale(glam::Vec2::new(scl, scl))
+                    );
+                }
+            }
+            _ => ()
+        }
 
         if self.game_over {
             if self.objective_completed {

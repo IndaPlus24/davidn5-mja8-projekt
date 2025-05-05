@@ -118,10 +118,6 @@ impl AppState {
             "hold".to_string(),
             Image::from_path(ctx, "/board/hold.png").unwrap(),
         );
-        image_map.insert(
-            "line_marker".to_string(),
-            Image::from_path(ctx, "/board/line_goal_marker.png").unwrap(),
-        );
 
         image_map
     }
@@ -151,6 +147,10 @@ impl AppState {
         image_map.insert(
             "game_over".to_string(),
             Image::from_path(ctx, "/misc/game_over.png").unwrap(),
+        );
+        image_map.insert(
+            "line_marker".to_string(),
+            Image::from_path(ctx, "/board/line_goal_marker.png").unwrap(),
         );
 
         image_map
