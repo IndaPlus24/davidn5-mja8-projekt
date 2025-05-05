@@ -14,7 +14,7 @@ pub enum ScoreType {
 }
 
 impl Game {
-    pub fn add_score(&mut self, score_type: Option<ScoreType>) {
+    pub fn add_score(&mut self, score_type: &Option<ScoreType>) {
         let mut points = 0.;
         if let Some(s) = score_type {
             points += match s {
@@ -62,7 +62,9 @@ impl Game {
                     if self.back_to_back {
                         points *= 1.5;
                     }
-                    self.back_to_back = true;
+                    
+                    if self.latest_clear_difficult {self.back_to_back = true}
+                    self.latest_clear_difficult = true;
                 }
             }
 
@@ -77,8 +79,11 @@ impl Game {
                         else {2000.}
                     },
                     _ => 0.
-                }
+                };
+
+                self.all_clear = true;
             }
+            else {self.all_clear = false}
             
             match s {
                 ScoreType::TSpinMini |

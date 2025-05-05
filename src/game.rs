@@ -61,6 +61,7 @@ pub struct Game {
     pub combo: usize,
     pub latest_clear_difficult: bool, // true if latest line clear was a tetris or t-spin
     pub back_to_back: bool,
+    pub all_clear: bool,
 }
 
 impl Game {
@@ -112,6 +113,7 @@ impl Game {
             combo: 0,
             latest_clear_difficult: false,
             back_to_back: false,
+            all_clear: false,
         }
     }
 

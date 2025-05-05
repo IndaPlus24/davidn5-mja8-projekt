@@ -1,5 +1,6 @@
 use std::time::Instant;
 use crate::consts::GameMode;
+use crate::gamemodes::versus::get_attack_value;
 use crate::scoring::ScoreType;
 use crate::Game;
 use crate::Piece;
@@ -56,7 +57,10 @@ impl Game {
         });
 
         let score_type = self.get_score_type();
-        self.add_score(score_type);
+        self.add_score(&score_type);
+
+        let attack = get_attack_value(&score_type, self.back_to_back, self.combo);
+        if attack > 0 {println!("Attack: {}, b2b: {}", attack, self.back_to_back)}
 
         self.pieces += 1;
 
