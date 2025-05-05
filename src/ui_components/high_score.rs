@@ -5,7 +5,7 @@ use crate::AppState;
 use crate::consts::{WINDOW_HEIGHT, WINDOW_WIDTH};
 
 pub fn render_high_score(state : &AppState ,assets: &HashMap<String, Image>, canvas: &mut Canvas, scl: f32){
-    let mut animation_state = &state.animation_state;
+    let animation_state = &state.animation_state;
     let center = (WINDOW_WIDTH / 2., WINDOW_HEIGHT / 2.);
 
     let image = assets.get("empty_box").unwrap();

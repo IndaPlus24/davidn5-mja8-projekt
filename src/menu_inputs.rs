@@ -5,8 +5,8 @@ use crate::{animation_state::AnimationState, bots::bot::Bot, consts::GameMode, G
 // TODO: change key codes according to launch type
 const UP: KeyCode = KeyCode::Up;
 const DOWN: KeyCode = KeyCode::Down;
-const LEFT: KeyCode = KeyCode::Left; // will be used for settings
-const RIGHT: KeyCode = KeyCode::Right; // will be used for settings
+const LEFT: KeyCode = KeyCode::Left; 
+const RIGHT: KeyCode = KeyCode::Right; 
 const SELECT: KeyCode = KeyCode::Space;
 
 pub fn handle_start_screen_inputs(ctx: &ggez::Context, screen_state: &mut ScreenState) {
@@ -19,13 +19,14 @@ pub fn handle_start_screen_inputs(ctx: &ggez::Context, screen_state: &mut Screen
 pub fn handle_main_menu_inputs(ctx: &ggez::Context, screen_state: &mut ScreenState, animation_state: &mut AnimationState) {
     let keyboard = &ctx.keyboard;
     if keyboard.is_key_just_pressed(DOWN) {
-        animation_state.selected_item_main_menu = 1
+        animation_state.selected_item_main_menu = (animation_state.selected_item_main_menu + 1) % 3;
     } else if keyboard.is_key_just_pressed(UP) {
-        animation_state.selected_item_main_menu = 0;
+        animation_state.selected_item_main_menu = (animation_state.selected_item_main_menu + 2) % 3;
     } else if keyboard.is_key_just_pressed(SELECT) {
         *screen_state = match animation_state.selected_item_main_menu {
             0 => ScreenState::GameModeSelector,
-            _ => ScreenState::Settings
+            1 => ScreenState::HighScore,
+            _=> ScreenState::Settings
         };
     }
 }
@@ -128,15 +129,20 @@ pub fn handle_highscore_inputs(ctx: &ggez::Context, screen_state: &mut ScreenSta
     let keyboard = &ctx.keyboard;
     if keyboard.is_key_just_pressed(DOWN) || keyboard.is_key_just_pressed(UP){
         animation_state.selected_item_high_score.1 = (animation_state.selected_item_high_score.1 + 1) % 2;
-    } else if keyboard.is_key_just_pressed(RIGHT) {
-        animation_state.selected_item_high_score.0 = (animation_state.selected_item_high_score.0 + 1) % 3;
-        animation_state.highscore_list = get_highscore_list(animation_state)
-    }else if keyboard.is_key_just_pressed(LEFT) {
-        animation_state.selected_item_high_score.0 = (animation_state.selected_item_high_score.0 + 2) % 3;
-        animation_state.highscore_list = get_highscore_list(animation_state);
     }else if keyboard.is_key_just_pressed(SELECT){
         if animation_state.selected_item_high_score.1  == 1{
             *screen_state = ScreenState::MainMenu;
+        }
+    }
+
+    if animation_state.selected_item_high_score.1 == 0 {
+        if keyboard.is_key_just_pressed(RIGHT) {
+            animation_state.selected_item_high_score.0 = (animation_state.selected_item_high_score.0 + 1) % 3;
+            animation_state.highscore_list = get_highscore_list(animation_state)
+        }else if keyboard.is_key_just_pressed(LEFT) {
+            animation_state.selected_item_high_score.0 = (animation_state.selected_item_high_score.0 + 2) % 3;
+            animation_state.highscore_list = get_highscore_list(animation_state);
+    
         }
     }
 }

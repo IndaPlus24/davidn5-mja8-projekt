@@ -61,7 +61,7 @@ impl AppState {
     ) -> GameResult<AppState> {
         let mut state = AppState {
             animation_state: AnimationState::new(get_scores_from_file("res/highscores/highscore_marathon.csv")),
-            screen_state: ScreenState::HighScore,
+            screen_state: ScreenState::StartScreen,
             drifarkaden : false,
 
             piece_assets: AppState::preload_piece_assets(ctx),
