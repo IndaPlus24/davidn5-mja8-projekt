@@ -37,9 +37,9 @@ pub fn multi_controller_keyboard_keybindings() -> Vec<HashMap<GameAction, KeyCod
     use GameAction::*;
 
     let mut player1 = HashMap::new();
-    player1.insert(MoveRight, KeyCode::A);
+    player1.insert(MoveRight, KeyCode::D);
     player1.insert(SoftDrop, KeyCode::S);
-    player1.insert(MoveLeft, KeyCode::D);
+    player1.insert(MoveLeft, KeyCode::A);
     player1.insert(HardDrop, KeyCode::X);
     player1.insert(RotateCcw, KeyCode::Q);
     player1.insert(Rotate180, KeyCode::W);

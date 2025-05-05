@@ -51,6 +51,7 @@ pub struct Game {
     pub lines: usize,
     pub level: usize,
     pub pieces: usize,
+    pub attack: usize,
     pub start_time: Instant,
     pub final_time: Duration,
 
@@ -61,6 +62,7 @@ pub struct Game {
     pub combo: usize,
     pub latest_clear_difficult: bool, // true if latest line clear was a tetris or t-spin
     pub back_to_back: bool,
+    pub all_clear: bool,
 }
 
 impl Game {
@@ -103,6 +105,7 @@ impl Game {
             lines: 0,
             level: 1,
             pieces: 0,
+            attack: 0,
             start_time: Instant::now(),
             final_time: Duration::from_secs(0),
 
@@ -112,6 +115,7 @@ impl Game {
             combo: 0,
             latest_clear_difficult: false,
             back_to_back: false,
+            all_clear: false,
         }
     }
 
@@ -131,6 +135,7 @@ impl Game {
         self.lines = 0;
         self.set_level(1);
         self.pieces = 0;
+        self.attack = 0;
         self.start_time = Instant::now();
 
         self.latest_clear_difficult = false;

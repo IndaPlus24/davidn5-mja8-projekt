@@ -6,6 +6,8 @@ pub struct AnimationState {
     pub selected_item_gamemode_selector: i32,
     pub selected_item_singleplayer_selector: i32,
     pub selected_item_bot_selector: i32,
+
+    pub players_ready: (bool, bool),
 }
 
 impl AnimationState {
@@ -26,6 +28,9 @@ impl AnimationState {
 
             // Arrow Bot Selector
             selected_item_bot_selector: 0,
+
+            // Ready checks for player one and two. Used in both rematch prompt and initial ready check
+            players_ready: (false, false),
         }
     }
 }

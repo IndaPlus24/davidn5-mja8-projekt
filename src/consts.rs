@@ -2,8 +2,11 @@
 pub const WINDOW_WIDTH: f32 = 1920.;
 pub const WINDOW_HEIGHT: f32 = 1080.;
 
-pub const GAME_1_POS: (f32, f32) = (100., 100.);
+pub const GAME_1_POS: (f32, f32) = (200., 100.);
 pub const GAME_1_SCL: f32 = 1.;
+
+pub const GAME_2_POS: (f32, f32) = (1028., 100.);
+pub const GAME_2_SCL: f32 = 1.;
 
 pub const BOARD_AMOUNT_COLUMNS: usize = 10;
 pub const BOARD_AMOUNT_ROWS: usize = 40;
@@ -21,7 +24,9 @@ pub enum ScreenState {
     Marathon,
     FourtyLines,
     Survival, // Low priority. Might add if we have time
+    VersusReady,
     Versus,
+    VersusRematch,
     VsBots,
     GameOver,
     HighscoreInput,

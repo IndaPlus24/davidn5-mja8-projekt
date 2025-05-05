@@ -17,7 +17,7 @@ pub fn render_gamemode_selector(assets: &HashMap<String, Image>, canvas: &mut Ca
             .scale(glam::Vec2::new(scl, scl))
     );
 
-    let start_game = Text::new(TextFragment{
+    let solo = Text::new(TextFragment{
         text : "   SOLO".to_string(),
         font : Some("Tetris font".to_string()),
         color: Some(Color::WHITE), 
@@ -25,13 +25,13 @@ pub fn render_gamemode_selector(assets: &HashMap<String, Image>, canvas: &mut Ca
 
     });
 
-    canvas.draw(&start_game,
+    canvas.draw(&solo,
         graphics::DrawParam::new()
             .dest(glam::Vec2::new(center.0 - image_half_size.0 + 110., center.1 - 400.))
             .scale(glam::Vec2::new(scl, scl))
     );
 
-    let multiplayer = Text::new(TextFragment{
+    let marathon = Text::new(TextFragment{
         text : "Marathon".to_string(),
         font : Some("Tetris font".to_string()),
         color: Some(Color::WHITE), 
@@ -39,13 +39,13 @@ pub fn render_gamemode_selector(assets: &HashMap<String, Image>, canvas: &mut Ca
 
     });
 
-    canvas.draw(&multiplayer,
+    canvas.draw(&marathon,
         graphics::DrawParam::new()
             .dest(glam::Vec2::new(center.0 - image_half_size.0 + 200., center.1 - 225.))
             .scale(glam::Vec2::new(scl, scl))
     );
 
-    let default = Text::new(TextFragment{
+    let fourty_lines = Text::new(TextFragment{
         text : "40 Lines".to_string(),
         font : Some("Tetris font".to_string()),
         color: Some(Color::WHITE), 
@@ -53,13 +53,13 @@ pub fn render_gamemode_selector(assets: &HashMap<String, Image>, canvas: &mut Ca
 
     });
 
-    canvas.draw(&default,
+    canvas.draw(&fourty_lines,
         graphics::DrawParam::new()
             .dest(glam::Vec2::new(center.0 - image_half_size.0 + 200., center.1 - 75.))
             .scale(glam::Vec2::new(scl, scl))
     );
 
-    let vs_bots = Text::new(TextFragment{
+    let survival = Text::new(TextFragment{
         text : "Survival".to_string(),
         font : Some("Tetris font".to_string()),
         color: Some(Color::WHITE), 
@@ -67,7 +67,7 @@ pub fn render_gamemode_selector(assets: &HashMap<String, Image>, canvas: &mut Ca
 
     });
 
-    canvas.draw(&vs_bots,
+    canvas.draw(&survival,
         graphics::DrawParam::new()
             .dest(glam::Vec2::new(center.0 - image_half_size.0 + 200., center.1 + 75.))
             .scale(glam::Vec2::new(scl, scl))
