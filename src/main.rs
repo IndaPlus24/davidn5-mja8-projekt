@@ -16,7 +16,6 @@ use animation_state::AnimationState;
 use bots::bot::Bot;
 use bots::train_bot::train_ai;
 use consts::{GameMode, ScreenState, GAME_1_POS, GAME_1_SCL, GAME_2_POS, GAME_2_SCL, WINDOW_HEIGHT, WINDOW_WIDTH};
-use consts::{GameMode, ScreenState, GAME_1_POS, GAME_1_SCL, WINDOW_HEIGHT, WINDOW_WIDTH};
 use csv::{Reader, Writer};
 use menu_inputs::*;
 use std::collections::HashMap;
