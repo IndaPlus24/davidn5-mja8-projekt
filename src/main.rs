@@ -207,7 +207,7 @@ pub fn save_scores_to_file(path: &str, scores: Vec<(String, usize)>) -> bool {
 impl event::EventHandler<ggez::GameError> for AppState {
     fn update(&mut self, ctx: &mut Context) -> GameResult {
 
-        if self.game_one.game_over {
+        if self.game_one.game_over{
             //TODO Prompt name
             let name = "test";
             let path = match self.game_one.gamemode {
@@ -215,7 +215,11 @@ impl event::EventHandler<ggez::GameError> for AppState {
                 GameMode::FourtyLines => "res/highscores/highscore_fourty_lines.csv",
                 _ => "res/highscores/highscore_survival.csv"
             };
-            let _ = Self::save_score(name.to_string(), self.game_one.score, path);
+            if self.game_one.gamemode == GameMode::FourtyLines{
+                let _ = Self::save_score(name.to_string(), self.game_one.final_time.as_secs() as usize, path);
+            }else{
+                let _ = Self::save_score(name.to_string(), self.game_one.score, path);
+            }
             self.screen_state = ScreenState::HighscoreInput;
             self.game_one.game_over = false;
             self.screen_state = ScreenState::HighScore;

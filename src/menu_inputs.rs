@@ -149,9 +149,9 @@ pub fn handle_highscore_inputs(ctx: &ggez::Context, screen_state: &mut ScreenSta
 
 pub fn get_highscore_list(animation_state: &mut AnimationState) -> Vec<(String, usize)>{
     match animation_state.selected_item_high_score.0 {
-        0 => get_scores_from_file("res/highscores/highscore_marathon.csv"),
-        1 => get_scores_from_file("res/highscores/highscore_fourty_lines.csv"),
-        2 => get_scores_from_file("res/highscores/highscore_survival.csv"),
+        1 => get_scores_from_file("res/highscores/highscore_marathon.csv"),
+        2 => get_scores_from_file("res/highscores/highscore_fourty_lines.csv"),
+        0 => get_scores_from_file("res/highscores/highscore_survival.csv"),
         _ => Vec::new(),
     }
 }

@@ -33,6 +33,37 @@ pub fn render_high_score(state : &AppState ,assets: &HashMap<String, Image>, can
     );
 
     let titles = ["SURVIVAL", "MARATHON", "40L"];
+    if animation_state.selected_item_high_score.0 == 0 || animation_state.selected_item_high_score.0 == 2 {
+
+        let labels = Text::new(TextFragment{
+            text : "NAME      TIME (seconds)".to_string(),
+            font : Some("Tetris font".to_string()),
+            color: Some(Color::WHITE), 
+            scale : Some(PxScale::from(20.0))
+    
+        });
+    
+        canvas.draw(&labels,
+            graphics::DrawParam::new()
+                .dest(glam::Vec2::new(center.0 - image_half_size.0 + 300., center.1 - 200.))
+                .scale(glam::Vec2::new(scl, scl))
+        );
+    }else {
+        let labels = Text::new(TextFragment{
+            text : "NAME      SCORE".to_string(),
+            font : Some("Tetris font".to_string()),
+            color: Some(Color::WHITE), 
+            scale : Some(PxScale::from(20.0))
+    
+        });
+    
+        canvas.draw(&labels,
+            graphics::DrawParam::new()
+                .dest(glam::Vec2::new(center.0 - image_half_size.0 + 300., center.1 - 200.))
+                .scale(glam::Vec2::new(scl, scl))
+        );
+    }
+
     for i in 0..3 {
 
         let mut text = titles[i].to_string(); 
