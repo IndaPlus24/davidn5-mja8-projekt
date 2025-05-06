@@ -71,8 +71,7 @@ impl Game {
                     self.send_garbage(10);
                 }
             } else {
-                // Recieve ready garbage
-                
+                self.recieve_ready_garbage();
             }
         }
 

@@ -8,6 +8,8 @@ pub const GAME_1_SCL: f32 = 1.;
 pub const GAME_2_POS: (f32, f32) = (1028., 100.);
 pub const GAME_2_SCL: f32 = 1.;
 
+pub const GARBAGE_CAP: usize = 8;
+
 pub const BOARD_AMOUNT_COLUMNS: usize = 10;
 pub const BOARD_AMOUNT_ROWS: usize = 40;
 
