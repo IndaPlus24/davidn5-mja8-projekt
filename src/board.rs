@@ -1,6 +1,6 @@
 use std::time::Instant;
 use crate::consts::GameMode;
-use crate::gamemodes::versus::get_attack_value;
+use crate::gamemodes::versus::versus::get_attack_value;
 use crate::scoring::ScoreType;
 use crate::Game;
 use crate::Piece;

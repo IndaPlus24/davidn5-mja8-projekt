@@ -1,8 +1,6 @@
-use std::time::Duration;
-
 use ggez::{glam, graphics::{self, Canvas, Color, PxScale, Text, TextAlign, TextFragment, TextLayout}};
 
-use crate::Game;
+use crate::{ui_components::stat_formatting::*, Game};
 
 impl Game {
     pub fn render_40l_stats(&mut self, canvas: &mut Canvas, pos: (f32, f32), scl: f32) {
@@ -129,18 +127,4 @@ impl Game {
                 .scale(glam::Vec2::new(scl, scl))
         );
     }
-}
-
-fn get_formatted_time(duration: Duration) -> String {
-    let mut secs = duration.as_secs();
-    let mins = secs / 60;
-    secs %= 60;
-    let millis = duration.subsec_millis();
-    
-    format!("{}:{:0>2}.{:0>3}", mins, secs, millis)
-}
-
-fn get_formatted_pps(pieces: usize, duration: Duration) -> String {
-    let pps = pieces as f32 / duration.as_secs_f32();
-    format!("{:.2}/s", pps)
 }
