@@ -164,7 +164,7 @@ impl Game {
         let pos = self.canvas_pos;
         let scl = self.canvas_scale;
 
-        let (mut x, y) = (pos.0 + 168. * scl, pos.1 + 160. * scl);
+        let (mut x, y) = (pos.0 + 168. * scl, pos.1);
         if self.gamemode == GameMode::Versus {x += 36. * scl}
 
         // Line marker
@@ -180,7 +180,7 @@ impl Game {
                     canvas.draw(
                         assets.get("line_marker").unwrap(),
                         graphics::DrawParam::new()
-                            .dest(glam::Vec2::new(x + 4. * scl, y + y_offset * scl))
+                            .dest(glam::Vec2::new(x, y + y_offset * scl))
                             .scale(glam::Vec2::new(scl, scl))
                     );
                 }
@@ -193,14 +193,14 @@ impl Game {
                 canvas.draw(
                     assets.get("finish").unwrap(),
                     graphics::DrawParam::new()
-                        .dest(glam::Vec2::new(x, y))
+                        .dest(glam::Vec2::new(x, y + 160. * scl))
                         .scale(glam::Vec2::new(scl, scl))
                 );
             } else {
                 canvas.draw(
                     assets.get("game_over").unwrap(),
                     graphics::DrawParam::new()
-                        .dest(glam::Vec2::new(x, y))
+                        .dest(glam::Vec2::new(x, y + 160. * scl))
                         .scale(glam::Vec2::new(scl, scl))
                 );
             }    
