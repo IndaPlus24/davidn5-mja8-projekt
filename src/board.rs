@@ -59,11 +59,16 @@ impl Game {
         let score_type = self.get_score_type();
         self.add_score(&score_type);
 
-        let attack = get_attack_value(&score_type, self.back_to_back, self.combo);
-        // TODO: send 10 extra attack if all clear  
-        if attack > 0 {println!("Attack: {}, b2b: {}", attack, self.back_to_back)}
-        self.attack += attack;
-        if self.all_clear {self.attack += 10}
+        // Attack
+        if self.gamemode == GameMode::Versus {
+            let attack = get_attack_value(&score_type, self.back_to_back, self.combo);
+            if attack > 0 {
+                self.send_garbage(attack);
+            }
+            if self.all_clear {
+                self.send_garbage(10);
+            }
+        }
 
         self.pieces += 1;
 
