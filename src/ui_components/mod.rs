@@ -6,3 +6,4 @@ pub mod main_menu;
 pub mod start_screen;
 pub mod versus_ready;
 pub mod high_score;
+pub mod input_name;

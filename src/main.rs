@@ -22,7 +22,7 @@ use std::collections::HashMap;
 use std::error::Error;
 use std::path;
 use std::str::FromStr;
-use ui_components::{bot_selector, gamemode_selector, high_score, main_menu, singleplayer_selector, start_screen, versus_ready};
+use ui_components::{bot_selector, gamemode_selector, high_score, input_name, main_menu, singleplayer_selector, start_screen, versus_ready};
 
 pub use crate::config::input_config::*;
 pub use crate::game::Game;
@@ -60,7 +60,7 @@ impl AppState {
     ) -> GameResult<AppState> {
         let mut state = AppState {
             animation_state: AnimationState::new(get_scores_from_file("res/highscores/highscore_marathon.csv")),
-            screen_state: ScreenState::StartScreen,
+            screen_state: ScreenState::HighscoreInput,
             drifarkaden : false,
 
             piece_assets: AppState::preload_piece_assets(ctx),
@@ -273,6 +273,9 @@ impl event::EventHandler<ggez::GameError> for AppState {
             ScreenState::HighScore => {
                 handle_highscore_inputs(ctx, &mut self.screen_state, &mut self.animation_state);
             }
+            ScreenState::HighscoreInput => {
+                handle_name_inputs(ctx, &mut self.screen_state, &mut self.animation_state);
+            }
             _ => {}
         }
 
@@ -283,7 +286,7 @@ impl event::EventHandler<ggez::GameError> for AppState {
         let mut canvas =
             graphics::Canvas::from_frame(ctx, graphics::Color::from([0.1, 0.2, 0.3, 1.0]));
 
-        match self.screen_state {
+        match &self.screen_state {
             ScreenState::Marathon |
             ScreenState::FourtyLines |
             ScreenState::Survival => {
@@ -360,6 +363,13 @@ impl event::EventHandler<ggez::GameError> for AppState {
                 high_score::render_high_score(
                     &self,
                     &self.menu_assets,
+                    &mut canvas,
+                    1.,
+                    );
+            }
+            ScreenState::HighscoreInput => {
+                input_name::render_input_name(
+                    self,
                     &mut canvas,
                     1.,
                     );
