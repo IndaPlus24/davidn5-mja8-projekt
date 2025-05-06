@@ -9,7 +9,13 @@ pub struct AnimationState {
 
     pub players_ready: (bool, bool),
     pub selected_item_high_score : (i32,i32),
-    pub highscore_list : Vec<(String, usize)>
+    pub highscore_list : Vec<(String, usize)>,
+
+    pub selected_key : (usize, usize),
+    pub ticks : usize,
+    pub size_index : usize, 
+    pub name_input : String,
+    pub name_ready : bool,
 }
 
 impl AnimationState {
@@ -37,6 +43,13 @@ impl AnimationState {
             // Arrow High Score
             selected_item_high_score : (0,0),
             highscore_list,
+
+            //Input Name
+            selected_key : (0,0),
+            ticks : 0,
+            size_index : 0,
+            name_input: String::from(""),
+            name_ready : false,
         }
     }
 }

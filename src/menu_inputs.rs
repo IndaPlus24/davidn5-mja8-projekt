@@ -1,5 +1,3 @@
-use ggez::input::keyboard::{self, KeyboardContext};
-
 use crate::{animation_state::AnimationState, bots::bot::Bot, consts::GameMode, Game, GameAction, KeyCode, ScreenState, get_scores_from_file};
 
 // TODO: change key codes according to launch type
@@ -153,5 +151,77 @@ pub fn get_highscore_list(animation_state: &mut AnimationState) -> Vec<(String, 
         2 => get_scores_from_file("res/highscores/highscore_fourty_lines.csv"),
         0 => get_scores_from_file("res/highscores/highscore_survival.csv"),
         _ => Vec::new(),
+    }
+}
+
+pub fn handle_name_inputs(
+    ctx: &ggez::Context,
+    _screen_state: &mut ScreenState,
+    animation_state: &mut AnimationState,
+) {
+    use ggez::input::keyboard::KeyCode::*;
+
+    let keyboard = &ctx.keyboard;
+
+    // Move cursor vertically
+    if keyboard.is_key_just_pressed(Down) {
+        if animation_state.selected_item_high_score.1 == 0 {
+            // Move down in keyboard or go to CONTINUE
+            if animation_state.selected_key.0 + 1 < 3 {
+                animation_state.selected_key.0 += 1;
+                animation_state.selected_key.1 = animation_state.selected_key.1.min(
+                    get_keyboard_row(animation_state.selected_key.0).len() - 1,
+                );
+            } else {
+                animation_state.selected_item_high_score.1 = 1; // CONTINUE
+            }
+        }
+    } else if keyboard.is_key_just_pressed(Up) {
+        if animation_state.selected_item_high_score.1 == 1 {
+            animation_state.selected_item_high_score.1 = 0; 
+        } else if animation_state.selected_key.0 > 0 {
+            animation_state.selected_key.0 -= 1;
+            animation_state.selected_key.1 = animation_state.selected_key.1.min(
+                get_keyboard_row(animation_state.selected_key.0).len() - 1,
+            );
+        }
+    }
+
+    // Move cursor horizontally
+    if animation_state.selected_item_high_score.1 == 0 {
+        let row_len = get_keyboard_row(animation_state.selected_key.0).len();
+        if keyboard.is_key_just_pressed(Right) {
+            animation_state.selected_key.1 = (animation_state.selected_key.1 + 1) % row_len;
+        } else if keyboard.is_key_just_pressed(Left) {
+            animation_state.selected_key.1 = (animation_state.selected_key.1 + row_len - 1) % row_len;
+        }
+    }
+
+    // Select key or activate continue
+    if keyboard.is_key_just_pressed(Space) || keyboard.is_key_just_pressed(Return) {
+        if animation_state.selected_item_high_score.1 == 1 {
+            animation_state.name_ready = true;
+        } else {
+            let row = get_keyboard_row(animation_state.selected_key.0);
+            if let Some(&ch) = row.get(animation_state.selected_key.1) {
+                if animation_state.selected_key == (2,7){
+                    animation_state.name_input.pop();
+                }else {
+                    if animation_state.name_input.len() < 10 {
+                        animation_state.name_input.push(*ch);
+                    }
+                }
+            }
+        }
+    }
+}
+
+// Helper to get keyboard rows
+fn get_keyboard_row(row: usize) -> &'static [&'static char] {
+    match row {
+        0 => &[&'Q', &'W', &'E', &'R',& 'T',& 'Y',& 'U', &'I', &'O',& 'P',&'Å'],
+        1 => &[&'A', &'S', &'D', &'F',& 'G',& 'H',& 'I', &'J', &'K',& 'L',&'Ö', &'Ä'],
+        2 => &[&'Z', &'X', &'C', &'V',& 'B',& 'N',& 'M',&'<'],
+        _ => &[],
     }
 }

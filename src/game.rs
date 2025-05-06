@@ -26,6 +26,7 @@ pub struct Game {
     pub piece_queue: VecDeque<PieceType>,
     pub can_hold: bool,
     pub controls: HashMap<GameAction, KeyCode>,
+    pub continue_to_highscore : bool,
 
     // Timing/movement tomfoolery
     pub moving_right: bool,
@@ -82,6 +83,7 @@ impl Game {
             piece_queue: VecDeque::new(),
             can_hold: true,
             controls: default_keyboard_keybindings(),
+            continue_to_highscore : false,
 
             moving_right: false,
             moving_left: false,
@@ -126,6 +128,7 @@ impl Game {
         self.garbage_queue = VecDeque::new();
         self.piece_queue = VecDeque::new();
         self.spawn_piece_from_queue();
+        self.continue_to_highscore  = false;
 
         self.moving_right = false;
         self.moving_left = false;
@@ -192,6 +195,9 @@ impl Game {
     pub fn update(&mut self, ctx: &mut Context) {
         if self.game_over {
             if ctx.keyboard.is_key_just_pressed(KeyCode::R) {self.reset_game();}
+            if ctx.keyboard.is_key_just_pressed(*self.controls.get(&GameAction::HardDrop).unwrap()){
+                self.continue_to_highscore = true;
+            }
             return;
         }
 

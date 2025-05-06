@@ -203,7 +203,7 @@ impl Game {
                         .dest(glam::Vec2::new(x, y))
                         .scale(glam::Vec2::new(scl, scl))
                 );
-            }
+            }    
         }
 
         self

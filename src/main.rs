@@ -22,7 +22,7 @@ use std::collections::HashMap;
 use std::error::Error;
 use std::path;
 use std::str::FromStr;
-use ui_components::{bot_selector, gamemode_selector, high_score, main_menu, singleplayer_selector, start_screen, versus_ready};
+use ui_components::{bot_selector, gamemode_selector, high_score, input_name, main_menu, singleplayer_selector, start_screen, versus_ready};
 
 pub use crate::config::input_config::*;
 pub use crate::game::Game;
@@ -206,22 +206,28 @@ pub fn save_scores_to_file(path: &str, scores: Vec<(String, usize)>) -> bool {
 impl event::EventHandler<ggez::GameError> for AppState {
     fn update(&mut self, ctx: &mut Context) -> GameResult {
 
-        if self.game_one.game_over{
-            //TODO Prompt name
-            let name = "test";
-            let path = match self.game_one.gamemode {
-                GameMode::Marathon => "res/highscores/highscore_marathon.csv",
-                GameMode::FourtyLines => "res/highscores/highscore_fourty_lines.csv",
-                _ => "res/highscores/highscore_survival.csv"
-            };
-            if self.game_one.gamemode == GameMode::FourtyLines{
-                let _ = Self::save_score(name.to_string(), self.game_one.final_time.as_secs() as usize, path);
-            }else{
-                let _ = Self::save_score(name.to_string(), self.game_one.score, path);
-            }
+        if self.game_one.game_over && self.game_one.continue_to_highscore{
             self.screen_state = ScreenState::HighscoreInput;
-            self.game_one.game_over = false;
-            self.screen_state = ScreenState::HighScore;
+            
+            if self.animation_state.name_ready {
+                let name = &self.animation_state.name_input;
+                let path = match self.game_one.gamemode {
+                    GameMode::Marathon => "res/highscores/highscore_marathon.csv",
+                    GameMode::FourtyLines => "res/highscores/highscore_fourty_lines.csv",
+                    _ => "res/highscores/highscore_survival.csv"
+                };
+                if self.game_one.gamemode == GameMode::FourtyLines{
+                    let _ = Self::save_score(name.to_string(), self.game_one.final_time.as_secs() as usize, path);
+                }else{
+                    let _ = Self::save_score(name.to_string(), self.game_one.score, path);
+                }
+                self.animation_state.name_input = "".to_string();
+                self.animation_state.name_ready = false;
+
+                self.game_one.game_over = false;
+                self.game_one.continue_to_highscore = false;
+                self.screen_state = ScreenState::HighScore;
+            }
         }
         match self.screen_state {
             ScreenState::Marathon    |
@@ -273,6 +279,9 @@ impl event::EventHandler<ggez::GameError> for AppState {
             ScreenState::HighScore => {
                 handle_highscore_inputs(ctx, &mut self.screen_state, &mut self.animation_state);
             }
+            ScreenState::HighscoreInput => {
+                handle_name_inputs(ctx, &mut self.screen_state, &mut self.animation_state);
+            }
             _ => {}
         }
 
@@ -283,7 +292,7 @@ impl event::EventHandler<ggez::GameError> for AppState {
         let mut canvas =
             graphics::Canvas::from_frame(ctx, graphics::Color::from([0.1, 0.2, 0.3, 1.0]));
 
-        match self.screen_state {
+        match &self.screen_state {
             ScreenState::Marathon |
             ScreenState::FourtyLines |
             ScreenState::Survival => {
@@ -360,6 +369,13 @@ impl event::EventHandler<ggez::GameError> for AppState {
                 high_score::render_high_score(
                     &self,
                     &self.menu_assets,
+                    &mut canvas,
+                    1.,
+                    );
+            }
+            ScreenState::HighscoreInput => {
+                input_name::render_input_name(
+                    self,
                     &mut canvas,
                     1.,
                     );
