@@ -269,6 +269,18 @@ impl event::EventHandler<ggez::GameError> for AppState {
             ScreenState::Versus => {
                 self.game_one.update(ctx);
                 self.game_two.update(ctx);
+
+                // Garbage handling
+                while self.game_one.garbage_outbound.len() > 0 {
+                    self.game_two.receive_garbage(
+                        self.game_one.garbage_outbound.pop_front().unwrap()
+                    );
+                }
+                while self.game_two.garbage_outbound.len() > 0 {
+                    self.game_one.receive_garbage(
+                        self.game_two.garbage_outbound.pop_front().unwrap()
+                    );
+                }
             }
             ScreenState::BotSelector => {
                 handle_bot_selector_inputs(ctx, &mut self.screen_state, &mut self.animation_state, &mut self.bot);
