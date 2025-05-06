@@ -156,7 +156,7 @@ pub fn get_highscore_list(animation_state: &mut AnimationState) -> Vec<(String, 
 
 pub fn handle_name_inputs(
     ctx: &ggez::Context,
-    screen_state: &mut ScreenState,
+    _screen_state: &mut ScreenState,
     animation_state: &mut AnimationState,
 ) {
     use ggez::input::keyboard::KeyCode::*;
