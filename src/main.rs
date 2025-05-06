@@ -60,7 +60,7 @@ impl AppState {
     ) -> GameResult<AppState> {
         let mut state = AppState {
             animation_state: AnimationState::new(get_scores_from_file("res/highscores/highscore_marathon.csv")),
-            screen_state: ScreenState::HighscoreInput,
+            screen_state: ScreenState::StartScreen,
             drifarkaden : false,
 
             piece_assets: AppState::preload_piece_assets(ctx),
@@ -207,21 +207,26 @@ impl event::EventHandler<ggez::GameError> for AppState {
     fn update(&mut self, ctx: &mut Context) -> GameResult {
 
         if self.game_one.game_over{
-            //TODO Prompt name
-            let name = "test";
-            let path = match self.game_one.gamemode {
-                GameMode::Marathon => "res/highscores/highscore_marathon.csv",
-                GameMode::FourtyLines => "res/highscores/highscore_fourty_lines.csv",
-                _ => "res/highscores/highscore_survival.csv"
-            };
-            if self.game_one.gamemode == GameMode::FourtyLines{
-                let _ = Self::save_score(name.to_string(), self.game_one.final_time.as_secs() as usize, path);
-            }else{
-                let _ = Self::save_score(name.to_string(), self.game_one.score, path);
-            }
             self.screen_state = ScreenState::HighscoreInput;
-            self.game_one.game_over = false;
-            self.screen_state = ScreenState::HighScore;
+
+            if self.animation_state.name_ready {
+                let name = &self.animation_state.name_input;
+                let path = match self.game_one.gamemode {
+                    GameMode::Marathon => "res/highscores/highscore_marathon.csv",
+                    GameMode::FourtyLines => "res/highscores/highscore_fourty_lines.csv",
+                    _ => "res/highscores/highscore_survival.csv"
+                };
+                if self.game_one.gamemode == GameMode::FourtyLines{
+                    let _ = Self::save_score(name.to_string(), self.game_one.final_time.as_secs() as usize, path);
+                }else{
+                    let _ = Self::save_score(name.to_string(), self.game_one.score, path);
+                }
+                self.animation_state.name_input = "".to_string();
+                self.animation_state.name_ready = false;
+
+                self.game_one.game_over = false;
+                self.screen_state = ScreenState::HighScore;
+            }
         }
         match self.screen_state {
             ScreenState::Marathon    |

@@ -15,6 +15,7 @@ pub struct AnimationState {
     pub ticks : usize,
     pub size_index : usize, 
     pub name_input : String,
+    pub name_ready : bool,
 }
 
 impl AnimationState {
@@ -48,6 +49,7 @@ impl AnimationState {
             ticks : 0,
             size_index : 0,
             name_input: String::from(""),
+            name_ready : false,
         }
     }
 }

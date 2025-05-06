@@ -1,5 +1,3 @@
-use ggez::input::keyboard::{self, KeyboardContext};
-
 use crate::{animation_state::AnimationState, bots::bot::Bot, consts::GameMode, Game, GameAction, KeyCode, ScreenState, get_scores_from_file};
 
 // TODO: change key codes according to launch type
@@ -202,7 +200,7 @@ pub fn handle_name_inputs(
     // Select key or activate continue
     if keyboard.is_key_just_pressed(Space) || keyboard.is_key_just_pressed(Return) {
         if animation_state.selected_item_high_score.1 == 1 {
-            *screen_state = ScreenState::HighScore;
+            animation_state.name_ready = true;
         } else {
             let row = get_keyboard_row(animation_state.selected_key.0);
             if let Some(&ch) = row.get(animation_state.selected_key.1) {
@@ -217,8 +215,8 @@ pub fn handle_name_inputs(
 // Helper to get keyboard rows
 fn get_keyboard_row(row: usize) -> &'static [&'static char] {
     match row {
-        0 => &[&'Q', &'W', &'E', &'R',& 'T',& 'Y',& 'U', &'I', &'O',& 'P',& 'Å'],
-        1 => &[&'A', &'S', &'D', &'F',& 'G',& 'H',& 'I', &'J', &'K',& 'L',& 'Ö', &'Ä'],
+        0 => &[&'Q', &'W', &'E', &'R',& 'T',& 'Y',& 'U', &'I', &'O',& 'P',&'Å'],
+        1 => &[&'A', &'S', &'D', &'F',& 'G',& 'H',& 'I', &'J', &'K',& 'L',&'Ö', &'Ä'],
         2 => &[&'Z', &'X', &'C', &'V',& 'B',& 'N',& 'M'],
         _ => &[],
     }

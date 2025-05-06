@@ -1,11 +1,10 @@
-use ggez::{glam, graphics::{self, Canvas, Color, Image, PxScale, Text, TextFragment}};
-use std::collections::HashMap;
+use ggez::{glam, graphics::{self, Canvas, Color, PxScale, Text, TextFragment}};
 
 use crate::AppState;
 use crate::consts::{WINDOW_HEIGHT, WINDOW_WIDTH};
 
 pub fn render_input_name(state : &mut AppState, canvas: &mut Canvas, scl: f32){
-    let mut animation_state = &mut state.animation_state;
+    let animation_state = &mut state.animation_state;
     let assets = &state.menu_assets;
     let center = (WINDOW_WIDTH / 2., WINDOW_HEIGHT / 2.);
 

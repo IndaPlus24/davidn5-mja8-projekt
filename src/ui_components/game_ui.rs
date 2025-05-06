@@ -5,8 +5,6 @@ use ggez::{glam, graphics::{self, Canvas, Image}};
 use crate::{consts::GameMode, Game, Piece, PieceType};
 use crate::consts::{BOARD_AMOUNT_COLUMNS, BOARD_AMOUNT_ROWS};
 
-use super::input_name::render_input_name;
-
 
 impl Game {
     pub fn render_board(&mut self, assets: &HashMap<String, Image>, canvas: &mut Canvas) -> &mut Self {
