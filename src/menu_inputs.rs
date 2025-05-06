@@ -204,8 +204,12 @@ pub fn handle_name_inputs(
         } else {
             let row = get_keyboard_row(animation_state.selected_key.0);
             if let Some(&ch) = row.get(animation_state.selected_key.1) {
-                if animation_state.name_input.len() < 10 {
-                    animation_state.name_input.push(*ch);
+                if animation_state.selected_key == (2,7){
+                    animation_state.name_input.pop();
+                }else {
+                    if animation_state.name_input.len() < 10 {
+                        animation_state.name_input.push(*ch);
+                    }
                 }
             }
         }
@@ -217,7 +221,7 @@ fn get_keyboard_row(row: usize) -> &'static [&'static char] {
     match row {
         0 => &[&'Q', &'W', &'E', &'R',& 'T',& 'Y',& 'U', &'I', &'O',& 'P',&'Å'],
         1 => &[&'A', &'S', &'D', &'F',& 'G',& 'H',& 'I', &'J', &'K',& 'L',&'Ö', &'Ä'],
-        2 => &[&'Z', &'X', &'C', &'V',& 'B',& 'N',& 'M'],
+        2 => &[&'Z', &'X', &'C', &'V',& 'B',& 'N',& 'M',&'<'],
         _ => &[],
     }
 }

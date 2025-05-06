@@ -48,7 +48,7 @@ pub fn render_input_name(state : &mut AppState, canvas: &mut Canvas, scl: f32){
     let keyboard = vec![
     vec!["Q","W","E","R","T","Y","U","I","O","P","Å"],
     vec!["A","S","D","F","G","H","I","J","K","L","Ö","Ä"],
-    vec!["Z","X","C","V","B","N","M"]];
+    vec!["Z","X","C","V","B","N","M","<"]];
 
     let mut sizes = Vec::new();
 
@@ -72,19 +72,35 @@ pub fn render_input_name(state : &mut AppState, canvas: &mut Canvas, scl: f32){
                 animation_state.size_index = (animation_state.size_index + 1) % sizes.len();
             }
             
-            let cont = Text::new(TextFragment{
-                text : format!("{}", key),
-                font : Some("Tetris font".to_string()),
-                color: Some(Color::WHITE), 
-                scale : Some(PxScale::from(size))
-        
-            });
-        
-            canvas.draw(&cont,
-                graphics::DrawParam::new()
-                    .dest(glam::Vec2::new(center.0 - image_half_size.0 + 200.+ 50. * k as f32, center.1 + i as f32 * 50.))
-                    .scale(glam::Vec2::new(scl, scl))
-            );
+            if (i,k) == (2,7){
+                let cont = Text::new(TextFragment{
+                    text : format!("<-"),
+                    font : Some("Tetris font".to_string()),
+                    color: Some(Color::WHITE), 
+                    scale : Some(PxScale::from(size))
+            
+                });
+            
+                canvas.draw(&cont,
+                    graphics::DrawParam::new()
+                        .dest(glam::Vec2::new(center.0 - image_half_size.0 + 200.+ 50. * k as f32, center.1 + i as f32 * 50.))
+                        .scale(glam::Vec2::new(scl, scl))
+                );
+            }else {
+                let cont = Text::new(TextFragment{
+                    text : format!("{}", key),
+                    font : Some("Tetris font".to_string()),
+                    color: Some(Color::WHITE), 
+                    scale : Some(PxScale::from(size))
+            
+                });
+            
+                canvas.draw(&cont,
+                    graphics::DrawParam::new()
+                        .dest(glam::Vec2::new(center.0 - image_half_size.0 + 200.+ 50. * k as f32, center.1 + i as f32 * 50.))
+                        .scale(glam::Vec2::new(scl, scl))
+                );
+            }
         }
     }
    
