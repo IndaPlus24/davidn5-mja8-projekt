@@ -4,16 +4,34 @@ use rand::random_range;
 use crate::Game;
 
 impl Game {
-    pub fn send_garbage(&mut self, amount: usize) {
+    pub fn send_garbage(&mut self, mut amount: usize) {
         self.attack += amount;
-        let column: usize = random_range(0..10);
 
-        let garbage = (column, amount, Some(Instant::now()));
-        self.garbage_outbound.push_back(garbage);
+        amount = self.negate_garbage(amount);
+
+        if amount > 0 {
+            let column: usize = random_range(0..10);
+            let garbage = (column, amount, Some(Instant::now()));
+            self.garbage_outbound.push_back(garbage);
+        }
     }
 
     pub fn receive_garbage(&mut self, garbage: (usize, usize, Option<Instant>)) {
         self.garbage_inbound.push_back(garbage);
+    }
+
+    // Remove garbage from inbound and return rest if present
+    fn negate_garbage(&mut self, mut amount: usize) -> usize {
+        while self.decrement_garbage() && amount > 0 {amount -= 1}
+        amount
+    }
+    fn decrement_garbage(&mut self) -> bool {
+        if let Some(g) = self.garbage_inbound.get_mut(0) {
+            g.1 -= 1; // Index of amount of garbage rows
+            if g.1 == 0 {self.garbage_inbound.pop_front();}
+            return true
+        }
+        false
     }
 
     pub fn update_garbage(&mut self) {

@@ -61,12 +61,18 @@ impl Game {
 
         // Attack
         if self.gamemode == GameMode::Versus {
-            let attack = get_attack_value(&score_type, self.back_to_back, self.combo);
-            if attack > 0 {
-                self.send_garbage(attack);
-            }
-            if self.all_clear {
-                self.send_garbage(10);
+            if self.prev_clear {
+                // Negate and attack
+                let attack = get_attack_value(&score_type, self.back_to_back, self.combo);
+                if attack > 0 {
+                    self.send_garbage(attack);
+                }
+                if self.all_clear {
+                    self.send_garbage(10);
+                }
+            } else {
+                // Recieve ready garbage
+                
             }
         }
 
