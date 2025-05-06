@@ -202,6 +202,7 @@ impl Game {
 
 
     pub fn update(&mut self, ctx: &mut Context) {
+        // Reset button. Remove before release
         if self.game_over {
             if ctx.keyboard.is_key_just_pressed(KeyCode::R) {self.reset_game();}
             if ctx.keyboard.is_key_just_pressed(*self.controls.get(&GameAction::HardDrop).unwrap()){
@@ -258,6 +259,8 @@ impl Game {
                 self.place_piece();
             }
         }
+
+        self.update_garbage();
     }
 
     pub fn on_ground_check(&mut self) {

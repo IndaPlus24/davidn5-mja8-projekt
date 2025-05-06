@@ -15,4 +15,14 @@ impl Game {
     pub fn receive_garbage(&mut self, garbage: (usize, usize, Option<Instant>)) {
         self.garbage_inbound.push_back(garbage);
     }
+
+    pub fn update_garbage(&mut self) {
+        self.garbage_inbound.iter_mut().for_each(|garbage: &mut (usize, usize, Option<Instant>)| {
+            if let Some(t) = garbage.2 {
+                if t.elapsed().as_millis() >= 500 {
+                    garbage.2 = None
+                }
+            }
+        });
+    }
 }
