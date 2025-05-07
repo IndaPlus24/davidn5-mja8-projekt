@@ -11,6 +11,8 @@ pub const GAME_2_SCL: f32 = 1.;
 pub const GARBAGE_CAP: usize = 8;
 pub const GARBAGE_DELAY: u128 = 2000; // time in milliseconds before garbage can appear on board
 
+pub const SURVIVAL_TIMER: u64 = 1000; // time in millis between each line spawn
+
 pub const BOARD_AMOUNT_COLUMNS: usize = 10;
 pub const BOARD_AMOUNT_ROWS: usize = 40;
 

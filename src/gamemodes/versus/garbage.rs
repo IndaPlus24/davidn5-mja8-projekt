@@ -80,6 +80,10 @@ impl Game {
             self.board[i] = self.board[i - 1].clone();
         }
 
+        if self.on_ground {
+            self.active_piece.midpoint.0 += 1;
+        }
+
         // Insert garbage row
         self.board[0] = row;
         self.garbage_received += 1;

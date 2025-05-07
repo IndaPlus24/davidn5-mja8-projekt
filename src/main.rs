@@ -15,13 +15,15 @@ mod gamemodes;
 use animation_state::AnimationState;
 use bots::bot::Bot;
 use bots::train_bot::train_ai;
-use consts::{GameMode, ScreenState, GAME_1_POS, GAME_1_SCL, GAME_2_POS, GAME_2_SCL, WINDOW_HEIGHT, WINDOW_WIDTH};
+use consts::{GameMode, ScreenState, GAME_1_POS, GAME_1_SCL, GAME_2_POS, GAME_2_SCL, SURVIVAL_TIMER, WINDOW_HEIGHT, WINDOW_WIDTH};
 use csv::{Reader, Writer};
 use menu_inputs::*;
+use rand::random_range;
 use std::collections::HashMap;
 use std::error::Error;
 use std::path;
 use std::str::FromStr;
+use std::time::{Duration, Instant};
 use ui_components::{bot_selector, gamemode_selector, high_score, input_name, main_menu, singleplayer_selector, start_screen, versus_ready};
 
 pub use crate::config::input_config::*;
@@ -45,6 +47,8 @@ struct AppState {
     menu_assets: HashMap<String, Image>,
     misc_assets: HashMap<String, Image>,
 
+    timer: Option<Instant>,
+
     // Games
     game_one: Game,
     game_two: Game,
@@ -67,6 +71,8 @@ impl AppState {
             board_assets: AppState::preload_board_assets(ctx),
             menu_assets: AppState::preload_menu_assets(ctx),
             misc_assets: AppState::preload_misc_assets(ctx),
+
+            timer: None,
 
             game_one: Game::new(GAME_1_POS, GAME_1_SCL),
             game_two: Game::new(GAME_2_POS, GAME_2_SCL),
@@ -249,6 +255,18 @@ impl event::EventHandler<ggez::GameError> for AppState {
         match self.screen_state {
             ScreenState::Singleplayer => {
                 self.game_one.update(ctx);
+
+                // Survival garbage
+                if self.game_one.gamemode == GameMode::Survival && !self.game_one.game_over {
+                    if let Some(t) = self.timer {
+                        if t.elapsed() >= Duration::from_millis(SURVIVAL_TIMER) {
+                            self.timer = Some(t + Duration::from_secs(1));
+                            self.game_one.add_garbage_row(random_range(0..9));
+                        }
+                    } else {
+                        self.timer = Some(Instant::now())
+                    }
+                }
             }
             ScreenState::StartScreen => {
                 handle_start_screen_inputs(ctx, &mut self.screen_state);

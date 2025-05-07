@@ -10,18 +10,18 @@ impl Game {
             self.start_time.elapsed()
         };
 
-        // Level
-        let mut level = Text::new(TextFragment{
-            text: "Level".to_string(),
+        // Garbage lines
+        let mut lines = Text::new(TextFragment{
+            text: "Garbage lines".to_string(),
             font: Some("Tetris font".to_string()),
             color: Some(Color::WHITE), 
             scale: Some(PxScale::from(16.))
         });
-        level.set_layout(TextLayout{
+        lines.set_layout(TextLayout{
             h_align: TextAlign::End,
             v_align: TextAlign::Middle
         });
-        canvas.draw(&level,
+        canvas.draw(&lines,
             graphics::DrawParam::new()
                 .dest(glam::Vec2::new(pos.0 + 156. * scl, pos.1 + 496. * scl))
                 .scale(glam::Vec2::new(scl, scl))
