@@ -41,5 +41,6 @@ pub enum ScreenState {
 pub enum GameMode {
     Marathon,
     FourtyLines,
+    Survival,
     Versus,
 }

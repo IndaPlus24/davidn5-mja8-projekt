@@ -67,6 +67,7 @@ pub fn handle_singleplayer_selector_inputs(ctx: &ggez::Context, screen_state: &m
             2 => {
                 *screen_state = ScreenState::Survival;
                 game.reset_game();
+                game.gamemode = GameMode::Survival;
             },
             _=> {
                 *screen_state = ScreenState::GameModeSelector;

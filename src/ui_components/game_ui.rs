@@ -254,13 +254,16 @@ impl Game {
         match self.gamemode {
             GameMode::Marathon => {
                 self.render_marathon_stats(canvas, pos, scl);
-            },
+            }
             GameMode::FourtyLines => {
                 self.render_40l_stats(canvas, pos, scl);
-            },
+            }
+            GameMode::Survival => {
+                self.render_survival_stats(canvas, pos, scl);
+            }
             GameMode::Versus => {
                 self.render_vs_stats(canvas, pos, scl);
-            },
+            }
         }
 
         self
