@@ -1,7 +1,7 @@
 use std::time::Instant;
 use rand::random_range;
 
-use crate::{board::{BOARD_AMOUNT_COLUMNS, BOARD_AMOUNT_ROWS}, consts::GARBAGE_CAP, Game, PieceType};
+use crate::{board::{BOARD_AMOUNT_COLUMNS, BOARD_AMOUNT_ROWS}, consts::{GARBAGE_CAP, GARBAGE_DELAY}, Game, PieceType};
 
 impl Game {
     pub fn send_garbage(&mut self, mut amount: usize) {
@@ -64,7 +64,7 @@ impl Game {
     pub fn update_garbage(&mut self) {
         self.garbage_inbound.iter_mut().for_each(|garbage: &mut (usize, usize, Option<Instant>)| {
             if let Some(t) = garbage.2 {
-                if t.elapsed().as_millis() >= 500 {
+                if t.elapsed().as_millis() >= GARBAGE_DELAY {
                     garbage.2 = None
                 }
             }

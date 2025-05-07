@@ -119,6 +119,23 @@ impl AppState {
             Image::from_path(ctx, "/board/hold.png").unwrap(),
         );
 
+        image_map.insert( // Attack of 1
+            "garb_s".to_string(),
+            Image::from_path(ctx, "/board/garbage_s.png").unwrap(),
+        );
+        image_map.insert( // Top part of attack > 1
+            "garb_t".to_string(),
+            Image::from_path(ctx, "/board/garbage_t.png").unwrap(),
+        );
+        image_map.insert( // Middle part of attack > 1
+            "garb_m".to_string(),
+            Image::from_path(ctx, "/board/garbage_m.png").unwrap(),
+        );
+        image_map.insert( // Bottom part of attack > 1
+            "garb_b".to_string(),
+            Image::from_path(ctx, "/board/garbage_b.png").unwrap(),
+        );
+
         image_map
     }
 

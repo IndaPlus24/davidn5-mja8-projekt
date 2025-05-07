@@ -1,8 +1,8 @@
 use std::collections::HashMap;
 
-use ggez::{glam, graphics::{self, Canvas, Image}};
+use ggez::{glam, graphics::{self, Canvas, Color, Image}};
 
-use crate::{consts::GameMode, Game, Piece, PieceType};
+use crate::{consts::{GameMode, GARBAGE_CAP}, Game, Piece, PieceType};
 use crate::consts::{BOARD_AMOUNT_COLUMNS, BOARD_AMOUNT_ROWS};
 
 
@@ -27,11 +27,48 @@ impl Game {
                     .dest(glam::Vec2::new(x, y))
                     .scale(glam::Vec2::new(scl, scl))
             );
-            // TODO: add garbage meter
+
+            // Garbage queue
+            let mut y_offset = 608. * scl;
+            let mut draw_garbage = |img: &Image, col: Color, pos: (f32, f32)| {
+                canvas.draw(
+                    img,
+                    graphics::DrawParam::new()
+                        .dest(glam::Vec2::new(pos.0 + 4. * scl, pos.1))
+                        .scale(glam::Vec2::new(scl, scl))
+                        .color(col)
+                );
+            };
+
+            self.garbage_inbound.iter().for_each(|g| {
+                let col = match g.2 {
+                    Some(_) => Color::from_rgba(255, 255, 255, 127),
+                    None => Color::WHITE
+                };
+
+                if g.1 == 1 {
+                    draw_garbage(assets.get("garb_s").unwrap(), col, (x, y + y_offset));
+                    y_offset -= 32. * scl;
+                } else {
+                    for i in 0..g.1 {
+                        if i == 0 {
+                            draw_garbage(assets.get("garb_b").unwrap(), col, (x, y + y_offset));
+                        }
+                        else if i == g.1 - 1 {
+                            draw_garbage(assets.get("garb_t").unwrap(), col, (x, y + y_offset));
+                        } else {
+                            draw_garbage(assets.get("garb_m").unwrap(), col, (x, y + y_offset));
+                        }
+                        y_offset -= 32. * scl;
+                    }
+                }
+            });
+
+            let y_offset = (639. - 32. * GARBAGE_CAP as f32) * scl;
             canvas.draw(
                 assets.get("garb_sep").unwrap(),
                 graphics::DrawParam::new()
-                    .dest(glam::Vec2::new(x + 6. * scl, y + 383. * scl))
+                    .dest(glam::Vec2::new(x + 8. * scl, y + y_offset))
                     .scale(glam::Vec2::new(scl, scl))
             );
             
