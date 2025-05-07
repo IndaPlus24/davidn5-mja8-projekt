@@ -1,6 +1,6 @@
 use ggez::{glam, graphics::{self, Canvas, Color, PxScale, Text, TextAlign, TextFragment, TextLayout}};
 
-use crate::Game;
+use crate::{ui_components::stat_formatting::*, Game};
 
 impl Game {
     pub fn level_up(&mut self) {
@@ -104,20 +104,4 @@ impl Game {
                 .scale(glam::Vec2::new(scl, scl))
         );
     }
-}
-
-fn get_formatted_score(score: usize) -> String {
-    let mut s = score;
-    let mega = s / 1_000_000;
-    s %= 1_000_000;
-    let kilo = s / 1_000;
-    s %= 1_000;
-
-    if mega == 0 {
-        if kilo == 0 {
-            return s.to_string();
-        }
-        return format!("{},{:0>3}", kilo, s);
-    }
-    return format!("{},{:0>3},{:0>3}", mega, kilo, s);
 }

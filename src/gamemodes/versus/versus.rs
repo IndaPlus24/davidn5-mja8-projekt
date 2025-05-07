@@ -1,6 +1,4 @@
-use std::time::Duration;
-
-use crate::{scoring::ScoreType, Game};
+use crate::{scoring::ScoreType, ui_components::stat_formatting::*, Game};
 
 use ggez::{glam, graphics::{self, Canvas, Color, PxScale, Text, TextAlign, TextFragment, TextLayout}};
 
@@ -171,13 +169,4 @@ impl Game {
                 .scale(glam::Vec2::new(scl, scl))
         );
     }
-}
-
-fn get_formatted_pps(pieces: usize, duration: Duration) -> String {
-    let pps = pieces as f32 / duration.as_secs_f32();
-    format!("{:.2}/s", pps)
-}
-fn get_formatted_apm(attack: usize, duration: Duration) -> String {
-    let apm = 60. * attack as f32 / duration.as_secs_f32();
-    format!("{:.2}/min", apm)
 }

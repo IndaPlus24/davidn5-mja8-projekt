@@ -20,13 +20,18 @@ pub struct Game {
 
     pub game_over: bool,
     pub objective_completed: bool,
-    pub garbage_queue: VecDeque<(usize, usize)>, // (amount, column of garbage hole)
-    pub active_piece: Piece,
-    pub held_piece: Option<PieceType>,
-    pub piece_queue: VecDeque<PieceType>,
-    pub can_hold: bool,
     pub controls: HashMap<GameAction, KeyCode>,
     pub continue_to_highscore : bool,
+
+    // Pieces
+    pub piece_queue: VecDeque<PieceType>,
+    pub active_piece: Piece,
+    pub held_piece: Option<PieceType>,
+    pub can_hold: bool,
+
+    // Garbage
+    pub garbage_outbound: VecDeque<(usize, usize, Option<Instant>)>, // (column, amount, Some(cooldown))
+    pub garbage_inbound: VecDeque<(usize, usize, Option<Instant>)>, // (column, amount, Some(cooldown))
 
     // Timing/movement tomfoolery
     pub moving_right: bool,
@@ -77,13 +82,15 @@ impl Game {
 
             game_over: false,
             objective_completed: false,
-            garbage_queue: VecDeque::new(),
             active_piece: Piece::new(PieceType::Z, 0),
             held_piece: None,
             piece_queue: VecDeque::new(),
             can_hold: true,
             controls: default_keyboard_keybindings(),
             continue_to_highscore : false,
+
+            garbage_inbound: VecDeque::new(),
+            garbage_outbound: VecDeque::new(),
 
             moving_right: false,
             moving_left: false,
@@ -125,10 +132,12 @@ impl Game {
         self.board = [[None; BOARD_AMOUNT_COLUMNS]; BOARD_AMOUNT_ROWS];
         self.game_over = false;
         self.held_piece = None;
-        self.garbage_queue = VecDeque::new();
         self.piece_queue = VecDeque::new();
         self.spawn_piece_from_queue();
         self.continue_to_highscore  = false;
+
+        self.garbage_inbound = VecDeque::new();
+        self.garbage_outbound = VecDeque::new();
 
         self.moving_right = false;
         self.moving_left = false;
@@ -193,6 +202,7 @@ impl Game {
 
 
     pub fn update(&mut self, ctx: &mut Context) {
+        // Reset button. Remove before release
         if self.game_over {
             if ctx.keyboard.is_key_just_pressed(KeyCode::R) {self.reset_game();}
             if ctx.keyboard.is_key_just_pressed(*self.controls.get(&GameAction::HardDrop).unwrap()){
@@ -249,6 +259,8 @@ impl Game {
                 self.place_piece();
             }
         }
+
+        self.update_garbage();
     }
 
     pub fn on_ground_check(&mut self) {

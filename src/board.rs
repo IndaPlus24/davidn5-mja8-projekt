@@ -1,6 +1,6 @@
 use std::time::Instant;
 use crate::consts::GameMode;
-use crate::gamemodes::versus::get_attack_value;
+use crate::gamemodes::versus::versus::get_attack_value;
 use crate::scoring::ScoreType;
 use crate::Game;
 use crate::Piece;
@@ -59,11 +59,21 @@ impl Game {
         let score_type = self.get_score_type();
         self.add_score(&score_type);
 
-        let attack = get_attack_value(&score_type, self.back_to_back, self.combo);
-        // TODO: send 10 extra attack if all clear  
-        if attack > 0 {println!("Attack: {}, b2b: {}", attack, self.back_to_back)}
-        self.attack += attack;
-        if self.all_clear {self.attack += 10}
+        // Attack
+        if self.gamemode == GameMode::Versus {
+            if self.prev_clear {
+                // Negate and attack
+                let attack = get_attack_value(&score_type, self.back_to_back, self.combo);
+                if attack > 0 {
+                    self.send_garbage(attack);
+                }
+                if self.all_clear {
+                    self.send_garbage(10);
+                }
+            } else {
+                self.recieve_ready_garbage();
+            }
+        }
 
         self.pieces += 1;
 
