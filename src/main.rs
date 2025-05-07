@@ -247,9 +247,7 @@ impl event::EventHandler<ggez::GameError> for AppState {
             }
         }
         match self.screen_state {
-            ScreenState::Marathon    |
-            ScreenState::FourtyLines |
-            ScreenState::Survival => {
+            ScreenState::Singleplayer => {
                 self.game_one.update(ctx);
             }
             ScreenState::StartScreen => {
@@ -322,9 +320,7 @@ impl event::EventHandler<ggez::GameError> for AppState {
             graphics::Canvas::from_frame(ctx, graphics::Color::from([0.1, 0.2, 0.3, 1.0]));
 
         match &self.screen_state {
-            ScreenState::Marathon |
-            ScreenState::FourtyLines |
-            ScreenState::Survival => {
+            ScreenState::Singleplayer => {
                 //Render game
                 self.game_one
                     .render_board(&self.board_assets, &mut canvas)

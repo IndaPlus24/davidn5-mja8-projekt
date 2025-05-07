@@ -52,25 +52,26 @@ pub fn handle_singleplayer_selector_inputs(ctx: &ggez::Context, screen_state: &m
     } else if keyboard.is_key_just_pressed(UP) {
         animation_state.selected_item_singleplayer_selector = (animation_state.selected_item_singleplayer_selector + 3) % 4;
     } else if keyboard.is_key_just_pressed(SELECT) {
-        match animation_state.selected_item_singleplayer_selector {
-            0 => {
-                *screen_state = ScreenState::Marathon;
-                game.reset_game();
-                game.gamemode = GameMode::Marathon;
-                game.set_level(1);
-            },
-            1 => {
-                *screen_state = ScreenState::FourtyLines;
-                game.reset_game();
-                game.gamemode = GameMode::FourtyLines;
-            },
-            2 => {
-                *screen_state = ScreenState::Survival;
-                game.reset_game();
-                game.gamemode = GameMode::Survival;
-            },
-            _=> {
+        let selected = animation_state.selected_item_singleplayer_selector;
+        match selected {
+            4 => {
                 *screen_state = ScreenState::GameModeSelector;
+            }
+            _ => {
+                *screen_state = ScreenState::Singleplayer;
+                game.reset_game();
+                match selected {
+                    0 => {
+                        game.gamemode = GameMode::Marathon;
+                        game.set_level(1);
+                    }
+                    1 => {
+                        game.gamemode = GameMode::FourtyLines;
+                    }
+                    _ => {
+                        game.gamemode = GameMode::Survival;
+                    }
+                }
             }
         }
     }

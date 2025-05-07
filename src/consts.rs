@@ -24,9 +24,7 @@ pub enum ScreenState {
     MainMenu,
     GameModeSelector,
     SingleplayerSelector,
-    Marathon,
-    FourtyLines,
-    Survival, // Low priority. Might add if we have time
+    Singleplayer,
     VersusReady,
     Versus,
     VersusRematch,
