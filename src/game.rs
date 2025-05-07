@@ -57,7 +57,8 @@ pub struct Game {
     pub lines: usize,
     pub level: usize,
     pub pieces: usize,
-    pub attack: usize,
+    pub garbage_sent: usize,
+    pub garbage_received: usize,
     pub start_time: Instant,
     pub final_time: Duration,
 
@@ -114,7 +115,8 @@ impl Game {
             lines: 0,
             level: 1,
             pieces: 0,
-            attack: 0,
+            garbage_sent: 0,
+            garbage_received: 0,
             start_time: Instant::now(),
             final_time: Duration::from_secs(0),
 
@@ -147,7 +149,8 @@ impl Game {
         self.lines = 0;
         self.set_level(1);
         self.pieces = 0;
-        self.attack = 0;
+        self.garbage_sent = 0;
+        self.garbage_received = 0;
         self.start_time = Instant::now();
 
         self.latest_clear_difficult = false;
