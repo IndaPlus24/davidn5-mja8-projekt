@@ -92,6 +92,4 @@ pub fn render_main_menu(assets: &HashMap<String, Image>, canvas: &mut Canvas, sc
             .dest(glam::Vec2::new(center.0 - image_half_size.0 + 100., arrow_y))
             .scale(glam::Vec2::new(scl, scl))
     );
-
-
 }

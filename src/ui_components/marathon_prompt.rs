@@ -115,5 +115,4 @@ pub fn render_marathon_prompt(assets: &HashMap<String, Image>, canvas: &mut Canv
                 .scale(glam::Vec2::new(scl, scl))
         );
     }
-    
 }

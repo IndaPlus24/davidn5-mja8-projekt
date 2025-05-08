@@ -555,6 +555,5 @@ pub fn main() -> GameResult {
         graphics::FontData::from_path(&context, "/PressStart2P-Regular.ttf")?,
     );
 
-    //println!("Opened Window...");
     event::run(context, event_loop, state) // Run window event loop
 }
