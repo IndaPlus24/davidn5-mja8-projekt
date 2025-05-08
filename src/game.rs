@@ -22,6 +22,10 @@ pub struct Game {
     pub controls: HashMap<GameAction, KeyCode>,
     pub continue_to_highscore: bool,
 
+    //Misc
+    pub countdown_start : Option<Instant>,
+    pub countdown_duration : Duration,
+
     // Pieces
     pub piece_queue: VecDeque<PieceType>,
     pub active_piece: Piece,
@@ -79,6 +83,9 @@ impl Game {
 
             board: [[None; BOARD_AMOUNT_COLUMNS]; BOARD_AMOUNT_ROWS],
             gamemode: GameMode::FourtyLines,
+
+            countdown_start : Some(Instant::now()),
+            countdown_duration : Duration::from_millis(3500),
 
             game_over: false,
             objective_completed: false,
@@ -144,6 +151,8 @@ impl Game {
         self.moving_left = false;
         self.last_drop = Instant::now();
 
+        self.countdown_start = Some(Instant::now());
+
         self.score = 0;
         self.lines = 0;
         self.set_level(1);
@@ -151,6 +160,7 @@ impl Game {
         self.garbage_sent = 0;
         self.garbage_received = 0;
         self.start_time = Instant::now();
+        
 
         self.latest_clear_difficult = false;
         self.back_to_back = false;
@@ -204,6 +214,16 @@ impl Game {
 
 
     pub fn update(&mut self, ctx: &mut Context) {
+        if let Some(start) = self.countdown_start{
+            let elapsed = start.elapsed(); 
+            if elapsed >= self.countdown_duration {
+                self.countdown_start = None
+            }
+            self.last_drop = Instant::now();
+            self.start_time = Instant::now();
+            return;
+        }
+
         // Reset button. Remove before release
         if self.game_over {
             if ctx.keyboard.is_key_just_pressed(KeyCode::R) {self.reset_game();}

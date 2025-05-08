@@ -1,6 +1,6 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, time::Duration};
 
-use ggez::{glam, graphics::{self, Canvas, Color, Image}};
+use ggez::{glam, graphics::{self, Canvas, Color, Image, PxScale, Text, TextAlign, TextFragment, TextLayout}};
 
 use crate::{consts::{GameMode, GARBAGE_CAP}, Game, Piece, PieceType};
 use crate::consts::{BOARD_AMOUNT_COLUMNS, BOARD_AMOUNT_ROWS};
@@ -198,11 +198,48 @@ impl Game {
     }
 
     pub fn render_misc(&mut self, assets: &HashMap<String, Image>, canvas: &mut Canvas) -> &mut Self {
+        
         let pos = self.canvas_pos;
         let scl = self.canvas_scl;
-
         let (mut x, y) = (pos.0 + 168. * scl, pos.1);
         if self.gamemode == GameMode::Versus {x += 36. * scl}
+
+        
+        // Countdown
+        if let Some(start) = self.countdown_start {
+            let elapsed = start.elapsed();
+            let remaining = self.countdown_duration.checked_sub(elapsed).unwrap_or(Duration::ZERO);
+            let seconds_left = remaining.as_secs();
+    
+            let countdown_text_str = match seconds_left {
+                3 => "3",
+                2 => "2",
+                1 => "1",
+                0 => "Go!",
+                _ => "",
+            };
+
+            let mut countdown_text = Text::new(TextFragment {
+                text: countdown_text_str.to_string(),
+                font: Some("Tetris font".to_string()),
+                color: Some(Color::WHITE),
+                scale: Some(PxScale::from(40.)),
+            });
+            countdown_text.set_layout(TextLayout {
+                h_align: TextAlign::Middle,
+                v_align: TextAlign::Begin,
+            });
+            let (x, y) = (pos.0 + 168. * scl + 6. * 32. , pos.1 + 288. * scl);
+
+
+            canvas.draw(
+                &countdown_text,
+                graphics::DrawParam::new()
+                    .dest(glam::Vec2::new(x,y))
+                    .scale(glam::Vec2::new(scl, scl)),
+            );
+
+        }
 
         // Line marker
         match self.gamemode {

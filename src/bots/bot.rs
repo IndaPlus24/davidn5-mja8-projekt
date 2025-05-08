@@ -1,5 +1,5 @@
 use std::{
-    collections::{HashSet, VecDeque}, time::Duration
+    collections::{HashSet, VecDeque}, time::{Duration, Instant}
 };
 
 use ggez::Context;
@@ -302,6 +302,16 @@ impl Bot {
     }
 
     pub fn render_bot_game(&mut self, _ctx: &mut Context) {
+
+        if let Some(start) = self.game.countdown_start{
+            let elapsed = start.elapsed(); 
+            if elapsed >= self.game.countdown_duration {
+                self.game.countdown_start = None
+            }
+            self.game.last_drop = Instant::now();
+            self.game.start_time = Instant::now();
+            return;
+        }
         if self.inputs.is_empty() {
             self.inputs = self.get_best_move_sequence();
 

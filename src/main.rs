@@ -273,7 +273,7 @@ impl event::EventHandler<ggez::GameError> for AppState {
                 }
 
                 // Survival garbage
-                if self.game_one.gamemode == GameMode::Survival && !self.game_one.game_over {
+                if self.game_one.gamemode == GameMode::Survival && !self.game_one.game_over && self.game_one.countdown_start.is_none() {
                     if let Some(t) = self.timer {
                         if t.elapsed() >= Duration::from_millis(SURVIVAL_TIMER) {
                             self.timer = Some(t + Duration::from_secs(1));
@@ -559,7 +559,9 @@ impl event::EventHandler<ggez::GameError> for AppState {
                 self.bot.game
                     .render_board(&self.board_assets, &mut canvas)
                     .render_pieces(&self.piece_assets,&mut canvas)
-                    .render_stats(&mut canvas);
+                    .render_stats(&mut canvas)
+                    .render_misc(&self.misc_assets, &mut canvas);
+
 
                 self.game_one
                     .render_board(&self.board_assets, &mut canvas)
