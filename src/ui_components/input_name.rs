@@ -3,7 +3,7 @@ use ggez::{glam, graphics::{self, Canvas, Color, PxScale, Text, TextFragment}};
 use crate::AppState;
 use crate::consts::{WINDOW_HEIGHT, WINDOW_WIDTH};
 
-pub fn render_input_name(state : &mut AppState, canvas: &mut Canvas, scl: f32){
+pub fn render_input_name(state: &mut AppState, canvas: &mut Canvas, scl: f32){
     let animation_state = &mut state.animation_state;
     let assets = &state.menu_assets;
     let center = (WINDOW_WIDTH / 2., WINDOW_HEIGHT / 2.);
@@ -19,10 +19,10 @@ pub fn render_input_name(state : &mut AppState, canvas: &mut Canvas, scl: f32){
     );
 
     let titel = Text::new(TextFragment{
-        text : "INPUT NAME".to_string(),
-        font : Some("Tetris font".to_string()),
+        text: "INPUT NAME".to_string(),
+        font: Some("Tetris font".to_string()),
         color: Some(Color::WHITE), 
-        scale : Some(PxScale::from(80.0))
+        scale: Some(PxScale::from(80.0))
 
     });
 
@@ -74,10 +74,10 @@ pub fn render_input_name(state : &mut AppState, canvas: &mut Canvas, scl: f32){
             
             if (i,k) == (2,7){
                 let cont = Text::new(TextFragment{
-                    text : format!("<-"),
-                    font : Some("Tetris font".to_string()),
+                    text: format!("<-"),
+                    font: Some("Tetris font".to_string()),
                     color: Some(Color::WHITE), 
-                    scale : Some(PxScale::from(size))
+                    scale: Some(PxScale::from(size))
             
                 });
             
@@ -88,10 +88,10 @@ pub fn render_input_name(state : &mut AppState, canvas: &mut Canvas, scl: f32){
                 );
             }else {
                 let cont = Text::new(TextFragment{
-                    text : format!("{}", key),
-                    font : Some("Tetris font".to_string()),
+                    text: format!("{}", key),
+                    font: Some("Tetris font".to_string()),
                     color: Some(Color::WHITE), 
-                    scale : Some(PxScale::from(size))
+                    scale: Some(PxScale::from(size))
             
                 });
             
@@ -106,10 +106,10 @@ pub fn render_input_name(state : &mut AppState, canvas: &mut Canvas, scl: f32){
    
 
     let cont = Text::new(TextFragment{
-        text : " CONTINUE".to_string(),
-        font : Some("Tetris font".to_string()),
+        text: " CONTINUE".to_string(),
+        font: Some("Tetris font".to_string()),
         color: Some(Color::WHITE), 
-        scale : Some(PxScale::from(60.0))
+        scale: Some(PxScale::from(60.0))
 
     });
 
@@ -121,10 +121,10 @@ pub fn render_input_name(state : &mut AppState, canvas: &mut Canvas, scl: f32){
 
     if animation_state.selected_item_high_score.1 == 1 {
         let arrow = Text::new(TextFragment{
-            text : ">".to_string(),
-            font : Some("Tetris font".to_string()),
+            text: ">".to_string(),
+            font: Some("Tetris font".to_string()),
             color: Some(Color::WHITE), 
-            scale : Some(PxScale::from(60.0))
+            scale: Some(PxScale::from(60.0))
     
         });
     

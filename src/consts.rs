@@ -21,7 +21,7 @@ pub const BOARD_AMOUNT_ROWS: usize = 40;
 
 //Delays (seconds)
 pub const DEFAULT_GRAVITY: f32 = 1.; // Cells per second
-pub const BOT_DIFFICULTY_SPEEDS : [f32 ; 3] = [5., 10. ,20.];
+pub const BOT_DIFFICULTY_SPEEDS: [f32 ; 3] = [5., 10. ,20.];
 
 #[derive(PartialEq)]
 pub enum ScreenState {
@@ -30,6 +30,7 @@ pub enum ScreenState {
     GameModeSelector,
     SingleplayerSelector,
     Singleplayer,
+    MarathonPrompt,
     FourtyLinesReset,
     VersusReady,
     Versus,

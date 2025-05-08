@@ -21,7 +21,7 @@ pub struct Game {
     pub game_over: bool,
     pub objective_completed: bool,
     pub controls: HashMap<GameAction, KeyCode>,
-    pub continue_to_highscore : bool,
+    pub continue_to_highscore: bool,
 
     // Pieces
     pub piece_queue: VecDeque<PieceType>,
@@ -88,7 +88,7 @@ impl Game {
             piece_queue: VecDeque::new(),
             can_hold: true,
             controls: default_keyboard_keybindings(),
-            continue_to_highscore : false,
+            continue_to_highscore: false,
 
             garbage_inbound: VecDeque::new(),
             garbage_outbound: VecDeque::new(),

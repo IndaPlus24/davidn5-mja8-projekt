@@ -19,10 +19,10 @@ pub fn render_reset_screen(assets: &HashMap<String, Image>, canvas: &mut Canvas,
 
     // Game over text
     let mut game_over = Text::new(TextFragment{
-        text : "GAME OVER".to_string(),
-        font : Some("Tetris font".to_string()),
+        text: "GAME OVER".to_string(),
+        font: Some("Tetris font".to_string()),
         color: Some(Color::WHITE), 
-        scale : Some(PxScale::from(90.))
+        scale: Some(PxScale::from(90.))
     });
     game_over.set_layout(TextLayout {
         h_align: TextAlign::Middle,
@@ -36,10 +36,10 @@ pub fn render_reset_screen(assets: &HashMap<String, Image>, canvas: &mut Canvas,
 
     // Options
     let retry = Text::new(TextFragment{
-        text : "Retry".to_string(),
-        font : Some("Tetris font".to_string()),
+        text: "Retry".to_string(),
+        font: Some("Tetris font".to_string()),
         color: Some(Color::WHITE), 
-        scale : Some(PxScale::from(60.))
+        scale: Some(PxScale::from(60.))
     });
     canvas.draw(&retry,
         graphics::DrawParam::new()
@@ -48,10 +48,10 @@ pub fn render_reset_screen(assets: &HashMap<String, Image>, canvas: &mut Canvas,
     );
 
     let main_menu = Text::new(TextFragment{
-        text : "Return to\nmain menu".to_string(),
-        font : Some("Tetris font".to_string()),
+        text: "Return to\nmain menu".to_string(),
+        font: Some("Tetris font".to_string()),
         color: Some(Color::WHITE), 
-        scale : Some(PxScale::from(60.))
+        scale: Some(PxScale::from(60.))
     });
     canvas.draw(&main_menu,
         graphics::DrawParam::new()
@@ -61,10 +61,10 @@ pub fn render_reset_screen(assets: &HashMap<String, Image>, canvas: &mut Canvas,
 
     // Arrow
     let arrow = Text::new(TextFragment{
-        text : ">".to_string(),
-        font : Some("Tetris font".to_string()),
+        text: ">".to_string(),
+        font: Some("Tetris font".to_string()),
         color: Some(Color::WHITE), 
-        scale : Some(PxScale::from(60.))
+        scale: Some(PxScale::from(60.))
     });
 
     let arrow_y = match animation_state.selected_item_reset_selector {

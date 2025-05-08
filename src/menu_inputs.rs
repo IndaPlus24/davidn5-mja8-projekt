@@ -66,24 +66,41 @@ pub fn handle_singleplayer_selector_inputs(ctx: &ggez::Context, screen_state: &m
     } else if keyboard.is_key_just_pressed(SELECT) {
         let selected = animation_state.selected_item_singleplayer_selector;
         *screen_state = match selected {
+            0 => {
+                animation_state.selected_item_marathon_prompt = (1, 0);
+                ScreenState::MarathonPrompt
+            }
             3 => ScreenState::GameModeSelector,
             _ => {
                 game.reset_game();
                 match selected {
-                    0 => {
-                        game.gamemode = GameMode::Marathon;
-                        game.set_level(1);
-                    }
-                    1 => {
-                        game.gamemode = GameMode::FourtyLines;
-                    }
-                    _ => {
-                        game.gamemode = GameMode::Survival;
-                    }
+                    1 => game.gamemode = GameMode::FourtyLines,
+                    _ => game.gamemode = GameMode::Survival
                 }
                 ScreenState::Singleplayer
             }
         }
+    }
+}
+
+pub fn handle_marathon_prompt_inputs(ctx: &ggez::Context, screen_state: &mut ScreenState, animation_state: &mut AnimationState, game: &mut Game) {
+    let keyboard = &ctx.keyboard;
+    if keyboard.is_key_just_pressed(DOWN)
+    || keyboard.is_key_just_pressed(UP) {
+        animation_state.selected_item_marathon_prompt.1 = (animation_state.selected_item_marathon_prompt.1 + 1) % 2;
+    } else if keyboard.is_key_just_pressed(LEFT) { // Decrease starting level
+        let mut new_level = animation_state.selected_item_marathon_prompt.0 - 1;
+        if new_level == 0 {new_level = 1}
+        animation_state.selected_item_marathon_prompt.0 = new_level;
+    } else if keyboard.is_key_just_pressed(RIGHT) { // Increase starting level
+        let mut new_level = animation_state.selected_item_marathon_prompt.0 + 1;
+        if new_level == 16 {new_level = 15}
+        animation_state.selected_item_marathon_prompt.0 = new_level;
+    } else if keyboard.is_key_just_pressed(SELECT) { // Set level and start game
+        game.reset_game();
+        game.set_level(animation_state.selected_item_marathon_prompt.0);
+        game.gamemode = GameMode::Marathon;
+        *screen_state = ScreenState::Singleplayer
     }
 }
 
@@ -126,7 +143,7 @@ pub fn handle_versus_prepost_inputs(
     }
 }
 
-pub fn handle_bot_selector_inputs(ctx: &ggez::Context, screen_state: &mut ScreenState, animation_state: &mut AnimationState, bot : &mut Bot) {
+pub fn handle_bot_selector_inputs(ctx: &ggez::Context, screen_state: &mut ScreenState, animation_state: &mut AnimationState, bot: &mut Bot) {
     let keyboard = &ctx.keyboard;
     if keyboard.is_key_just_pressed(DOWN) {
         animation_state.selected_item_bot_selector = (animation_state.selected_item_bot_selector + 1) % 4;

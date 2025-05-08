@@ -39,7 +39,7 @@ struct AppState {
     //Screen states and info
     animation_state: AnimationState,
     screen_state: ScreenState,
-    drifarkaden : bool,
+    drifarkaden: bool,
 
     // Assets
     piece_assets: HashMap<PieceType, Image>,
@@ -65,7 +65,7 @@ impl AppState {
         let mut state = AppState {
             animation_state: AnimationState::new(get_scores_from_file("res/highscores/highscore_marathon.csv")),
             screen_state: ScreenState::StartScreen,
-            drifarkaden : false,
+            drifarkaden: false,
 
             piece_assets: AppState::preload_piece_assets(ctx),
             board_assets: AppState::preload_board_assets(ctx),
@@ -179,7 +179,7 @@ impl AppState {
         image_map
     }
 
-    fn save_score(name: String, score: usize, path : &str) -> Result<(), Box<dyn Error>> {
+    fn save_score(name: String, score: usize, path: &str) -> Result<(), Box<dyn Error>> {
         //Get previous scores and add new score
         let mut scores = get_scores_from_file(path);
         scores.push((name, score));
@@ -287,6 +287,9 @@ impl event::EventHandler<ggez::GameError> for AppState {
             }
             ScreenState::SingleplayerSelector => {
                 handle_singleplayer_selector_inputs(ctx, &mut self.screen_state, &mut self.animation_state, &mut self.game_one);
+            }
+            ScreenState::MarathonPrompt => {
+                handle_marathon_prompt_inputs(ctx, &mut self.screen_state, &mut self.animation_state, &mut self.game_one);
             }
             ScreenState::FourtyLinesReset => {
                 handle_reset_screen_inputs(ctx, &mut self.screen_state, &mut self.animation_state, &mut self.game_one);
@@ -420,6 +423,14 @@ impl event::EventHandler<ggez::GameError> for AppState {
             }
             ScreenState::SingleplayerSelector => {
                 singleplayer_selector::render_gamemode_selector(
+                    &self.menu_assets,
+                    &mut canvas,
+                    1.,
+                    &mut self.animation_state,
+                );
+            }
+            ScreenState::MarathonPrompt => {
+                marathon_prompt::render_marathon_prompt(
                     &self.menu_assets,
                     &mut canvas,
                     1.,

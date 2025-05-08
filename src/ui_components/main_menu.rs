@@ -18,10 +18,10 @@ pub fn render_main_menu(assets: &HashMap<String, Image>, canvas: &mut Canvas, sc
     );
 
     let main_menu = Text::new(TextFragment{
-        text : "MAIN MENU".to_string(),
-        font : Some("Tetris font".to_string()),
+        text: "MAIN MENU".to_string(),
+        font: Some("Tetris font".to_string()),
         color: Some(Color::WHITE), 
-        scale : Some(PxScale::from(90.0))
+        scale: Some(PxScale::from(90.0))
 
     });
 
@@ -32,10 +32,10 @@ pub fn render_main_menu(assets: &HashMap<String, Image>, canvas: &mut Canvas, sc
     );
 
     let start_game = Text::new(TextFragment{
-        text : "START GAME".to_string(),
-        font : Some("Tetris font".to_string()),
+        text: "START GAME".to_string(),
+        font: Some("Tetris font".to_string()),
         color: Some(Color::WHITE), 
-        scale : Some(PxScale::from(60.0))
+        scale: Some(PxScale::from(60.0))
 
     });
 
@@ -46,10 +46,10 @@ pub fn render_main_menu(assets: &HashMap<String, Image>, canvas: &mut Canvas, sc
     );
 
     let highscores = Text::new(TextFragment{
-        text : "HIGH SCORES".to_string(),
-        font : Some("Tetris font".to_string()),
+        text: "HIGH SCORES".to_string(),
+        font: Some("Tetris font".to_string()),
         color: Some(Color::WHITE), 
-        scale : Some(PxScale::from(60.0))
+        scale: Some(PxScale::from(60.0))
 
     });
 
@@ -60,10 +60,10 @@ pub fn render_main_menu(assets: &HashMap<String, Image>, canvas: &mut Canvas, sc
     );
 
     let settings = Text::new(TextFragment{
-        text : "SETTINGS".to_string(),
-        font : Some("Tetris font".to_string()),
+        text: "SETTINGS".to_string(),
+        font: Some("Tetris font".to_string()),
         color: Some(Color::WHITE), 
-        scale : Some(PxScale::from(60.0))
+        scale: Some(PxScale::from(60.0))
 
     });
 
@@ -74,10 +74,10 @@ pub fn render_main_menu(assets: &HashMap<String, Image>, canvas: &mut Canvas, sc
     );
 
     let arrow = Text::new(TextFragment{
-        text : ">".to_string(),
-        font : Some("Tetris font".to_string()),
+        text: ">".to_string(),
+        font: Some("Tetris font".to_string()),
         color: Some(Color::WHITE), 
-        scale : Some(PxScale::from(60.0))
+        scale: Some(PxScale::from(60.0))
 
     });
 

@@ -5,15 +5,16 @@ pub struct AnimationState {
     pub selected_item_main_menu: i32,
     pub selected_item_gamemode_selector: i32,
     pub selected_item_singleplayer_selector: i32,
+    pub selected_item_marathon_prompt: (usize, usize),
     pub selected_item_reset_selector: i32,
     pub selected_item_bot_selector: i32,
 
     pub players_ready: (bool, bool),
     pub selected_item_high_score: (i32,i32),
-    pub highscore_list : Vec<(String, usize)>,
+    pub highscore_list: Vec<(String, usize)>,
 
     pub selected_key: (usize, usize),
-    pub ticks : usize,
+    pub ticks: usize,
     pub size_index: usize, 
     pub name_input: String,
     pub name_ready: bool,
@@ -34,6 +35,9 @@ impl AnimationState {
 
             // Arrow Singleplayer Selector
             selected_item_singleplayer_selector: 0, // (0 - Marathon)....(1 - 40L) .....(2 - Survival)
+
+            // Arrow(s) Marathon Prompt
+            selected_item_marathon_prompt: (1, 0), // ((n, 0) - Start Level) ... ((n, 1) - Confirm)
 
             // Arrow Reset Selector
             selected_item_reset_selector: 0, // (0 - Reset) ... (1 - Main Menu)
