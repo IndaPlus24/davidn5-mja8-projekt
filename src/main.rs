@@ -229,7 +229,7 @@ pub fn save_scores_to_file(path: &str, scores: Vec<(String, usize)>) -> bool {
 impl event::EventHandler<ggez::GameError> for AppState {
     fn update(&mut self, ctx: &mut Context) -> GameResult {
 
-        if self.game_one.game_over && self.game_one.continue_to_highscore{
+        if self.game_one.game_over && self.game_one.continue_to_highscore {
             self.screen_state = ScreenState::HighscoreInput;
             
             if self.animation_state.name_ready {
