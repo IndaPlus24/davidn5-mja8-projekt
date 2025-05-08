@@ -72,7 +72,7 @@ pub fn render_versus_rematch(
     });
     canvas.draw(&p1,
         graphics::DrawParam::new()
-            .dest(glam::Vec2::new(center.0 - image_half_size.0 / 2., center.1 - 100.))
+            .dest(glam::Vec2::new(center.0 - 250., center.1 - 100.))
             .scale(glam::Vec2::new(scl, scl))
     );
 
@@ -93,7 +93,7 @@ pub fn render_versus_rematch(
     });
     canvas.draw(&p1_ready,
         graphics::DrawParam::new()
-            .dest(glam::Vec2::new(center.0 - image_half_size.0 / 2., center.1 + 20.))
+            .dest(glam::Vec2::new(center.0 - 250., center.1 + 20.))
             .scale(glam::Vec2::new(scl, scl))
     );
 
@@ -110,7 +110,7 @@ pub fn render_versus_rematch(
     });
     canvas.draw(&p2,
         graphics::DrawParam::new()
-            .dest(glam::Vec2::new(center.0 + image_half_size.0 / 2., center.1 - 100.))
+            .dest(glam::Vec2::new(center.0 + 250., center.1 - 100.))
             .scale(glam::Vec2::new(scl, scl))
     );
 
@@ -131,7 +131,7 @@ pub fn render_versus_rematch(
     });
     canvas.draw(&p2_ready,
         graphics::DrawParam::new()
-            .dest(glam::Vec2::new(center.0 + image_half_size.0 / 2., center.1 + 20.))
+            .dest(glam::Vec2::new(center.0 + 250., center.1 + 20.))
             .scale(glam::Vec2::new(scl, scl))
     );
 
@@ -149,7 +149,7 @@ pub fn render_versus_rematch(
     });
     canvas.draw(&time,
         graphics::DrawParam::new()
-            .dest(glam::Vec2::new(center.0, center.1 + 200.))
+            .dest(glam::Vec2::new(center.0, center.1 + 370.))
             .scale(glam::Vec2::new(scl, scl))
     );
 }

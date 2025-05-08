@@ -332,6 +332,22 @@ impl event::EventHandler<ggez::GameError> for AppState {
                     self.game_two.gamemode = GameMode::Versus;
                 }
 
+                if let Some(t) = self.timer {
+                    if t.elapsed() >= Duration::from_secs(10) {
+                        if !self.drifarkaden {
+                            self.game_one.controls = default_keyboard_keybindings();
+                        }
+
+                        self.game_one.canvas_pos = GAME_1_SOLO_POS;
+                        self.game_one.canvas_scl = GAME_1_SOLO_SCL;
+
+                        self.screen_state = ScreenState::MainMenu;
+                        self.timer = None;
+                    }
+                } else {
+                    self.timer = Some(Instant::now());
+                }
+
                 handle_versus_prepost_inputs(
                     ctx,
                     &mut self.screen_state,
@@ -514,6 +530,7 @@ impl event::EventHandler<ggez::GameError> for AppState {
                     &mut canvas,
                     1.,
                     &mut self.animation_state,
+                    self.timer,
                 );
             }
             ScreenState::Versus => {

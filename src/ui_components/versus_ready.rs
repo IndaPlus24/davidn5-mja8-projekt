@@ -1,5 +1,5 @@
 use ggez::{glam, graphics::{self, Canvas, Color, Image, PxScale, Text, TextAlign, TextFragment, TextLayout}};
-use std::collections::HashMap;
+use std::{collections::HashMap, time::Instant};
 
 use crate::animation_state::AnimationState;
 use crate::consts::{WINDOW_HEIGHT, WINDOW_WIDTH};
@@ -8,7 +8,8 @@ pub fn render_versus_ready(
     assets: &HashMap<String, Image>,
     canvas: &mut Canvas,
     scl: f32,
-    animation_state: &mut AnimationState
+    animation_state: &mut AnimationState,
+    timer: Option<Instant>
 ) {
     let center = (WINDOW_WIDTH / 2., WINDOW_HEIGHT / 2.);
 
@@ -35,7 +36,7 @@ pub fn render_versus_ready(
     });
     canvas.draw(&p1,
         graphics::DrawParam::new()
-            .dest(glam::Vec2::new(center.0 - image_half_size.0 / 2., center.1 - 100.))
+            .dest(glam::Vec2::new(center.0 - 250., center.1 - 100.))
             .scale(glam::Vec2::new(scl, scl))
     );
 
@@ -56,7 +57,7 @@ pub fn render_versus_ready(
     });
     canvas.draw(&p1_ready,
         graphics::DrawParam::new()
-            .dest(glam::Vec2::new(center.0 - image_half_size.0 / 2., center.1 + 20.))
+            .dest(glam::Vec2::new(center.0 - 250., center.1 + 20.))
             .scale(glam::Vec2::new(scl, scl))
     );
 
@@ -73,7 +74,7 @@ pub fn render_versus_ready(
     });
     canvas.draw(&p2,
         graphics::DrawParam::new()
-            .dest(glam::Vec2::new(center.0 + image_half_size.0 / 2., center.1 - 100.))
+            .dest(glam::Vec2::new(center.0 + 250., center.1 - 100.))
             .scale(glam::Vec2::new(scl, scl))
     );
 
@@ -94,7 +95,27 @@ pub fn render_versus_ready(
     });
     canvas.draw(&p2_ready,
         graphics::DrawParam::new()
-            .dest(glam::Vec2::new(center.0 + image_half_size.0 / 2., center.1 + 20.))
+            .dest(glam::Vec2::new(center.0 + 250., center.1 + 20.))
             .scale(glam::Vec2::new(scl, scl))
     );
+
+    // Timer
+    if let Some(t) = timer {
+        let time_left = 10 - t.elapsed().as_secs();
+        let mut time = Text::new(TextFragment{
+            text: format!("Returning to main menu in... {}", time_left),
+            font: Some("Tetris font".to_string()),
+            color: Some(Color::WHITE), 
+            scale: Some(PxScale::from(25.))
+        });
+        time.set_layout(TextLayout{
+            h_align: TextAlign::Middle,
+            v_align: TextAlign::Begin
+        });
+        canvas.draw(&time,
+            graphics::DrawParam::new()
+                .dest(glam::Vec2::new(center.0, center.1 + 370.))
+                .scale(glam::Vec2::new(scl, scl))
+        );
+    }
 }
