@@ -80,6 +80,10 @@ impl AppState {
             bot: Bot::new(0),
         };
 
+        state.bot.game.canvas_pos = GAME_2_VS_POS; 
+        state.bot.game.canvas_scl = GAME_2_VS_SCL;
+
+
         state.game_one.reset_game();
         state.game_two.reset_game();
 
@@ -301,7 +305,7 @@ impl event::EventHandler<ggez::GameError> for AppState {
             // Versus
             ScreenState::VersusReady => {
                 if self.game_one.gamemode != GameMode::Versus
-                || self.game_one.gamemode != GameMode::Versus {
+                || self.game_two.gamemode != GameMode::Versus {
                     if !self.drifarkaden {
                         let vs_controls = multi_controller_keyboard_keybindings();
                         self.game_one.controls = vs_controls[0].clone();
@@ -369,10 +373,43 @@ impl event::EventHandler<ggez::GameError> for AppState {
             }
 
             ScreenState::BotSelector => {
-                handle_bot_selector_inputs(ctx, &mut self.screen_state, &mut self.animation_state, &mut self.bot);
+                handle_bot_selector_inputs(ctx,self,);
             }
             ScreenState::VsBots => {
-                self.bot.render_bot_game(ctx);
+
+                if self.game_one.gamemode != GameMode::Versus{
+                    if !self.drifarkaden {
+                        self.game_one.controls = default_keyboard_keybindings();
+                    }
+
+                    self.game_one.canvas_pos = GAME_1_VS_POS;
+                    self.game_one.canvas_scl = GAME_1_VS_SCL;
+                    
+                    self.game_one.gamemode = GameMode::Versus;
+                    self.bot.game.gamemode = GameMode::Versus;
+                }
+
+                if self.game_one.game_over || self.bot.game.game_over {
+                    if ctx.keyboard.is_key_just_pressed(*self.game_one.controls.get(&GameAction::HardDrop).unwrap()) {
+                        self.screen_state = ScreenState::MainMenu;
+                    }
+                }else {
+                    self.game_one.update(ctx);
+                    self.bot.render_bot_game(ctx);
+                }
+
+                // Garbage handling
+                while self.game_one.garbage_outbound.len() > 0 {
+                    self.bot.game.receive_garbage(
+                        self.game_one.garbage_outbound.pop_front().unwrap()
+                    );
+                }
+                while self.bot.game.garbage_outbound.len() > 0 {
+                    self.game_one.receive_garbage(
+                        self.bot.game.garbage_outbound.pop_front().unwrap()
+                    );
+                }
+
             }
             ScreenState::HighScore => {
                 handle_highscore_inputs(ctx, &mut self.screen_state, &mut self.animation_state);
@@ -519,6 +556,12 @@ impl event::EventHandler<ggez::GameError> for AppState {
                     .render_board(&self.board_assets, &mut canvas)
                     .render_pieces(&self.piece_assets,&mut canvas)
                     .render_stats(&mut canvas);
+
+                self.game_one
+                    .render_board(&self.board_assets, &mut canvas)
+                    .render_pieces(&self.piece_assets, &mut canvas)
+                    .render_stats(&mut canvas)
+                    .render_misc(&self.misc_assets, &mut canvas);
             }
         }
 

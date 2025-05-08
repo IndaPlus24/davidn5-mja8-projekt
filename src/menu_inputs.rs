@@ -1,4 +1,4 @@
-use crate::{animation_state::AnimationState, bots::bot::Bot, consts::GameMode, get_scores_from_file, AppState, Game, GameAction, KeyCode, ScreenState};
+use crate::{animation_state::AnimationState, consts::GameMode, get_scores_from_file, AppState, Game, GameAction, KeyCode, ScreenState};
 
 // TODO: change key codes according to launch type
 const UP: KeyCode = KeyCode::Up;
@@ -143,7 +143,12 @@ pub fn handle_versus_prepost_inputs(
     }
 }
 
-pub fn handle_bot_selector_inputs(ctx: &ggez::Context, screen_state: &mut ScreenState, animation_state: &mut AnimationState, bot: &mut Bot) {
+pub fn handle_bot_selector_inputs(ctx: &ggez::Context, state : &mut AppState) {
+
+    let animation_state = &mut state.animation_state;
+    let screen_state = &mut state.screen_state;
+    let bot = &mut state.bot;
+
     let keyboard = &ctx.keyboard;
     if keyboard.is_key_just_pressed(DOWN) {
         animation_state.selected_item_bot_selector = (animation_state.selected_item_bot_selector + 1) % 4;
@@ -153,14 +158,20 @@ pub fn handle_bot_selector_inputs(ctx: &ggez::Context, screen_state: &mut Screen
         *screen_state = match animation_state.selected_item_bot_selector {
             0 => {
                 bot.difficulty = 0;
+                bot.game.reset_game();
+                state.game_one.reset_game();
                 ScreenState::VsBots
             },
             1 => {
                 bot.difficulty = 1;
+                bot.game.reset_game();
+                state.game_one.reset_game();
                 ScreenState::VsBots
             },
             2 => {
                 bot.difficulty = 2;
+                bot.game.reset_game();
+                state.game_one.reset_game();
                 ScreenState::VsBots
             },
             _ => ScreenState::GameModeSelector
