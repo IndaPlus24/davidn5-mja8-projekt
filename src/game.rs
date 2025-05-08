@@ -208,9 +208,11 @@ impl Game {
         // Reset button. Remove before release
         if self.game_over {
             if ctx.keyboard.is_key_just_pressed(KeyCode::R) {self.reset_game();}
-            if ctx.keyboard.is_key_just_pressed(*self.controls.get(&GameAction::HardDrop).unwrap()) 
-            && self.gamemode != GameMode::Versus {
-                self.continue_to_highscore = true;
+            if ctx.keyboard.is_key_just_pressed(*self.controls.get(&GameAction::HardDrop).unwrap()) {
+                if (self.gamemode == GameMode::FourtyLines
+                && !self.objective_completed)
+                || self.gamemode == GameMode::Versus {}
+                else {self.continue_to_highscore = true}
             }
             return;
         }

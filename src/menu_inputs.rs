@@ -87,6 +87,23 @@ pub fn handle_singleplayer_selector_inputs(ctx: &ggez::Context, screen_state: &m
     }
 }
 
+pub fn handle_reset_screen_inputs(ctx: &ggez::Context, screen_state: &mut ScreenState, animation_state: &mut AnimationState, game: &mut Game) {
+    let keyboard = &ctx.keyboard;
+    if keyboard.is_key_just_pressed(DOWN)
+    || keyboard.is_key_just_pressed(UP) {
+        animation_state.selected_item_reset_selector = (animation_state.selected_item_reset_selector + 1) % 2;
+    } else if keyboard.is_key_just_pressed(SELECT) {
+        let selected = animation_state.selected_item_reset_selector;
+        *screen_state = match selected {
+            0 => {
+                game.reset_game();
+                ScreenState::Singleplayer
+            }
+            _ => ScreenState::MainMenu
+        }
+    }
+}
+
 pub fn handle_versus_prepost_inputs(
     ctx: &ggez::Context,
     screen_state: &mut ScreenState,

@@ -256,6 +256,14 @@ impl event::EventHandler<ggez::GameError> for AppState {
             ScreenState::Singleplayer => {
                 self.game_one.update(ctx);
 
+                // 40L top-out check
+                if self.game_one.gamemode == GameMode::FourtyLines
+                && self.game_one.game_over
+                && !self.game_one.objective_completed {
+                    self.animation_state.selected_item_reset_selector = 0;
+                    self.screen_state = ScreenState::FourtyLinesReset
+                }
+
                 // Survival garbage
                 if self.game_one.gamemode == GameMode::Survival && !self.game_one.game_over {
                     if let Some(t) = self.timer {
@@ -279,6 +287,9 @@ impl event::EventHandler<ggez::GameError> for AppState {
             }
             ScreenState::SingleplayerSelector => {
                 handle_singleplayer_selector_inputs(ctx, &mut self.screen_state, &mut self.animation_state, &mut self.game_one);
+            }
+            ScreenState::FourtyLinesReset => {
+                handle_reset_screen_inputs(ctx, &mut self.screen_state, &mut self.animation_state, &mut self.game_one);
             }
 
             // Versus
@@ -409,6 +420,14 @@ impl event::EventHandler<ggez::GameError> for AppState {
             }
             ScreenState::SingleplayerSelector => {
                 singleplayer_selector::render_gamemode_selector(
+                    &self.menu_assets,
+                    &mut canvas,
+                    1.,
+                    &mut self.animation_state,
+                );
+            }
+            ScreenState::FourtyLinesReset => {
+                reset_screen::render_reset_screen(
                     &self.menu_assets,
                     &mut canvas,
                     1.,
