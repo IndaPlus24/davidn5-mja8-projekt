@@ -255,9 +255,9 @@ impl event::EventHandler<ggez::GameError> for AppState {
                     _ => "res/highscores/highscore_survival.csv"
                 };
                 if self.game_one.gamemode == GameMode::FourtyLines{
-                    let _ = Self::save_score(name.to_string(), self.game_one.final_time.as_millis() as usize, path, true);
-                }else if self.game_one.gamemode == GameMode::Survival {
                     let _ = Self::save_score(name.to_string(), self.game_one.final_time.as_millis() as usize, path, false);
+                }else if self.game_one.gamemode == GameMode::Survival {
+                    let _ = Self::save_score(name.to_string(), self.game_one.final_time.as_millis() as usize, path, true);
                 }else{
                     let _ = Self::save_score(name.to_string(), self.game_one.score, path,true);
                 }
