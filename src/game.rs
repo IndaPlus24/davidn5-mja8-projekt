@@ -269,21 +269,21 @@ impl Game {
             // Check if DAS is charged
             if !self.das_charged && das_start.elapsed() >= self.das {
                 self.das_charged = true;
-                self.arr_start = Some(das_start + self.das);
+                self.arr_start = Some(das_start + self.das - self.arr);
             }
 
-            if let Some(mut arr_start) = self.arr_start {
+            if self.das_charged {
                 // Move if ARR allows
-                while arr_start.elapsed() >= self.arr {
+                while self.arr_start.unwrap().elapsed() >= self.arr {
                     if self.moving_left {
-                        if !self.move_piece(-1, 0) {break}
+                        if !self.move_piece(-1, 0) {}
                         else {self.add_action()}
                     }
                     else if self.moving_right {
-                        if !self.move_piece(1, 0) {break}
+                        if !self.move_piece(1, 0) {}
                         else {self.add_action()}
                     }
-                    arr_start += self.arr;
+                    self.arr_start = Some(self.arr_start.unwrap() + self.arr);
                 }
             }
         }
