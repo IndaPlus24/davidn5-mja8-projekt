@@ -11,8 +11,14 @@ pub const GAME_1_VS_SCL: f32 = 1.;
 pub const GAME_2_VS_POS: (f32, f32) = (1028., 200.);
 pub const GAME_2_VS_SCL: f32 = 1.;
 
+pub const SETTINGS_TICK_SPEED: u128 = 150; // in millis
+
+pub const DEFAULT_DAS: u64 = 165; // in millis
+pub const DEFAULT_ARR: u64 = 35; // in millis
+pub const DEFAULT_SDS: f32 = 15.; // in cells per seconds
+
 pub const GARBAGE_CAP: usize = 8;
-pub const GARBAGE_DELAY: u128 = 2000; // time in milliseconds before garbage can appear on board
+pub const GARBAGE_DELAY: u128 = 1000; // time in milliseconds before garbage can appear on board
 
 pub const SURVIVAL_TIMER: u64 = 1000; // time in millis between each line spawn
 

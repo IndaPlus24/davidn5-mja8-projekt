@@ -5,7 +5,7 @@ use ggez::Context;
 use rand::Rng;
 
 use crate::board::{BOARD_AMOUNT_COLUMNS, BOARD_AMOUNT_ROWS};
-use crate::consts::{GameMode, DEFAULT_GRAVITY};
+use crate::consts::{GameMode, DEFAULT_ARR, DEFAULT_DAS, DEFAULT_GRAVITY, DEFAULT_SDS};
 use crate::{default_keyboard_keybindings, GameAction, KeyCode, Piece, PieceType};
 
 #[derive(Clone)]
@@ -88,8 +88,8 @@ impl Game {
             board: [[None; BOARD_AMOUNT_COLUMNS]; BOARD_AMOUNT_ROWS],
             gamemode: GameMode::FourtyLines,
 
-            countdown_start : Some(Instant::now()),
-            countdown_duration : Duration::from_millis(3500),
+            countdown_start: Some(Instant::now()),
+            countdown_duration: Duration::from_millis(3500),
 
             game_over: false,
             objective_completed: false,
@@ -107,12 +107,12 @@ impl Game {
             moving_left: false,
             soft_dropping: false,
 
-            das: Duration::from_millis(85),
+            das: Duration::from_millis(DEFAULT_DAS),
             das_start: None,
             das_charged: false,
-            arr: Duration::from_millis(0),
+            arr: Duration::from_millis(DEFAULT_ARR),
             arr_start: None,
-            sds: 999.,
+            sds: DEFAULT_SDS,
             gravity: DEFAULT_GRAVITY,
             last_drop: Instant::now(),
             fall_timing: Duration::from_millis((1000. / DEFAULT_GRAVITY) as u64),

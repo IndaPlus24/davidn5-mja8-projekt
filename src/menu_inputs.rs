@@ -1,6 +1,8 @@
+use std::{f32::INFINITY, time::{Duration, Instant}};
+
 use rand::Rng;
 
-use crate::{animation_state::AnimationState, consts::GameMode, get_scores_from_file, AppState, Game, GameAction, KeyCode, ScreenState};
+use crate::{animation_state::AnimationState, consts::{GameMode, SETTINGS_TICK_SPEED}, get_scores_from_file, AppState, Game, GameAction, KeyCode, ScreenState};
 
 #[allow(non_snake_case)]
 pub struct MenuInputs {
@@ -335,43 +337,92 @@ pub fn handle_settings_input(
     // Adjust selected setting
     let game = &mut state.game_one;
 
-    match animation_state.selected_item_settings {
-        0 => { // ARR
-            if keyboard.is_key_pressed(menuinputs.LEFT) && game.arr.as_millis() > 0{
-                let new_val = game.arr.as_millis().saturating_sub(1);
-                game.arr = std::time::Duration::from_millis(new_val as u64);
-            }
-            if keyboard.is_key_pressed(menuinputs.RIGHT) &&game.arr.as_millis() < 999{
-                let new_val = (game.arr + std::time::Duration::from_millis(1)).as_millis();
-                game.arr = std::time::Duration::from_millis(new_val as u64);
-            }
-        }
-        1 => { // DAS
-            if keyboard.is_key_pressed(menuinputs.LEFT)&& game.das.as_millis() > 0 {
-                let new_val = game.das.as_millis().saturating_sub(1);
-                game.das = std::time::Duration::from_millis(new_val as u64);
-            }
-            if keyboard.is_key_pressed(menuinputs.RIGHT) && game.das.as_millis() < 999{
-                let new_val = (game.das + std::time::Duration::from_millis(1)).as_millis();
-                game.das = std::time::Duration::from_millis(new_val as u64);
-            }
-        }
-        2 => { // SDS
-            if keyboard.is_key_pressed(menuinputs.LEFT) && game.sds > 0.{
-                let new_val = game.sds - 1.;
-                game.sds = new_val;
-            }
-            if keyboard.is_key_pressed(menuinputs.RIGHT) && game.sds < 999.{
-                let new_val = game.sds + 1.;
-                game.sds = new_val;
-            }
-        }
-        3 => { // Confirm
-            if keyboard.is_key_just_pressed(menuinputs.SELECT) {
-                *screen_state = ScreenState::MainMenu;
-            }
-        }
-        _ => {}
+    if keyboard.is_key_just_released(menuinputs.LEFT)
+    || keyboard.is_key_just_released(menuinputs.RIGHT) {
+        animation_state.last_setting_tick = None;
     }
 
+    if keyboard.is_key_pressed(menuinputs.LEFT) {
+        if let Some(t) = animation_state.last_setting_tick {
+            if t.elapsed().as_millis() >= SETTINGS_TICK_SPEED {
+                match animation_state.selected_item_settings {
+                    0 => decrement_das(game),
+                    1 => decrement_arr(game),
+                    2 => decrement_sds(game),
+                    _ => ()
+                }
+                animation_state.last_setting_tick = Some(t + Duration::from_millis(SETTINGS_TICK_SPEED as u64))
+            }
+        } else {
+            animation_state.last_setting_tick = Some(Instant::now() - Duration::from_millis(SETTINGS_TICK_SPEED as u64))
+        }
+    }
+
+    if keyboard.is_key_pressed(menuinputs.RIGHT) {
+        if let Some(t) = animation_state.last_setting_tick {
+            if t.elapsed().as_millis() >= SETTINGS_TICK_SPEED {
+                match animation_state.selected_item_settings {
+                    0 => increment_das(game),
+                    1 => increment_arr(game),
+                    2 => increment_sds(game),
+                    _ => ()
+                }
+                animation_state.last_setting_tick = Some(t + Duration::from_millis(SETTINGS_TICK_SPEED as u64))
+            }
+        } else {
+            animation_state.last_setting_tick = Some(Instant::now() - Duration::from_millis(SETTINGS_TICK_SPEED as u64))
+        }
+    }
+
+    // Confirm
+    if keyboard.is_key_just_pressed(menuinputs.SELECT)
+    && animation_state.selected_item_settings == 3 {
+        *screen_state = ScreenState::MainMenu;
+    }
+}
+
+// Helper functions
+fn increment_das(game: &mut Game) {
+    let das = game.das.as_millis();
+    if das < 200 {
+        game.das = Duration::from_millis((das + 5) as u64)
+    }
+}
+fn decrement_das(game: &mut Game) {
+    let das = game.das.as_millis();
+    if das > 50 {
+        game.das = Duration::from_millis((das - 5) as u64)
+    }
+}
+
+fn increment_arr(game: &mut Game) {
+    let arr = game.arr.as_millis();
+    if arr < 100 {
+        game.arr = Duration::from_millis((arr + 5) as u64)
+    }
+}
+fn decrement_arr(game: &mut Game) {
+    let arr = game.arr.as_millis();
+    if arr > 0 {
+        game.arr = Duration::from_millis((arr - 5) as u64)
+    }
+}
+
+fn increment_sds(game: &mut Game) {
+    let sds = game.sds;
+    if sds < 100. {
+        game.sds += 5.
+    }
+    else if sds == 100. {
+        game.sds = INFINITY
+    }
+}
+fn decrement_sds(game: &mut Game) {
+    let sds = game.sds;
+    if sds == INFINITY {
+        game.sds = 100.
+    }
+    else if sds > 5. {
+        game.sds -= 5.
+    }
 }

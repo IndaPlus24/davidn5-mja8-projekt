@@ -37,10 +37,10 @@ pub fn render_settings(canvas: &mut Canvas, scl: f32, state: &mut AppState) {
             .scale(glam::Vec2::new(scl, scl)),
     );
 
-    let labels = ["Arr", "Das", "Sds"];
+    let labels = ["Das", "Arr", "Sds"];
     let values = [
-        state.game_one.arr.as_millis(),
         state.game_one.das.as_millis(),
+        state.game_one.arr.as_millis(),
         state.game_one.sds as u128,
     ];
 
@@ -67,8 +67,9 @@ pub fn render_settings(canvas: &mut Canvas, scl: f32, state: &mut AppState) {
                 .scale(glam::Vec2::new(scl, scl)),
         );
 
+        let text = if *value > 500 {"inf".to_string()} else {value.to_string()};
         let mut text_value = Text::new(TextFragment {
-            text: value.to_string(),
+            text: text,
             font: Some("Tetris font".to_string()),
             color: Some(Color::WHITE),
             scale: Some(PxScale::from(60.)),
