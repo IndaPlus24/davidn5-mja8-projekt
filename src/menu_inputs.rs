@@ -22,8 +22,14 @@ pub fn handle_main_menu_inputs(ctx: &ggez::Context, screen_state: &mut ScreenSta
         animation_state.selected_item_main_menu = (animation_state.selected_item_main_menu + 2) % 3;
     } else if keyboard.is_key_just_pressed(SELECT) {
         *screen_state = match animation_state.selected_item_main_menu {
-            0 => ScreenState::GameModeSelector,
-            1 => ScreenState::HighScore,
+            0 => {
+                animation_state.selected_item_gamemode_selector = 0;
+                ScreenState::GameModeSelector
+            }
+            1 => {
+                animation_state.selected_item_high_score = (0, 0);
+                ScreenState::HighScore
+            }
             _=> ScreenState::Settings
         };
     }
@@ -38,8 +44,14 @@ pub fn handle_gamemode_selector_inputs(ctx: &ggez::Context, screen_state: &mut S
     } else if keyboard.is_key_just_pressed(SELECT) {
         *screen_state = match animation_state.selected_item_gamemode_selector {
             0 => ScreenState::VersusReady,
-            1 => ScreenState::SingleplayerSelector,
-            2 => ScreenState::BotSelector,
+            1 => {
+                animation_state.selected_item_singleplayer_selector = 0;
+                ScreenState::SingleplayerSelector
+            }
+            2 => {
+                animation_state.selected_item_bot_selector = 0;
+                ScreenState::BotSelector
+            }
             _ => ScreenState::MainMenu
         }
     }
@@ -53,12 +65,9 @@ pub fn handle_singleplayer_selector_inputs(ctx: &ggez::Context, screen_state: &m
         animation_state.selected_item_singleplayer_selector = (animation_state.selected_item_singleplayer_selector + 3) % 4;
     } else if keyboard.is_key_just_pressed(SELECT) {
         let selected = animation_state.selected_item_singleplayer_selector;
-        match selected {
-            3 => {
-                *screen_state = ScreenState::GameModeSelector;
-            }
+        *screen_state = match selected {
+            3 => ScreenState::GameModeSelector,
             _ => {
-                *screen_state = ScreenState::Singleplayer;
                 game.reset_game();
                 match selected {
                     0 => {
@@ -72,6 +81,7 @@ pub fn handle_singleplayer_selector_inputs(ctx: &ggez::Context, screen_state: &m
                         game.gamemode = GameMode::Survival;
                     }
                 }
+                ScreenState::Singleplayer
             }
         }
     }

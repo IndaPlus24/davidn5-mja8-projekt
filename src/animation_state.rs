@@ -8,18 +8,18 @@ pub struct AnimationState {
     pub selected_item_bot_selector: i32,
 
     pub players_ready: (bool, bool),
-    pub selected_item_high_score : (i32,i32),
+    pub selected_item_high_score: (i32,i32),
     pub highscore_list : Vec<(String, usize)>,
 
-    pub selected_key : (usize, usize),
+    pub selected_key: (usize, usize),
     pub ticks : usize,
-    pub size_index : usize, 
-    pub name_input : String,
-    pub name_ready : bool,
+    pub size_index: usize, 
+    pub name_input: String,
+    pub name_ready: bool,
 }
 
 impl AnimationState {
-    pub fn new(highscore_list : Vec<(String, usize)>) -> Self {
+    pub fn new(highscore_list: Vec<(String, usize)>) -> Self {
         Self {
             // Bouncing text in start_screen.rs
             start_screen_y: -50.,
@@ -41,15 +41,15 @@ impl AnimationState {
             players_ready: (false, false),
 
             // Arrow High Score
-            selected_item_high_score : (0,0),
+            selected_item_high_score: (0, 0),
             highscore_list,
 
             //Input Name
-            selected_key : (0,0),
-            ticks : 0,
-            size_index : 0,
+            selected_key: (0,0),
+            ticks: 0,
+            size_index: 0,
             name_input: String::from(""),
-            name_ready : false,
+            name_ready: false,
         }
     }
 }
