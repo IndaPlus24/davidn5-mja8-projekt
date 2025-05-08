@@ -439,7 +439,7 @@ impl event::EventHandler<ggez::GameError> for AppState {
 
     fn draw(&mut self, ctx: &mut Context) -> GameResult {
         let mut canvas =
-            graphics::Canvas::from_frame(ctx, graphics::Color::from([0.1, 0.2, 0.3, 1.0]));
+            graphics::Canvas::from_frame(ctx, graphics::Color::from_rgb(232, 61, 132));
 
         match &self.screen_state {
             ScreenState::Singleplayer => {
