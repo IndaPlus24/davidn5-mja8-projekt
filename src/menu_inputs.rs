@@ -77,7 +77,7 @@ pub fn handle_singleplayer_selector_inputs(ctx: &ggez::Context, screen_state: &m
     }
 }
 
-pub fn handle_versus_ready_inputs(
+pub fn handle_versus_prepost_inputs(
     ctx: &ggez::Context,
     screen_state: &mut ScreenState,
     animation_state: &mut AnimationState,

@@ -24,7 +24,7 @@ use std::error::Error;
 use std::path;
 use std::str::FromStr;
 use std::time::{Duration, Instant};
-use ui_components::{bot_selector, gamemode_selector, high_score, input_name, main_menu, singleplayer_selector, start_screen, versus_ready};
+use ui_components::*;
 
 pub use crate::config::input_config::*;
 pub use crate::game::Game;
@@ -280,18 +280,22 @@ impl event::EventHandler<ggez::GameError> for AppState {
             ScreenState::SingleplayerSelector => {
                 handle_singleplayer_selector_inputs(ctx, &mut self.screen_state, &mut self.animation_state, &mut self.game_one);
             }
+
+            // Versus
             ScreenState::VersusReady => {
                 if self.game_one.gamemode != GameMode::Versus
                 || self.game_one.gamemode != GameMode::Versus {
-                    let vs_controls = multi_controller_keyboard_keybindings();
-                    self.game_one.controls = vs_controls[0].clone();
-                    self.game_two.controls = vs_controls[1].clone();
-
+                    if !self.drifarkaden {
+                        let vs_controls = multi_controller_keyboard_keybindings();
+                        self.game_one.controls = vs_controls[0].clone();
+                        self.game_two.controls = vs_controls[1].clone();
+                    }
+                    
                     self.game_one.gamemode = GameMode::Versus;
                     self.game_two.gamemode = GameMode::Versus;
                 }
 
-                handle_versus_ready_inputs(
+                handle_versus_prepost_inputs(
                     ctx,
                     &mut self.screen_state,
                     &mut self.animation_state,
@@ -314,7 +318,32 @@ impl event::EventHandler<ggez::GameError> for AppState {
                         self.game_two.garbage_outbound.pop_front().unwrap()
                     );
                 }
+
+                if self.game_one.game_over || self.game_two.game_over {
+                    self.animation_state.players_ready = (false, false);
+                    self.timer = Some(Instant::now());
+                    self.screen_state = ScreenState::VersusRematch;
+                }
             }
+            ScreenState::VersusRematch => {
+                if let Some(t) = self.timer {
+                    if t.elapsed() >= Duration::from_secs(10) {
+                        if !self.drifarkaden {
+                            self.game_one.controls = default_keyboard_keybindings();
+                        }
+                        self.screen_state = ScreenState::MainMenu;
+                    }
+                }
+
+                handle_versus_prepost_inputs(
+                    ctx,
+                    &mut self.screen_state,
+                    &mut self.animation_state,
+                    &mut self.game_one,
+                    &mut self.game_two,
+                );
+            }
+
             ScreenState::BotSelector => {
                 handle_bot_selector_inputs(ctx, &mut self.screen_state, &mut self.animation_state, &mut self.bot);
             }
@@ -379,6 +408,8 @@ impl event::EventHandler<ggez::GameError> for AppState {
                     &mut self.animation_state,
                 );
             }
+
+            // Versus
             ScreenState::VersusReady => {
                 versus_ready::render_versus_ready(
                     &self.menu_assets,
@@ -400,6 +431,19 @@ impl event::EventHandler<ggez::GameError> for AppState {
                     .render_stats(&mut canvas)
                     .render_misc(&self.misc_assets, &mut canvas);
             }
+            ScreenState::VersusRematch => {
+                let winner = if self.game_one.game_over {1} else {0};
+
+                versus_rematch::render_versus_rematch(
+                    &self.menu_assets,
+                    &mut canvas,
+                    1.,
+                    &mut self.animation_state,
+                    winner,
+                    self.timer,
+                );
+            }
+
             ScreenState::BotSelector => {
                 bot_selector::render_bot_selector(
                     &self.menu_assets,
