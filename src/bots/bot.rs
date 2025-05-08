@@ -24,10 +24,10 @@ pub struct Bot {
 }
 
 impl Bot {
-    pub fn new(difficulty: usize) -> Self {
+    pub fn new(difficulty: usize, id : u64) -> Self {
 
-        let mut g = Game::new(GAME_1_SOLO_POS, GAME_1_SOLO_SCL);
-        g.reset_game();
+        let mut g = Game::new(GAME_1_SOLO_POS, GAME_1_SOLO_SCL, id);
+        g.reset_game(Some(id));
 
         Self {
             game: g,
@@ -56,7 +56,7 @@ impl Bot {
         Self {
             weights: w,
             fitness: 0.0,
-            game: Game::new(GAME_1_SOLO_POS, GAME_1_SOLO_SCL),
+            game: Game::new(GAME_1_SOLO_POS, GAME_1_SOLO_SCL, 0),
             inputs: vec![],
             game_steps: 0,
             difficulty: 0
@@ -84,7 +84,7 @@ impl Bot {
         Self {
             weights: w,
             fitness: 0.0,
-            game: Game::new(GAME_1_SOLO_POS, GAME_1_SOLO_SCL),
+            game: Game::new(GAME_1_SOLO_POS, GAME_1_SOLO_SCL,0),
             inputs: vec![],
             game_steps: 0,
             difficulty: 0,

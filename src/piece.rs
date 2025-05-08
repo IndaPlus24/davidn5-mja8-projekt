@@ -1,4 +1,4 @@
-use rand::{seq::SliceRandom, Rng};
+use rand::{seq::SliceRandom, Rng, SeedableRng};
 use std::{collections::VecDeque, vec};
 
 use crate::rotation::{
@@ -31,8 +31,8 @@ impl PieceType {
         }
     }
 
-    pub fn get_random() -> PieceType {
-        let mut rng = rand::rng();
+    pub fn get_random(id : u64) -> PieceType {
+        let mut rng = rand::rngs::StdRng::seed_from_u64(id);
         let piece_num = rng.random_range(0..7);
         PieceType::get_piecetype_from_num(piece_num)
     }
@@ -50,8 +50,8 @@ impl PieceType {
         }
     }
 
-    pub fn get_random_as_list() -> VecDeque<PieceType> {
-        let mut rng = rand::rng();
+    pub fn get_random_as_list(id : &u64) -> VecDeque<PieceType> {
+        let mut rng = rand::rngs::StdRng::seed_from_u64(*id);
         let mut nums: Vec<i32> = vec![0, 1, 2, 3, 4, 5, 6];
         nums.shuffle(&mut rng);
 

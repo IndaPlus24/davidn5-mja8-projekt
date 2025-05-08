@@ -18,7 +18,7 @@ use bots::train_bot::train_ai;
 use consts::*;
 use csv::{Reader, Writer};
 use menu_inputs::*;
-use rand::random_range;
+use rand::{random_range, Rng};
 use std::collections::HashMap;
 use std::error::Error;
 use std::path;
@@ -64,6 +64,9 @@ impl AppState {
         ctx: &mut Context,
         args: Option<Vec<HashMap<GameAction, KeyCode>>>,
     ) -> GameResult<AppState> {
+        let mut rng = rand::rng();
+        let id = Some(rng.random());
+
         let mut state = AppState {
             animation_state: AnimationState::new(get_scores_from_file("res/highscores/highscore_marathon.csv")),
             screen_state: ScreenState::StartScreen,
@@ -76,19 +79,18 @@ impl AppState {
 
             timer: None,
 
-            game_one: Game::new(GAME_1_SOLO_POS, GAME_1_SOLO_SCL),
-            game_two: Game::new(GAME_2_VS_POS, GAME_2_VS_SCL),
+            game_one: Game::new(GAME_1_SOLO_POS, GAME_1_SOLO_SCL, id.unwrap()),
+            game_two: Game::new(GAME_2_VS_POS, GAME_2_VS_SCL, id.unwrap()),
 
-            bot: Bot::new(0),
+            bot: Bot::new(0, id.unwrap()),
             menuinputs : MenuInputs::pc_inputs()
         };
 
         state.bot.game.canvas_pos = GAME_2_VS_POS; 
         state.bot.game.canvas_scl = GAME_2_VS_SCL;
 
-
-        state.game_one.reset_game();
-        state.game_two.reset_game();
+        state.game_one.reset_game(id);
+        state.game_two.reset_game(id);
 
         if let Some(keybinds) = args {
             state.game_one.controls = keybinds[0].clone();

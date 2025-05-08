@@ -1,3 +1,5 @@
+use rand::Rng;
+
 use crate::{animation_state::AnimationState, consts::GameMode, get_scores_from_file, AppState, Game, GameAction, KeyCode, ScreenState};
 
 #[allow(non_snake_case)]
@@ -96,7 +98,7 @@ pub fn handle_singleplayer_selector_inputs(ctx: &ggez::Context, screen_state: &m
             }
             3 => ScreenState::GameModeSelector,
             _ => {
-                game.reset_game();
+                game.reset_game(None);
                 match selected {
                     1 => game.gamemode = GameMode::FourtyLines,
                     _ => game.gamemode = GameMode::Survival
@@ -121,7 +123,7 @@ pub fn handle_marathon_prompt_inputs(ctx: &ggez::Context, screen_state: &mut Scr
         if new_level == 16 {new_level = 15}
         animation_state.selected_item_marathon_prompt.0 = new_level;
     } else if keyboard.is_key_just_pressed(menuinputs.SELECT) { // Set level and start game
-        game.reset_game();
+        game.reset_game(None);
         game.set_level(animation_state.selected_item_marathon_prompt.0);
         game.gamemode = GameMode::Marathon;
         *screen_state = ScreenState::Singleplayer
@@ -137,7 +139,7 @@ pub fn handle_reset_screen_inputs(ctx: &ggez::Context, screen_state: &mut Screen
         let selected = animation_state.selected_item_reset_selector;
         *screen_state = match selected {
             0 => {
-                game.reset_game();
+                game.reset_game(None);
                 ScreenState::Singleplayer
             }
             _ => ScreenState::MainMenu
@@ -161,8 +163,10 @@ pub fn handle_versus_prepost_inputs(
     }
 
     if animation_state.players_ready.0 && animation_state.players_ready.1 {
-        game_one.reset_game();
-        game_two.reset_game();
+        let mut rng = rand::rng(); 
+        let id = Some(rng.random());
+        game_one.reset_game(id);
+        game_two.reset_game(id);
         *screen_state = ScreenState::Versus;
     }
 }
@@ -174,6 +178,9 @@ pub fn handle_bot_selector_inputs(ctx: &ggez::Context, state : &mut AppState) {
     let bot = &mut state.bot;
     let menuinputs = &state.menuinputs;
 
+    let mut rng = rand::rng(); 
+    let id = Some(rng.random());
+
     let keyboard = &ctx.keyboard;
     if keyboard.is_key_just_pressed(menuinputs.DOWN) {
         animation_state.selected_item_bot_selector = (animation_state.selected_item_bot_selector + 1) % 4;
@@ -183,20 +190,20 @@ pub fn handle_bot_selector_inputs(ctx: &ggez::Context, state : &mut AppState) {
         *screen_state = match animation_state.selected_item_bot_selector {
             0 => {
                 bot.difficulty = 0;
-                bot.game.reset_game();
-                state.game_one.reset_game();
+                bot.game.reset_game(id);
+                state.game_one.reset_game(id);
                 ScreenState::VsBots
             },
             1 => {
                 bot.difficulty = 1;
-                bot.game.reset_game();
-                state.game_one.reset_game();
+                bot.game.reset_game(id);
+                state.game_one.reset_game(id);
                 ScreenState::VsBots
             },
             2 => {
                 bot.difficulty = 2;
-                bot.game.reset_game();
-                state.game_one.reset_game();
+                bot.game.reset_game(id);
+                state.game_one.reset_game(id);
                 ScreenState::VsBots
             },
             _ => ScreenState::GameModeSelector

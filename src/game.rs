@@ -2,6 +2,7 @@ use std::collections::{HashMap, VecDeque};
 use std::time::{Duration, Instant};
 
 use ggez::Context;
+use rand::Rng;
 
 use crate::board::{BOARD_AMOUNT_COLUMNS, BOARD_AMOUNT_ROWS};
 use crate::consts::{GameMode, DEFAULT_GRAVITY};
@@ -9,6 +10,8 @@ use crate::{default_keyboard_keybindings, GameAction, KeyCode, Piece, PieceType}
 
 #[derive(Clone)]
 pub struct Game {
+
+    pub id : u64,
     // Canvas info
     pub canvas_pos: (f32, f32),
     pub canvas_scl: f32,
@@ -76,8 +79,9 @@ pub struct Game {
 }
 
 impl Game {
-    pub fn new(pos: (f32, f32), scl: f32) -> Self {
+    pub fn new(pos: (f32, f32), scl: f32, id : u64) -> Self {
         Game {
+            id, 
             canvas_pos: pos,
             canvas_scl: scl,
 
@@ -136,13 +140,19 @@ impl Game {
         }
     }
 
-    pub fn reset_game(&mut self) {
+    pub fn reset_game(&mut self, id : Option<u64>) {
         self.board = [[None; BOARD_AMOUNT_COLUMNS]; BOARD_AMOUNT_ROWS];
         self.game_over = false;
         self.held_piece = None;
         self.piece_queue = VecDeque::new();
         self.spawn_piece_from_queue();
         self.continue_to_highscore  = false;
+        if let Some(i) = id {
+            self.id = i;
+        }else {
+            let mut rng = rand::rng();
+            self.id = rng.random();
+        }
 
         self.garbage_inbound = VecDeque::new();
         self.garbage_outbound = VecDeque::new();
@@ -203,7 +213,7 @@ impl Game {
     pub fn spawn_piece_from_queue(&mut self) {
         // Generate new bag if piece queue is shorter than 7 pieces
         if self.piece_queue.len() < 7 {
-            let mut l = PieceType::get_random_as_list();
+            let mut l = PieceType::get_random_as_list(&self.id);
             self.piece_queue.append(&mut l);
         }
 
@@ -226,7 +236,7 @@ impl Game {
 
         // Reset button. Remove before release
         if self.game_over {
-            if ctx.keyboard.is_key_just_pressed(KeyCode::R) {self.reset_game();}
+            if ctx.keyboard.is_key_just_pressed(KeyCode::R) {self.reset_game(None);}
             if ctx.keyboard.is_key_just_pressed(*self.controls.get(&GameAction::HardDrop).unwrap()) {
                 if (self.gamemode == GameMode::FourtyLines
                 && !self.objective_completed)

@@ -91,7 +91,7 @@ impl Game {
 
         // Reset
         if keyboard.is_key_just_pressed(ggez::input::keyboard::KeyCode::R) {
-            self.reset_game();
+            self.reset_game(None);
         }
     }
 }
