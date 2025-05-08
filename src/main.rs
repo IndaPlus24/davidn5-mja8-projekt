@@ -18,7 +18,7 @@ use bots::train_bot::train_ai;
 use consts::*;
 use csv::{Reader, Writer};
 use menu_inputs::*;
-use rand::random_range;
+use rand::{random_range, Rng};
 use std::collections::HashMap;
 use std::error::Error;
 use std::path;
@@ -55,6 +55,8 @@ struct AppState {
 
     // Bots,
     bot: Bot,
+
+    menuinputs : MenuInputs,
 }
 
 impl AppState {
@@ -62,8 +64,11 @@ impl AppState {
         ctx: &mut Context,
         args: Option<Vec<HashMap<GameAction, KeyCode>>>,
     ) -> GameResult<AppState> {
+        let mut rng = rand::rng();
+        let id = Some(rng.random());
+
         let mut state = AppState {
-            animation_state: AnimationState::new(get_scores_from_file("res/highscores/highscore_marathon.csv")),
+            animation_state: AnimationState::new(get_scores_from_file("res/highscores/highscore_survival.csv")),
             screen_state: ScreenState::StartScreen,
             drifarkaden: false,
 
@@ -74,19 +79,24 @@ impl AppState {
 
             timer: None,
 
-            game_one: Game::new(GAME_1_SOLO_POS, GAME_1_SOLO_SCL),
-            game_two: Game::new(GAME_2_VS_POS, GAME_2_VS_SCL),
+            game_one: Game::new(GAME_1_SOLO_POS, GAME_1_SOLO_SCL, id.unwrap()),
+            game_two: Game::new(GAME_2_VS_POS, GAME_2_VS_SCL, id.unwrap()),
 
-            bot: Bot::new(0),
+            bot: Bot::new(0, id.unwrap()),
+            menuinputs : MenuInputs::pc_inputs()
         };
 
-        state.game_one.reset_game();
-        state.game_two.reset_game();
+        state.bot.game.canvas_pos = GAME_2_VS_POS; 
+        state.bot.game.canvas_scl = GAME_2_VS_SCL;
+
+        state.game_one.reset_game(id);
+        state.game_two.reset_game(id);
 
         if let Some(keybinds) = args {
             state.game_one.controls = keybinds[0].clone();
             state.game_two.controls = keybinds[1].clone();
             state.drifarkaden = true;
+            state.menuinputs = MenuInputs::drifarkaden_inputs();
         }
 
         Ok(state)
@@ -179,13 +189,17 @@ impl AppState {
         image_map
     }
 
-    fn save_score(name: String, score: usize, path: &str) -> Result<(), Box<dyn Error>> {
+    fn save_score(name: String, score: usize, path: &str, ascending_order : bool) -> Result<(), Box<dyn Error>> {
         //Get previous scores and add new score
         let mut scores = get_scores_from_file(path);
         scores.push((name, score));
 
-        //Sort scores and reverse
-        scores.sort_by(|a, b| b.1.cmp(&a.1));
+        if ascending_order {
+            //Sort scores and reverse
+            scores.sort_by(|a, b| b.1.cmp(&a.1));
+        }else {
+            scores.sort_by(|a, b| a.1.cmp(&b.1));
+        }
 
         //Write top 5 to file
         if save_scores_to_file(path, scores) {
@@ -230,6 +244,7 @@ impl event::EventHandler<ggez::GameError> for AppState {
     fn update(&mut self, ctx: &mut Context) -> GameResult {
 
         if self.game_one.game_over && self.game_one.continue_to_highscore {
+
             self.screen_state = ScreenState::HighscoreInput;
             
             if self.animation_state.name_ready {
@@ -240,9 +255,11 @@ impl event::EventHandler<ggez::GameError> for AppState {
                     _ => "res/highscores/highscore_survival.csv"
                 };
                 if self.game_one.gamemode == GameMode::FourtyLines{
-                    let _ = Self::save_score(name.to_string(), self.game_one.final_time.as_secs() as usize, path);
+                    let _ = Self::save_score(name.to_string(), self.game_one.final_time.as_millis() as usize, path, false);
+                }else if self.game_one.gamemode == GameMode::Survival {
+                    let _ = Self::save_score(name.to_string(), self.game_one.final_time.as_millis() as usize, path, true);
                 }else{
-                    let _ = Self::save_score(name.to_string(), self.game_one.score, path);
+                    let _ = Self::save_score(name.to_string(), self.game_one.score, path,true);
                 }
                 self.animation_state.name_input = "".to_string();
                 self.animation_state.name_ready = false;
@@ -265,7 +282,7 @@ impl event::EventHandler<ggez::GameError> for AppState {
                 }
 
                 // Survival garbage
-                if self.game_one.gamemode == GameMode::Survival && !self.game_one.game_over {
+                if self.game_one.gamemode == GameMode::Survival && !self.game_one.game_over && self.game_one.countdown_start.is_none() {
                     if let Some(t) = self.timer {
                         if t.elapsed() >= Duration::from_millis(SURVIVAL_TIMER) {
                             self.timer = Some(t + Duration::from_secs(1));
@@ -277,28 +294,31 @@ impl event::EventHandler<ggez::GameError> for AppState {
                 }
             }
             ScreenState::StartScreen => {
-                handle_start_screen_inputs(ctx, &mut self.screen_state);
+                handle_start_screen_inputs(ctx, &mut self.screen_state, &self.menuinputs);
             }
             ScreenState::MainMenu => {
-                handle_main_menu_inputs(ctx, &mut self.screen_state, &mut self.animation_state);
+                handle_main_menu_inputs(ctx, &mut self.screen_state, &mut self.animation_state, &self.menuinputs);
             }
             ScreenState::GameModeSelector => {
-                handle_gamemode_selector_inputs(ctx, &mut self.screen_state, &mut self.animation_state);
+                handle_gamemode_selector_inputs(ctx, &mut self.screen_state, &mut self.animation_state, &self.menuinputs);
             }
             ScreenState::SingleplayerSelector => {
-                handle_singleplayer_selector_inputs(ctx, &mut self.screen_state, &mut self.animation_state, &mut self.game_one);
+                handle_singleplayer_selector_inputs(ctx, &mut self.screen_state, &mut self.animation_state, &mut self.game_one, &self.menuinputs);
             }
             ScreenState::MarathonPrompt => {
-                handle_marathon_prompt_inputs(ctx, &mut self.screen_state, &mut self.animation_state, &mut self.game_one);
+                handle_marathon_prompt_inputs(ctx, &mut self.screen_state, &mut self.animation_state, &mut self.game_one, &self.menuinputs);
             }
             ScreenState::FourtyLinesReset => {
-                handle_reset_screen_inputs(ctx, &mut self.screen_state, &mut self.animation_state, &mut self.game_one);
+                handle_reset_screen_inputs(ctx, &mut self.screen_state, &mut self.animation_state, &mut self.game_one,&self.menuinputs);
+            }
+            ScreenState::Settings => {
+                handle_settings_input(ctx, self);
             }
 
             // Versus
             ScreenState::VersusReady => {
                 if self.game_one.gamemode != GameMode::Versus
-                || self.game_one.gamemode != GameMode::Versus {
+                || self.game_two.gamemode != GameMode::Versus {
                     if !self.drifarkaden {
                         let vs_controls = multi_controller_keyboard_keybindings();
                         self.game_one.controls = vs_controls[0].clone();
@@ -366,18 +386,50 @@ impl event::EventHandler<ggez::GameError> for AppState {
             }
 
             ScreenState::BotSelector => {
-                handle_bot_selector_inputs(ctx, &mut self.screen_state, &mut self.animation_state, &mut self.bot);
+                handle_bot_selector_inputs(ctx,self);
             }
             ScreenState::VsBots => {
-                self.bot.render_bot_game(ctx);
+
+                if self.game_one.gamemode != GameMode::Versus{
+                    if !self.drifarkaden {
+                        self.game_one.controls = default_keyboard_keybindings();
+                    }
+
+                    self.game_one.canvas_pos = GAME_1_VS_POS;
+                    self.game_one.canvas_scl = GAME_1_VS_SCL;
+                    
+                    self.game_one.gamemode = GameMode::Versus;
+                    self.bot.game.gamemode = GameMode::Versus;
+                }
+
+                if self.game_one.game_over || self.bot.game.game_over {
+                    if ctx.keyboard.is_key_just_pressed(*self.game_one.controls.get(&GameAction::HardDrop).unwrap()) {
+                        self.screen_state = ScreenState::MainMenu;
+                    }
+                }else {
+                    self.game_one.update(ctx);
+                    self.bot.render_bot_game(ctx);
+                }
+
+                // Garbage handling
+                while self.game_one.garbage_outbound.len() > 0 {
+                    self.bot.game.receive_garbage(
+                        self.game_one.garbage_outbound.pop_front().unwrap()
+                    );
+                }
+                while self.bot.game.garbage_outbound.len() > 0 {
+                    self.game_one.receive_garbage(
+                        self.bot.game.garbage_outbound.pop_front().unwrap()
+                    );
+                }
+
             }
             ScreenState::HighScore => {
-                handle_highscore_inputs(ctx, &mut self.screen_state, &mut self.animation_state);
+                handle_highscore_inputs(ctx, &mut self.screen_state, &mut self.animation_state, &self.menuinputs);
             }
             ScreenState::HighscoreInput => {
-                handle_name_inputs(ctx, &mut self.screen_state, &mut self.animation_state);
+                handle_name_inputs(ctx, &mut self.screen_state, &mut self.animation_state, &self.menuinputs);
             }
-            _ => {}
         }
 
         Ok(())
@@ -445,6 +497,13 @@ impl event::EventHandler<ggez::GameError> for AppState {
                     &mut self.animation_state,
                 );
             }
+            ScreenState::Settings => {
+                settings::render_settings(
+                    &mut canvas, 
+                    1.,
+                    self
+                );
+            }
 
             // Versus
             ScreenState::VersusReady => {
@@ -509,9 +568,16 @@ impl event::EventHandler<ggez::GameError> for AppState {
                 self.bot.game
                     .render_board(&self.board_assets, &mut canvas)
                     .render_pieces(&self.piece_assets,&mut canvas)
-                    .render_stats(&mut canvas);
+                    .render_stats(&mut canvas)
+                    .render_misc(&self.misc_assets, &mut canvas);
+
+
+                self.game_one
+                    .render_board(&self.board_assets, &mut canvas)
+                    .render_pieces(&self.piece_assets, &mut canvas)
+                    .render_stats(&mut canvas)
+                    .render_misc(&self.misc_assets, &mut canvas);
             }
-            _ => {}
         }
 
         canvas.finish(ctx)?;

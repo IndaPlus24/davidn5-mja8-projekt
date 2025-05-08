@@ -10,5 +10,5 @@ pub mod versus_ready;
 pub mod versus_rematch;
 pub mod high_score;
 pub mod input_name;
-
+pub mod settings;
 pub mod stat_formatting;

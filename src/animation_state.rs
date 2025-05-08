@@ -18,6 +18,8 @@ pub struct AnimationState {
     pub size_index: usize, 
     pub name_input: String,
     pub name_ready: bool,
+
+    pub selected_item_settings : usize,
 }
 
 impl AnimationState {
@@ -58,6 +60,9 @@ impl AnimationState {
             size_index: 0,
             name_input: String::from(""),
             name_ready: false,
+
+            //Settings 
+            selected_item_settings : 0,
         }
     }
 }

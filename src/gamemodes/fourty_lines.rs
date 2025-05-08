@@ -110,7 +110,12 @@ impl Game {
                 .scale(glam::Vec2::new(scl, scl))
         );
 
-        let formatted_time = get_formatted_time(elapsed);
+        
+        let mut formatted_time = get_formatted_time(elapsed);
+
+        if self.countdown_start.is_some(){
+            formatted_time = "0:00:000".to_string();
+        }
         let mut duration = Text::new(TextFragment{
             text: formatted_time,
             font: Some("Tetris font".to_string()),

@@ -1,8 +1,10 @@
 use ggez::{glam, graphics::{self, Canvas, Color, Image, PxScale, Text, TextFragment}};
-use std::collections::HashMap;
+use std::{collections::HashMap, time::Duration};
 
 use crate::AppState;
 use crate::consts::{WINDOW_HEIGHT, WINDOW_WIDTH};
+
+use super::stat_formatting::{get_formatted_score, get_formatted_time};
 
 pub fn render_high_score(state: &AppState ,assets: &HashMap<String, Image>, canvas: &mut Canvas, scl: f32){
     let animation_state = &state.animation_state;
@@ -36,7 +38,7 @@ pub fn render_high_score(state: &AppState ,assets: &HashMap<String, Image>, canv
     if animation_state.selected_item_high_score.0 == 0 || animation_state.selected_item_high_score.0 == 2 {
 
         let labels = Text::new(TextFragment{
-            text: "NAME      TIME (seconds)".to_string(),
+            text: "NAME      TIME ".to_string(),
             font: Some("Tetris font".to_string()),
             color: Some(Color::WHITE), 
             scale: Some(PxScale::from(20.0))
@@ -66,6 +68,7 @@ pub fn render_high_score(state: &AppState ,assets: &HashMap<String, Image>, canv
 
     for i in 0..3 {
 
+        
         let mut text = titles[i].to_string(); 
 
         if animation_state.selected_item_high_score == (i as i32,0){
@@ -89,10 +92,15 @@ pub fn render_high_score(state: &AppState ,assets: &HashMap<String, Image>, canv
     let scores = &animation_state.highscore_list;
 
     for p in 0..5 {
+        let mut _text: String = "".to_string();
+        if animation_state.selected_item_high_score.0 == 0 || animation_state.selected_item_high_score.0 == 2{
+            _text = format!("{}. {} : {}",p + 1,scores[p].0,get_formatted_time(Duration::from_millis(scores[p].1 as u64))); 
+        }else {
+            _text = format!("{}. {} : {}",p + 1,scores[p].0,get_formatted_score(scores[p].1 )); 
+        }
 
-        let text = format!("{}. {} : {}",p + 1,scores[p].0,scores[p].1 ); 
         let player1 = Text::new(TextFragment{
-            text: text,
+            text: _text,
             font: Some("Tetris font".to_string()),
             color: Some(Color::WHITE), 
             scale: Some(PxScale::from(30.0))
@@ -104,6 +112,7 @@ pub fn render_high_score(state: &AppState ,assets: &HashMap<String, Image>, canv
                 .dest(glam::Vec2::new(center.0 - image_half_size.0 + 200., center.1 - 150. + 50. * p as f32))
                 .scale(glam::Vec2::new(scl, scl))
         );
+
     } 
     
 
