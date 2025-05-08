@@ -54,7 +54,7 @@ pub fn handle_singleplayer_selector_inputs(ctx: &ggez::Context, screen_state: &m
     } else if keyboard.is_key_just_pressed(SELECT) {
         let selected = animation_state.selected_item_singleplayer_selector;
         match selected {
-            4 => {
+            3 => {
                 *screen_state = ScreenState::GameModeSelector;
             }
             _ => {

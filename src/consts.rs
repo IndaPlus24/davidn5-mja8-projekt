@@ -2,11 +2,14 @@
 pub const WINDOW_WIDTH: f32 = 1920.;
 pub const WINDOW_HEIGHT: f32 = 1080.;
 
-pub const GAME_1_POS: (f32, f32) = (200., 100.);
-pub const GAME_1_SCL: f32 = 1.;
+pub const GAME_1_SOLO_POS: (f32, f32) = (550., 100.);
+pub const GAME_1_SOLO_SCL: f32 = 1.25;
 
-pub const GAME_2_POS: (f32, f32) = (1028., 100.);
-pub const GAME_2_SCL: f32 = 1.;
+pub const GAME_1_VS_POS: (f32, f32) = (200., 200.);
+pub const GAME_1_VS_SCL: f32 = 1.;
+
+pub const GAME_2_VS_POS: (f32, f32) = (1028., 200.);
+pub const GAME_2_VS_SCL: f32 = 1.;
 
 pub const GARBAGE_CAP: usize = 8;
 pub const GARBAGE_DELAY: u128 = 2000; // time in milliseconds before garbage can appear on board
@@ -27,6 +30,7 @@ pub enum ScreenState {
     GameModeSelector,
     SingleplayerSelector,
     Singleplayer,
+    FourtyLinesReset,
     VersusReady,
     Versus,
     VersusRematch,

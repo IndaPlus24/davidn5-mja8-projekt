@@ -15,7 +15,7 @@ mod gamemodes;
 use animation_state::AnimationState;
 use bots::bot::Bot;
 use bots::train_bot::train_ai;
-use consts::{GameMode, ScreenState, GAME_1_POS, GAME_1_SCL, GAME_2_POS, GAME_2_SCL, SURVIVAL_TIMER, WINDOW_HEIGHT, WINDOW_WIDTH};
+use consts::*;
 use csv::{Reader, Writer};
 use menu_inputs::*;
 use rand::random_range;
@@ -74,8 +74,8 @@ impl AppState {
 
             timer: None,
 
-            game_one: Game::new(GAME_1_POS, GAME_1_SCL),
-            game_two: Game::new(GAME_2_POS, GAME_2_SCL),
+            game_one: Game::new(GAME_1_SOLO_POS, GAME_1_SOLO_SCL),
+            game_two: Game::new(GAME_2_VS_POS, GAME_2_VS_SCL),
 
             bot: Bot::new(0),
         };
@@ -290,6 +290,9 @@ impl event::EventHandler<ggez::GameError> for AppState {
                         self.game_one.controls = vs_controls[0].clone();
                         self.game_two.controls = vs_controls[1].clone();
                     }
+
+                    self.game_one.canvas_pos = GAME_1_VS_POS;
+                    self.game_one.canvas_scl = GAME_1_VS_SCL;
                     
                     self.game_one.gamemode = GameMode::Versus;
                     self.game_two.gamemode = GameMode::Versus;
@@ -331,6 +334,10 @@ impl event::EventHandler<ggez::GameError> for AppState {
                         if !self.drifarkaden {
                             self.game_one.controls = default_keyboard_keybindings();
                         }
+
+                        self.game_one.canvas_pos = GAME_1_SOLO_POS;
+                        self.game_one.canvas_scl = GAME_1_SOLO_SCL;
+
                         self.screen_state = ScreenState::MainMenu;
                     }
                 }

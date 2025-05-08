@@ -9,7 +9,7 @@ use crate::consts::{BOARD_AMOUNT_COLUMNS, BOARD_AMOUNT_ROWS};
 impl Game {
     pub fn render_board(&mut self, assets: &HashMap<String, Image>, canvas: &mut Canvas) -> &mut Self {
         let pos = self.canvas_pos;
-        let scl = self.canvas_scale;
+        let scl = self.canvas_scl;
 
         let (mut x, y) = (pos.0, pos.1);
         canvas.draw(
@@ -87,7 +87,7 @@ impl Game {
 
     pub fn render_pieces(&mut self, assets: &HashMap<PieceType, Image>, canvas: &mut Canvas) -> &mut Self {
         let pos = self.canvas_pos;
-        let scl = self.canvas_scale;
+        let scl = self.canvas_scl;
 
         //Board cells
         let (mut x, y) = (pos.0 + 168. * scl, pos.1 + 608. * scl);
@@ -191,7 +191,7 @@ impl Game {
 
             x -= x_offset;
             y -= y_offset;
-            y += 96.;
+            y += 96. * scl;
         }
 
         self
@@ -199,7 +199,7 @@ impl Game {
 
     pub fn render_misc(&mut self, assets: &HashMap<String, Image>, canvas: &mut Canvas) -> &mut Self {
         let pos = self.canvas_pos;
-        let scl = self.canvas_scale;
+        let scl = self.canvas_scl;
 
         let (mut x, y) = (pos.0 + 168. * scl, pos.1);
         if self.gamemode == GameMode::Versus {x += 36. * scl}
@@ -249,7 +249,7 @@ impl Game {
     // Render different stats depending on gamemode
     pub fn render_stats(&mut self, canvas: &mut Canvas) -> &mut Self {
         let pos = self.canvas_pos;
-        let scl = self.canvas_scale;
+        let scl = self.canvas_scl;
 
         match self.gamemode {
             GameMode::Marathon => {
