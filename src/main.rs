@@ -403,6 +403,9 @@ impl event::EventHandler<ggez::GameError> for AppState {
 
                 if self.game_one.game_over || self.bot.game.game_over {
                     if ctx.keyboard.is_key_just_pressed(*self.game_one.controls.get(&GameAction::HardDrop).unwrap()) {
+                        self.game_one.canvas_pos = GAME_1_SOLO_POS;
+                        self.game_one.canvas_scl = GAME_1_SOLO_SCL;
+
                         self.screen_state = ScreenState::MainMenu;
                     }
                 } else {
