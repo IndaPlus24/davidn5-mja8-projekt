@@ -1,5 +1,4 @@
 use std::collections::{HashMap, VecDeque};
-use std::f32::INFINITY;
 use std::time::{Duration, Instant};
 
 use ggez::Context;
@@ -102,7 +101,7 @@ impl Game {
             das_charged: false,
             arr: Duration::from_millis(0),
             arr_start: None,
-            sds: INFINITY,
+            sds: 999.,
             gravity: DEFAULT_GRAVITY,
             last_drop: Instant::now(),
             fall_timing: Duration::from_millis((1000. / DEFAULT_GRAVITY) as u64),

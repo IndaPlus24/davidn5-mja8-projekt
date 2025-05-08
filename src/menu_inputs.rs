@@ -1,4 +1,4 @@
-use crate::{animation_state::AnimationState, bots::bot::Bot, consts::GameMode, Game, GameAction, KeyCode, ScreenState, get_scores_from_file};
+use crate::{animation_state::AnimationState, bots::bot::Bot, consts::GameMode, get_scores_from_file, AppState, Game, GameAction, KeyCode, ScreenState};
 
 // TODO: change key codes according to launch type
 const UP: KeyCode = KeyCode::Up;
@@ -205,12 +205,11 @@ pub fn handle_name_inputs(
     _screen_state: &mut ScreenState,
     animation_state: &mut AnimationState,
 ) {
-    use ggez::input::keyboard::KeyCode::*;
 
     let keyboard = &ctx.keyboard;
 
     // Move cursor vertically
-    if keyboard.is_key_just_pressed(Down) {
+    if keyboard.is_key_just_pressed(DOWN) {
         if animation_state.selected_item_high_score.1 == 0 {
             // Move down in keyboard or go to CONTINUE
             if animation_state.selected_key.0 + 1 < 3 {
@@ -222,7 +221,7 @@ pub fn handle_name_inputs(
                 animation_state.selected_item_high_score.1 = 1; // CONTINUE
             }
         }
-    } else if keyboard.is_key_just_pressed(Up) {
+    } else if keyboard.is_key_just_pressed(UP) {
         if animation_state.selected_item_high_score.1 == 1 {
             animation_state.selected_item_high_score.1 = 0; 
         } else if animation_state.selected_key.0 > 0 {
@@ -236,15 +235,15 @@ pub fn handle_name_inputs(
     // Move cursor horizontally
     if animation_state.selected_item_high_score.1 == 0 {
         let row_len = get_keyboard_row(animation_state.selected_key.0).len();
-        if keyboard.is_key_just_pressed(Right) {
+        if keyboard.is_key_just_pressed(RIGHT) {
             animation_state.selected_key.1 = (animation_state.selected_key.1 + 1) % row_len;
-        } else if keyboard.is_key_just_pressed(Left) {
+        } else if keyboard.is_key_just_pressed(LEFT) {
             animation_state.selected_key.1 = (animation_state.selected_key.1 + row_len - 1) % row_len;
         }
     }
 
     // Select key or activate continue
-    if keyboard.is_key_just_pressed(Space) || keyboard.is_key_just_pressed(Return) {
+    if keyboard.is_key_just_pressed(SELECT) {
         if animation_state.selected_item_high_score.1 == 1 {
             animation_state.name_ready = true;
         } else {
@@ -270,4 +269,63 @@ fn get_keyboard_row(row: usize) -> &'static [&'static char] {
         2 => &[&'Z', &'X', &'C', &'V',& 'B',& 'N',& 'M',&'<'],
         _ => &[],
     }
+}
+
+pub fn handle_settings_input(
+    ctx: &ggez::Context,
+    state : &mut AppState
+) {
+    let keyboard = &ctx.keyboard;
+    let animation_state = &mut state.animation_state; 
+    let screen_state = &mut state.screen_state;
+
+    if keyboard.is_key_just_pressed(DOWN) {
+        animation_state.selected_item_settings = (animation_state.selected_item_settings + 1) % 4;
+    }
+    if keyboard.is_key_just_pressed(UP) {
+        animation_state.selected_item_settings = (animation_state.selected_item_settings + 3) % 4;
+    }
+
+    // Adjust selected setting
+    let game = &mut state.game_one;
+
+    match animation_state.selected_item_settings {
+        0 => { // ARR
+            if keyboard.is_key_pressed(LEFT) && game.arr.as_millis() > 0{
+                let new_val = game.arr.as_millis().saturating_sub(1);
+                game.arr = std::time::Duration::from_millis(new_val as u64);
+            }
+            if keyboard.is_key_pressed(RIGHT) &&game.arr.as_millis() < 999{
+                let new_val = (game.arr + std::time::Duration::from_millis(1)).as_millis();
+                game.arr = std::time::Duration::from_millis(new_val as u64);
+            }
+        }
+        1 => { // DAS
+            if keyboard.is_key_pressed(LEFT)&& game.das.as_millis() > 0 {
+                let new_val = game.das.as_millis().saturating_sub(1);
+                game.das = std::time::Duration::from_millis(new_val as u64);
+            }
+            if keyboard.is_key_pressed(RIGHT) && game.das.as_millis() < 999{
+                let new_val = (game.das + std::time::Duration::from_millis(1)).as_millis();
+                game.das = std::time::Duration::from_millis(new_val as u64);
+            }
+        }
+        2 => { // SDS
+            if keyboard.is_key_pressed(LEFT) && game.sds > 0.{
+                let new_val = game.sds - 1.;
+                game.sds = new_val;
+            }
+            if keyboard.is_key_pressed(RIGHT) && game.sds < 999.{
+                let new_val = game.sds + 1.;
+                game.sds = new_val;
+            }
+        }
+        3 => { // Confirm
+            if keyboard.is_key_just_pressed(SELECT) {
+                *screen_state = ScreenState::MainMenu;
+            }
+        }
+        _ => {}
+    }
+
 }

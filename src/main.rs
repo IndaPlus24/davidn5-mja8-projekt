@@ -294,6 +294,9 @@ impl event::EventHandler<ggez::GameError> for AppState {
             ScreenState::FourtyLinesReset => {
                 handle_reset_screen_inputs(ctx, &mut self.screen_state, &mut self.animation_state, &mut self.game_one);
             }
+            ScreenState::Settings => {
+                handle_settings_input(ctx, self);
+            }
 
             // Versus
             ScreenState::VersusReady => {
@@ -377,7 +380,6 @@ impl event::EventHandler<ggez::GameError> for AppState {
             ScreenState::HighscoreInput => {
                 handle_name_inputs(ctx, &mut self.screen_state, &mut self.animation_state);
             }
-            _ => {}
         }
 
         Ok(())
@@ -443,6 +445,13 @@ impl event::EventHandler<ggez::GameError> for AppState {
                     &mut canvas,
                     1.,
                     &mut self.animation_state,
+                );
+            }
+            ScreenState::Settings => {
+                settings::render_settings(
+                    &mut canvas, 
+                    1.,
+                    self
                 );
             }
 
@@ -511,7 +520,6 @@ impl event::EventHandler<ggez::GameError> for AppState {
                     .render_pieces(&self.piece_assets,&mut canvas)
                     .render_stats(&mut canvas);
             }
-            _ => {}
         }
 
         canvas.finish(ctx)?;
