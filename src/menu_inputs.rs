@@ -289,7 +289,9 @@ pub fn handle_name_inputs(
     // Select key or activate continue
     if keyboard.is_key_just_pressed(menuinputs.SELECT) {
         if animation_state.selected_item_high_score.1 == 1 {
-            animation_state.name_ready = true;
+            if animation_state.name_input != ""{
+                animation_state.name_ready = true;
+            }
         } else {
             let row = get_keyboard_row(animation_state.selected_key.0);
             if let Some(&ch) = row.get(animation_state.selected_key.1) {

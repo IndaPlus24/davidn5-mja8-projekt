@@ -68,7 +68,7 @@ impl AppState {
         let id = Some(rng.random());
 
         let mut state = AppState {
-            animation_state: AnimationState::new(get_scores_from_file("res/highscores/highscore_marathon.csv")),
+            animation_state: AnimationState::new(get_scores_from_file("res/highscores/highscore_survival.csv")),
             screen_state: ScreenState::StartScreen,
             drifarkaden: false,
 
@@ -189,13 +189,17 @@ impl AppState {
         image_map
     }
 
-    fn save_score(name: String, score: usize, path: &str) -> Result<(), Box<dyn Error>> {
+    fn save_score(name: String, score: usize, path: &str, ascending_order : bool) -> Result<(), Box<dyn Error>> {
         //Get previous scores and add new score
         let mut scores = get_scores_from_file(path);
         scores.push((name, score));
 
-        //Sort scores and reverse
-        scores.sort_by(|a, b| b.1.cmp(&a.1));
+        if ascending_order {
+            //Sort scores and reverse
+            scores.sort_by(|a, b| b.1.cmp(&a.1));
+        }else {
+            scores.sort_by(|a, b| a.1.cmp(&b.1));
+        }
 
         //Write top 5 to file
         if save_scores_to_file(path, scores) {
@@ -240,6 +244,7 @@ impl event::EventHandler<ggez::GameError> for AppState {
     fn update(&mut self, ctx: &mut Context) -> GameResult {
 
         if self.game_one.game_over && self.game_one.continue_to_highscore {
+
             self.screen_state = ScreenState::HighscoreInput;
             
             if self.animation_state.name_ready {
@@ -250,9 +255,11 @@ impl event::EventHandler<ggez::GameError> for AppState {
                     _ => "res/highscores/highscore_survival.csv"
                 };
                 if self.game_one.gamemode == GameMode::FourtyLines{
-                    let _ = Self::save_score(name.to_string(), self.game_one.final_time.as_secs() as usize, path);
+                    let _ = Self::save_score(name.to_string(), self.game_one.final_time.as_millis() as usize, path, true);
+                }else if self.game_one.gamemode == GameMode::Survival {
+                    let _ = Self::save_score(name.to_string(), self.game_one.final_time.as_millis() as usize, path, false);
                 }else{
-                    let _ = Self::save_score(name.to_string(), self.game_one.score, path);
+                    let _ = Self::save_score(name.to_string(), self.game_one.score, path,true);
                 }
                 self.animation_state.name_input = "".to_string();
                 self.animation_state.name_ready = false;
