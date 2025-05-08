@@ -84,6 +84,23 @@ pub fn render_marathon_prompt(assets: &HashMap<String, Image>, canvas: &mut Canv
             .scale(glam::Vec2::new(scl, scl))
     );
 
+    // Back
+    let mut back = Text::new(TextFragment{
+        text: "BACK".to_string(),
+        font: Some("Tetris font".to_string()),
+        color: Some(Color::WHITE), 
+        scale: Some(PxScale::from(60.))
+    });
+    back.set_layout(TextLayout {
+        h_align: TextAlign::Middle,
+        v_align: TextAlign::Begin
+    });
+    canvas.draw(&back,
+        graphics::DrawParam::new()
+            .dest(glam::Vec2::new(center.0, center.1 + 300.))
+            .scale(glam::Vec2::new(scl, scl))
+    );
+
     // Arrow(s)
     if animation_state.selected_item_marathon_prompt.1 == 0 {
         let one_wide = animation_state.selected_item_marathon_prompt.0 < 10;
@@ -102,7 +119,8 @@ pub fn render_marathon_prompt(assets: &HashMap<String, Image>, canvas: &mut Canv
                 .dest(glam::Vec2::new(center.0, center.1))
                 .scale(glam::Vec2::new(scl, scl))
         );
-    } else {
+    } 
+    else if animation_state.selected_item_marathon_prompt.1 == 1 {
         let arrow = Text::new(TextFragment{
             text: ">".to_string(),
             font: Some("Tetris font".to_string()),
@@ -112,6 +130,18 @@ pub fn render_marathon_prompt(assets: &HashMap<String, Image>, canvas: &mut Canv
         canvas.draw(&arrow,
             graphics::DrawParam::new()
                 .dest(glam::Vec2::new(center.0 - 300., center.1 + 200.))
+                .scale(glam::Vec2::new(scl, scl))
+        );
+    } else {
+        let arrow = Text::new(TextFragment{
+            text: ">".to_string(),
+            font: Some("Tetris font".to_string()),
+            color: Some(Color::WHITE), 
+            scale: Some(PxScale::from(60.))
+        });
+        canvas.draw(&arrow,
+            graphics::DrawParam::new()
+                .dest(glam::Vec2::new(center.0 - 220., center.1 + 300.))
                 .scale(glam::Vec2::new(scl, scl))
         );
     }

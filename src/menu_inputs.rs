@@ -58,7 +58,10 @@ pub fn handle_main_menu_inputs(ctx: &ggez::Context, screen_state: &mut ScreenSta
                 animation_state.selected_item_high_score = (0, 0);
                 ScreenState::HighScore
             }
-            _=> ScreenState::Settings
+            _=> {
+                animation_state.selected_item_settings = (0, 0);
+                ScreenState::Settings
+            }
         };
     }
 }
@@ -113,22 +116,34 @@ pub fn handle_singleplayer_selector_inputs(ctx: &ggez::Context, screen_state: &m
 
 pub fn handle_marathon_prompt_inputs(ctx: &ggez::Context, screen_state: &mut ScreenState, animation_state: &mut AnimationState, game: &mut Game, menuinputs: &MenuInputs) {
     let keyboard = &ctx.keyboard;
-    if keyboard.is_key_just_pressed(menuinputs.DOWN)
-    || keyboard.is_key_just_pressed(menuinputs.UP) {
-        animation_state.selected_item_marathon_prompt.1 = (animation_state.selected_item_marathon_prompt.1 + 1) % 2;
-    } else if keyboard.is_key_just_pressed(menuinputs.LEFT) { // Decrease starting level
-        let mut new_level = animation_state.selected_item_marathon_prompt.0 - 1;
-        if new_level == 0 {new_level = 1}
-        animation_state.selected_item_marathon_prompt.0 = new_level;
-    } else if keyboard.is_key_just_pressed(menuinputs.RIGHT) { // Increase starting level
-        let mut new_level = animation_state.selected_item_marathon_prompt.0 + 1;
-        if new_level == 16 {new_level = 15}
-        animation_state.selected_item_marathon_prompt.0 = new_level;
-    } else if keyboard.is_key_just_pressed(menuinputs.SELECT) { // Set level and start game
-        game.reset_game(None);
-        game.set_level(animation_state.selected_item_marathon_prompt.0);
-        game.gamemode = GameMode::Marathon;
-        *screen_state = ScreenState::Singleplayer
+    if keyboard.is_key_just_pressed(menuinputs.DOWN) {
+        animation_state.selected_item_marathon_prompt.1 = (animation_state.selected_item_marathon_prompt.1 + 1) % 3;
+    }
+    if keyboard.is_key_just_pressed(menuinputs.UP) {
+        animation_state.selected_item_marathon_prompt.1 = (animation_state.selected_item_marathon_prompt.1 + 2) % 3;
+    }
+    
+    if animation_state.selected_item_marathon_prompt.1 == 0 {
+        if keyboard.is_key_just_pressed(menuinputs.LEFT) { // Decrease starting level
+            let mut new_level = animation_state.selected_item_marathon_prompt.0 - 1;
+            if new_level == 0 {new_level = 1}
+            animation_state.selected_item_marathon_prompt.0 = new_level;
+        }
+        if keyboard.is_key_just_pressed(menuinputs.RIGHT) { // Increase starting level
+            let mut new_level = animation_state.selected_item_marathon_prompt.0 + 1;
+            if new_level == 16 {new_level = 15}
+            animation_state.selected_item_marathon_prompt.0 = new_level;
+        }
+    }
+    if keyboard.is_key_just_pressed(menuinputs.SELECT) {
+        if animation_state.selected_item_marathon_prompt.1 == 2 {
+            *screen_state = ScreenState::SingleplayerSelector
+        } else {
+            game.reset_game(None);
+            game.set_level(animation_state.selected_item_marathon_prompt.0);
+            game.gamemode = GameMode::Marathon;
+            *screen_state = ScreenState::Singleplayer
+        }    
     }
 }
 
