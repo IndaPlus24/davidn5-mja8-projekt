@@ -55,6 +55,8 @@ struct AppState {
 
     // Bots,
     bot: Bot,
+
+    menuinputs : MenuInputs,
 }
 
 impl AppState {
@@ -78,6 +80,7 @@ impl AppState {
             game_two: Game::new(GAME_2_VS_POS, GAME_2_VS_SCL),
 
             bot: Bot::new(0),
+            menuinputs : MenuInputs::pc_inputs()
         };
 
         state.bot.game.canvas_pos = GAME_2_VS_POS; 
@@ -91,6 +94,7 @@ impl AppState {
             state.game_one.controls = keybinds[0].clone();
             state.game_two.controls = keybinds[1].clone();
             state.drifarkaden = true;
+            state.menuinputs = MenuInputs::drifarkaden_inputs();
         }
 
         Ok(state)
@@ -281,22 +285,22 @@ impl event::EventHandler<ggez::GameError> for AppState {
                 }
             }
             ScreenState::StartScreen => {
-                handle_start_screen_inputs(ctx, &mut self.screen_state);
+                handle_start_screen_inputs(ctx, &mut self.screen_state, &self.menuinputs);
             }
             ScreenState::MainMenu => {
-                handle_main_menu_inputs(ctx, &mut self.screen_state, &mut self.animation_state);
+                handle_main_menu_inputs(ctx, &mut self.screen_state, &mut self.animation_state, &self.menuinputs);
             }
             ScreenState::GameModeSelector => {
-                handle_gamemode_selector_inputs(ctx, &mut self.screen_state, &mut self.animation_state);
+                handle_gamemode_selector_inputs(ctx, &mut self.screen_state, &mut self.animation_state, &self.menuinputs);
             }
             ScreenState::SingleplayerSelector => {
-                handle_singleplayer_selector_inputs(ctx, &mut self.screen_state, &mut self.animation_state, &mut self.game_one);
+                handle_singleplayer_selector_inputs(ctx, &mut self.screen_state, &mut self.animation_state, &mut self.game_one, &self.menuinputs);
             }
             ScreenState::MarathonPrompt => {
-                handle_marathon_prompt_inputs(ctx, &mut self.screen_state, &mut self.animation_state, &mut self.game_one);
+                handle_marathon_prompt_inputs(ctx, &mut self.screen_state, &mut self.animation_state, &mut self.game_one, &self.menuinputs);
             }
             ScreenState::FourtyLinesReset => {
-                handle_reset_screen_inputs(ctx, &mut self.screen_state, &mut self.animation_state, &mut self.game_one);
+                handle_reset_screen_inputs(ctx, &mut self.screen_state, &mut self.animation_state, &mut self.game_one,&self.menuinputs);
             }
             ScreenState::Settings => {
                 handle_settings_input(ctx, self);
@@ -373,7 +377,7 @@ impl event::EventHandler<ggez::GameError> for AppState {
             }
 
             ScreenState::BotSelector => {
-                handle_bot_selector_inputs(ctx,self,);
+                handle_bot_selector_inputs(ctx,self);
             }
             ScreenState::VsBots => {
 
@@ -412,10 +416,10 @@ impl event::EventHandler<ggez::GameError> for AppState {
 
             }
             ScreenState::HighScore => {
-                handle_highscore_inputs(ctx, &mut self.screen_state, &mut self.animation_state);
+                handle_highscore_inputs(ctx, &mut self.screen_state, &mut self.animation_state, &self.menuinputs);
             }
             ScreenState::HighscoreInput => {
-                handle_name_inputs(ctx, &mut self.screen_state, &mut self.animation_state);
+                handle_name_inputs(ctx, &mut self.screen_state, &mut self.animation_state, &self.menuinputs);
             }
         }
 
