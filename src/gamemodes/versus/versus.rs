@@ -137,7 +137,7 @@ impl Game {
         );
 
         let mut sent = Text::new(TextFragment{
-            text: self.attack.to_string(),
+            text: self.garbage_sent.to_string(),
             font: Some("Tetris font".to_string()),
             color: Some(Color::WHITE), 
             scale: Some(PxScale::from(24.))
@@ -152,7 +152,7 @@ impl Game {
                 .scale(glam::Vec2::new(scl, scl))
         );
 
-        let formatted_apm = get_formatted_apm(self.attack, elapsed);
+        let formatted_apm = get_formatted_apm(self.garbage_sent, elapsed);
         let mut apm = Text::new(TextFragment{
             text: formatted_apm,
             font: Some("Tetris font".to_string()),

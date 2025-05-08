@@ -18,10 +18,10 @@ pub fn render_gamemode_selector(assets: &HashMap<String, Image>, canvas: &mut Ca
     );
 
     let solo = Text::new(TextFragment{
-        text : "   SOLO".to_string(),
-        font : Some("Tetris font".to_string()),
+        text: "   SOLO".to_string(),
+        font: Some("Tetris font".to_string()),
         color: Some(Color::WHITE), 
-        scale : Some(PxScale::from(80.0))
+        scale: Some(PxScale::from(80.0))
 
     });
 
@@ -32,10 +32,10 @@ pub fn render_gamemode_selector(assets: &HashMap<String, Image>, canvas: &mut Ca
     );
 
     let marathon = Text::new(TextFragment{
-        text : "Marathon".to_string(),
-        font : Some("Tetris font".to_string()),
+        text: "Marathon".to_string(),
+        font: Some("Tetris font".to_string()),
         color: Some(Color::WHITE), 
-        scale : Some(PxScale::from(60.0))
+        scale: Some(PxScale::from(60.0))
 
     });
 
@@ -46,10 +46,10 @@ pub fn render_gamemode_selector(assets: &HashMap<String, Image>, canvas: &mut Ca
     );
 
     let fourty_lines = Text::new(TextFragment{
-        text : "40 Lines".to_string(),
-        font : Some("Tetris font".to_string()),
+        text: "40 Lines".to_string(),
+        font: Some("Tetris font".to_string()),
         color: Some(Color::WHITE), 
-        scale : Some(PxScale::from(60.0))
+        scale: Some(PxScale::from(60.0))
 
     });
 
@@ -60,10 +60,10 @@ pub fn render_gamemode_selector(assets: &HashMap<String, Image>, canvas: &mut Ca
     );
 
     let survival = Text::new(TextFragment{
-        text : "Survival".to_string(),
-        font : Some("Tetris font".to_string()),
+        text: "Survival".to_string(),
+        font: Some("Tetris font".to_string()),
         color: Some(Color::WHITE), 
-        scale : Some(PxScale::from(60.0))
+        scale: Some(PxScale::from(60.0))
 
     });
 
@@ -74,10 +74,10 @@ pub fn render_gamemode_selector(assets: &HashMap<String, Image>, canvas: &mut Ca
     );
 
     let back = Text::new(TextFragment{
-        text : "Back".to_string(),
-        font : Some("Tetris font".to_string()),
+        text: "Back".to_string(),
+        font: Some("Tetris font".to_string()),
         color: Some(Color::WHITE), 
-        scale : Some(PxScale::from(60.0))
+        scale: Some(PxScale::from(60.0))
 
     });
 
@@ -89,10 +89,10 @@ pub fn render_gamemode_selector(assets: &HashMap<String, Image>, canvas: &mut Ca
 
     
     let arrow = Text::new(TextFragment{
-        text : ">".to_string(),
-        font : Some("Tetris font".to_string()),
+        text: ">".to_string(),
+        font: Some("Tetris font".to_string()),
         color: Some(Color::WHITE), 
-        scale : Some(PxScale::from(60.0))
+        scale: Some(PxScale::from(60.0))
 
     });
 

@@ -35,7 +35,7 @@ pub fn train_ai() {
 
         println!("Top fitness: {}", population[0].fitness);
         println!("Best weights: {:?}", population[0].weights);
-        println!("Amount of steps : {}", population[0].game_steps);
+        println!("Amount of steps: {}", population[0].game_steps);
 
         let mut rng = rand::rng();
         let mut offspring: Vec<Bot> = vec![];

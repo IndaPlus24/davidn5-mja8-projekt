@@ -1,10 +1,10 @@
-use ggez::{glam, graphics::{self, Canvas, Color, Image, PxScale, Text, TextFragment}};
+use ggez::{glam, graphics::{self, Canvas, Color, Image, PxScale, Text, TextAlign, TextFragment, TextLayout}};
 use std::collections::HashMap;
 
 use crate::animation_state::AnimationState;
 use crate::consts::{WINDOW_HEIGHT, WINDOW_WIDTH};
 
-pub fn render_main_menu(assets: &HashMap<String, Image>, canvas: &mut Canvas, scl: f32, animation_state: &mut AnimationState){
+pub fn render_reset_screen(assets: &HashMap<String, Image>, canvas: &mut Canvas, scl: f32, animation_state: &mut AnimationState){
     let center = (WINDOW_WIDTH / 2., WINDOW_HEIGHT / 2.);
 
     let image = assets.get("empty_box").unwrap();
@@ -17,74 +17,59 @@ pub fn render_main_menu(assets: &HashMap<String, Image>, canvas: &mut Canvas, sc
             .scale(glam::Vec2::new(scl, scl))
     );
 
-    let main_menu = Text::new(TextFragment{
-        text: "MAIN MENU".to_string(),
+    // Game over text
+    let mut game_over = Text::new(TextFragment{
+        text: "GAME OVER".to_string(),
         font: Some("Tetris font".to_string()),
         color: Some(Color::WHITE), 
-        scale: Some(PxScale::from(90.0))
-
+        scale: Some(PxScale::from(90.))
     });
-
-    canvas.draw(&main_menu,
+    game_over.set_layout(TextLayout {
+        h_align: TextAlign::Middle,
+        v_align: TextAlign::Begin
+    });
+    canvas.draw(&game_over,
         graphics::DrawParam::new()
-            .dest(glam::Vec2::new(center.0 - image_half_size.0 + 110., center.1 - 400.))
+            .dest(glam::Vec2::new(center.0, center.1 - 400.))
             .scale(glam::Vec2::new(scl, scl))
     );
 
-    let start_game = Text::new(TextFragment{
-        text: "START GAME".to_string(),
+    // Options
+    let retry = Text::new(TextFragment{
+        text: "Retry".to_string(),
         font: Some("Tetris font".to_string()),
         color: Some(Color::WHITE), 
-        scale: Some(PxScale::from(60.0))
-
+        scale: Some(PxScale::from(60.))
     });
-
-    canvas.draw(&start_game,
+    canvas.draw(&retry,
         graphics::DrawParam::new()
             .dest(glam::Vec2::new(center.0 - image_half_size.0 + 200., center.1 - 175.))
             .scale(glam::Vec2::new(scl, scl))
     );
 
-    let highscores = Text::new(TextFragment{
-        text: "HIGH SCORES".to_string(),
+    let main_menu = Text::new(TextFragment{
+        text: "Return to\nmain menu".to_string(),
         font: Some("Tetris font".to_string()),
         color: Some(Color::WHITE), 
-        scale: Some(PxScale::from(60.0))
-
+        scale: Some(PxScale::from(60.))
     });
-
-    canvas.draw(&highscores,
+    canvas.draw(&main_menu,
         graphics::DrawParam::new()
             .dest(glam::Vec2::new(center.0 - image_half_size.0 + 200., center.1))
             .scale(glam::Vec2::new(scl, scl))
     );
 
-    let settings = Text::new(TextFragment{
-        text: "SETTINGS".to_string(),
-        font: Some("Tetris font".to_string()),
-        color: Some(Color::WHITE), 
-        scale: Some(PxScale::from(60.0))
-
-    });
-
-    canvas.draw(&settings,
-        graphics::DrawParam::new()
-            .dest(glam::Vec2::new(center.0 - image_half_size.0 + 200., center.1 + 175.))
-            .scale(glam::Vec2::new(scl, scl))
-    );
-
+    // Arrow
     let arrow = Text::new(TextFragment{
         text: ">".to_string(),
         font: Some("Tetris font".to_string()),
         color: Some(Color::WHITE), 
-        scale: Some(PxScale::from(60.0))
-
+        scale: Some(PxScale::from(60.))
     });
 
-    let arrow_y = match animation_state.selected_item_main_menu {
+    let arrow_y = match animation_state.selected_item_reset_selector {
         0 => center.1 - 175., 
-        1 => center.1,
-        _ => center.1 + 175.
+        _ => center.1 + 30.,
     }; 
 
     canvas.draw(&arrow,

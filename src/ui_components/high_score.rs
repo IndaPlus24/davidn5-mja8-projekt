@@ -4,7 +4,7 @@ use std::collections::HashMap;
 use crate::AppState;
 use crate::consts::{WINDOW_HEIGHT, WINDOW_WIDTH};
 
-pub fn render_high_score(state : &AppState ,assets: &HashMap<String, Image>, canvas: &mut Canvas, scl: f32){
+pub fn render_high_score(state: &AppState ,assets: &HashMap<String, Image>, canvas: &mut Canvas, scl: f32){
     let animation_state = &state.animation_state;
     let center = (WINDOW_WIDTH / 2., WINDOW_HEIGHT / 2.);
 
@@ -19,10 +19,10 @@ pub fn render_high_score(state : &AppState ,assets: &HashMap<String, Image>, can
     );
 
     let high_score = Text::new(TextFragment{
-        text : "HIGH SCORE".to_string(),
-        font : Some("Tetris font".to_string()),
+        text: "HIGH SCORE".to_string(),
+        font: Some("Tetris font".to_string()),
         color: Some(Color::WHITE), 
-        scale : Some(PxScale::from(80.0))
+        scale: Some(PxScale::from(80.0))
 
     });
 
@@ -36,10 +36,10 @@ pub fn render_high_score(state : &AppState ,assets: &HashMap<String, Image>, can
     if animation_state.selected_item_high_score.0 == 0 || animation_state.selected_item_high_score.0 == 2 {
 
         let labels = Text::new(TextFragment{
-            text : "NAME      TIME (seconds)".to_string(),
-            font : Some("Tetris font".to_string()),
+            text: "NAME      TIME (seconds)".to_string(),
+            font: Some("Tetris font".to_string()),
             color: Some(Color::WHITE), 
-            scale : Some(PxScale::from(20.0))
+            scale: Some(PxScale::from(20.0))
     
         });
     
@@ -50,10 +50,10 @@ pub fn render_high_score(state : &AppState ,assets: &HashMap<String, Image>, can
         );
     }else {
         let labels = Text::new(TextFragment{
-            text : "NAME      SCORE".to_string(),
-            font : Some("Tetris font".to_string()),
+            text: "NAME      SCORE".to_string(),
+            font: Some("Tetris font".to_string()),
             color: Some(Color::WHITE), 
-            scale : Some(PxScale::from(20.0))
+            scale: Some(PxScale::from(20.0))
     
         });
     
@@ -72,10 +72,10 @@ pub fn render_high_score(state : &AppState ,assets: &HashMap<String, Image>, can
             text = format!(">{}", text);
         }
         let gamemode = Text::new(TextFragment{
-            text : text,
-            font : Some("Tetris font".to_string()),
+            text: text,
+            font: Some("Tetris font".to_string()),
             color: Some(Color::WHITE), 
-            scale : Some(PxScale::from(30.0))
+            scale: Some(PxScale::from(30.0))
     
         });
     
@@ -92,10 +92,10 @@ pub fn render_high_score(state : &AppState ,assets: &HashMap<String, Image>, can
 
         let text = format!("{}. {} : {}",p + 1,scores[p].0,scores[p].1 ); 
         let player1 = Text::new(TextFragment{
-            text : text,
-            font : Some("Tetris font".to_string()),
+            text: text,
+            font: Some("Tetris font".to_string()),
             color: Some(Color::WHITE), 
-            scale : Some(PxScale::from(30.0))
+            scale: Some(PxScale::from(30.0))
     
         });
     
@@ -108,10 +108,10 @@ pub fn render_high_score(state : &AppState ,assets: &HashMap<String, Image>, can
     
 
     let back = Text::new(TextFragment{
-        text : "Back".to_string(),
-        font : Some("Tetris font".to_string()),
+        text: "Back".to_string(),
+        font: Some("Tetris font".to_string()),
         color: Some(Color::WHITE), 
-        scale : Some(PxScale::from(60.0))
+        scale: Some(PxScale::from(60.0))
 
     });
 
@@ -123,10 +123,10 @@ pub fn render_high_score(state : &AppState ,assets: &HashMap<String, Image>, can
 
     if animation_state.selected_item_high_score.1 == 1 {
         let arrow = Text::new(TextFragment{
-            text : ">".to_string(),
-            font : Some("Tetris font".to_string()),
+            text: ">".to_string(),
+            font: Some("Tetris font".to_string()),
             color: Some(Color::WHITE), 
-            scale : Some(PxScale::from(60.0))
+            scale: Some(PxScale::from(60.0))
     
         });
     

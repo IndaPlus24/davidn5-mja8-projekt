@@ -15,14 +15,16 @@ mod gamemodes;
 use animation_state::AnimationState;
 use bots::bot::Bot;
 use bots::train_bot::train_ai;
-use consts::{GameMode, ScreenState, GAME_1_POS, GAME_1_SCL, GAME_2_POS, GAME_2_SCL, WINDOW_HEIGHT, WINDOW_WIDTH};
+use consts::*;
 use csv::{Reader, Writer};
 use menu_inputs::*;
+use rand::random_range;
 use std::collections::HashMap;
 use std::error::Error;
 use std::path;
 use std::str::FromStr;
-use ui_components::{bot_selector, gamemode_selector, high_score, input_name, main_menu, singleplayer_selector, start_screen, versus_ready};
+use std::time::{Duration, Instant};
+use ui_components::*;
 
 pub use crate::config::input_config::*;
 pub use crate::game::Game;
@@ -37,13 +39,15 @@ struct AppState {
     //Screen states and info
     animation_state: AnimationState,
     screen_state: ScreenState,
-    drifarkaden : bool,
+    drifarkaden: bool,
 
     // Assets
     piece_assets: HashMap<PieceType, Image>,
     board_assets: HashMap<String, Image>,
     menu_assets: HashMap<String, Image>,
     misc_assets: HashMap<String, Image>,
+
+    timer: Option<Instant>,
 
     // Games
     game_one: Game,
@@ -61,15 +65,17 @@ impl AppState {
         let mut state = AppState {
             animation_state: AnimationState::new(get_scores_from_file("res/highscores/highscore_marathon.csv")),
             screen_state: ScreenState::StartScreen,
-            drifarkaden : false,
+            drifarkaden: false,
 
             piece_assets: AppState::preload_piece_assets(ctx),
             board_assets: AppState::preload_board_assets(ctx),
             menu_assets: AppState::preload_menu_assets(ctx),
             misc_assets: AppState::preload_misc_assets(ctx),
 
-            game_one: Game::new(GAME_1_POS, GAME_1_SCL),
-            game_two: Game::new(GAME_2_POS, GAME_2_SCL),
+            timer: None,
+
+            game_one: Game::new(GAME_1_SOLO_POS, GAME_1_SOLO_SCL),
+            game_two: Game::new(GAME_2_VS_POS, GAME_2_VS_SCL),
 
             bot: Bot::new(0),
         };
@@ -173,7 +179,7 @@ impl AppState {
         image_map
     }
 
-    fn save_score(name: String, score: usize, path : &str) -> Result<(), Box<dyn Error>> {
+    fn save_score(name: String, score: usize, path: &str) -> Result<(), Box<dyn Error>> {
         //Get previous scores and add new score
         let mut scores = get_scores_from_file(path);
         scores.push((name, score));
@@ -223,7 +229,7 @@ pub fn save_scores_to_file(path: &str, scores: Vec<(String, usize)>) -> bool {
 impl event::EventHandler<ggez::GameError> for AppState {
     fn update(&mut self, ctx: &mut Context) -> GameResult {
 
-        if self.game_one.game_over && self.game_one.continue_to_highscore{
+        if self.game_one.game_over && self.game_one.continue_to_highscore {
             self.screen_state = ScreenState::HighscoreInput;
             
             if self.animation_state.name_ready {
@@ -247,10 +253,28 @@ impl event::EventHandler<ggez::GameError> for AppState {
             }
         }
         match self.screen_state {
-            ScreenState::Marathon    |
-            ScreenState::FourtyLines |
-            ScreenState::Survival => {
+            ScreenState::Singleplayer => {
                 self.game_one.update(ctx);
+
+                // 40L top-out check
+                if self.game_one.gamemode == GameMode::FourtyLines
+                && self.game_one.game_over
+                && !self.game_one.objective_completed {
+                    self.animation_state.selected_item_reset_selector = 0;
+                    self.screen_state = ScreenState::FourtyLinesReset
+                }
+
+                // Survival garbage
+                if self.game_one.gamemode == GameMode::Survival && !self.game_one.game_over {
+                    if let Some(t) = self.timer {
+                        if t.elapsed() >= Duration::from_millis(SURVIVAL_TIMER) {
+                            self.timer = Some(t + Duration::from_secs(1));
+                            self.game_one.add_garbage_row(random_range(0..9));
+                        }
+                    } else {
+                        self.timer = Some(Instant::now())
+                    }
+                }
             }
             ScreenState::StartScreen => {
                 handle_start_screen_inputs(ctx, &mut self.screen_state);
@@ -264,18 +288,31 @@ impl event::EventHandler<ggez::GameError> for AppState {
             ScreenState::SingleplayerSelector => {
                 handle_singleplayer_selector_inputs(ctx, &mut self.screen_state, &mut self.animation_state, &mut self.game_one);
             }
+            ScreenState::MarathonPrompt => {
+                handle_marathon_prompt_inputs(ctx, &mut self.screen_state, &mut self.animation_state, &mut self.game_one);
+            }
+            ScreenState::FourtyLinesReset => {
+                handle_reset_screen_inputs(ctx, &mut self.screen_state, &mut self.animation_state, &mut self.game_one);
+            }
+
+            // Versus
             ScreenState::VersusReady => {
                 if self.game_one.gamemode != GameMode::Versus
                 || self.game_one.gamemode != GameMode::Versus {
-                    let vs_controls = multi_controller_keyboard_keybindings();
-                    self.game_one.controls = vs_controls[0].clone();
-                    self.game_two.controls = vs_controls[1].clone();
+                    if !self.drifarkaden {
+                        let vs_controls = multi_controller_keyboard_keybindings();
+                        self.game_one.controls = vs_controls[0].clone();
+                        self.game_two.controls = vs_controls[1].clone();
+                    }
 
+                    self.game_one.canvas_pos = GAME_1_VS_POS;
+                    self.game_one.canvas_scl = GAME_1_VS_SCL;
+                    
                     self.game_one.gamemode = GameMode::Versus;
                     self.game_two.gamemode = GameMode::Versus;
                 }
 
-                handle_versus_ready_inputs(
+                handle_versus_prepost_inputs(
                     ctx,
                     &mut self.screen_state,
                     &mut self.animation_state,
@@ -298,7 +335,36 @@ impl event::EventHandler<ggez::GameError> for AppState {
                         self.game_two.garbage_outbound.pop_front().unwrap()
                     );
                 }
+
+                if self.game_one.game_over || self.game_two.game_over {
+                    self.animation_state.players_ready = (false, false);
+                    self.timer = Some(Instant::now());
+                    self.screen_state = ScreenState::VersusRematch;
+                }
             }
+            ScreenState::VersusRematch => {
+                if let Some(t) = self.timer {
+                    if t.elapsed() >= Duration::from_secs(10) {
+                        if !self.drifarkaden {
+                            self.game_one.controls = default_keyboard_keybindings();
+                        }
+
+                        self.game_one.canvas_pos = GAME_1_SOLO_POS;
+                        self.game_one.canvas_scl = GAME_1_SOLO_SCL;
+
+                        self.screen_state = ScreenState::MainMenu;
+                    }
+                }
+
+                handle_versus_prepost_inputs(
+                    ctx,
+                    &mut self.screen_state,
+                    &mut self.animation_state,
+                    &mut self.game_one,
+                    &mut self.game_two,
+                );
+            }
+
             ScreenState::BotSelector => {
                 handle_bot_selector_inputs(ctx, &mut self.screen_state, &mut self.animation_state, &mut self.bot);
             }
@@ -322,9 +388,7 @@ impl event::EventHandler<ggez::GameError> for AppState {
             graphics::Canvas::from_frame(ctx, graphics::Color::from([0.1, 0.2, 0.3, 1.0]));
 
         match &self.screen_state {
-            ScreenState::Marathon |
-            ScreenState::FourtyLines |
-            ScreenState::Survival => {
+            ScreenState::Singleplayer => {
                 //Render game
                 self.game_one
                     .render_board(&self.board_assets, &mut canvas)
@@ -365,6 +429,24 @@ impl event::EventHandler<ggez::GameError> for AppState {
                     &mut self.animation_state,
                 );
             }
+            ScreenState::MarathonPrompt => {
+                marathon_prompt::render_marathon_prompt(
+                    &self.menu_assets,
+                    &mut canvas,
+                    1.,
+                    &mut self.animation_state,
+                );
+            }
+            ScreenState::FourtyLinesReset => {
+                reset_screen::render_reset_screen(
+                    &self.menu_assets,
+                    &mut canvas,
+                    1.,
+                    &mut self.animation_state,
+                );
+            }
+
+            // Versus
             ScreenState::VersusReady => {
                 versus_ready::render_versus_ready(
                     &self.menu_assets,
@@ -386,6 +468,19 @@ impl event::EventHandler<ggez::GameError> for AppState {
                     .render_stats(&mut canvas)
                     .render_misc(&self.misc_assets, &mut canvas);
             }
+            ScreenState::VersusRematch => {
+                let winner = if self.game_one.game_over {1} else {0};
+
+                versus_rematch::render_versus_rematch(
+                    &self.menu_assets,
+                    &mut canvas,
+                    1.,
+                    &mut self.animation_state,
+                    winner,
+                    self.timer,
+                );
+            }
+
             ScreenState::BotSelector => {
                 bot_selector::render_bot_selector(
                     &self.menu_assets,
@@ -460,6 +555,5 @@ pub fn main() -> GameResult {
         graphics::FontData::from_path(&context, "/PressStart2P-Regular.ttf")?,
     );
 
-    //println!("Opened Window...");
     event::run(context, event_loop, state) // Run window event loop
 }

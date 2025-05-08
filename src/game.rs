@@ -12,7 +12,7 @@ use crate::{default_keyboard_keybindings, GameAction, KeyCode, Piece, PieceType}
 pub struct Game {
     // Canvas info
     pub canvas_pos: (f32, f32),
-    pub canvas_scale: f32,
+    pub canvas_scl: f32,
 
     // General
     pub board: [[Option<PieceType>; BOARD_AMOUNT_COLUMNS]; BOARD_AMOUNT_ROWS],
@@ -21,7 +21,7 @@ pub struct Game {
     pub game_over: bool,
     pub objective_completed: bool,
     pub controls: HashMap<GameAction, KeyCode>,
-    pub continue_to_highscore : bool,
+    pub continue_to_highscore: bool,
 
     // Pieces
     pub piece_queue: VecDeque<PieceType>,
@@ -57,7 +57,8 @@ pub struct Game {
     pub lines: usize,
     pub level: usize,
     pub pieces: usize,
-    pub attack: usize,
+    pub garbage_sent: usize,
+    pub garbage_received: usize,
     pub start_time: Instant,
     pub final_time: Duration,
 
@@ -75,7 +76,7 @@ impl Game {
     pub fn new(pos: (f32, f32), scl: f32) -> Self {
         Game {
             canvas_pos: pos,
-            canvas_scale: scl,
+            canvas_scl: scl,
 
             board: [[None; BOARD_AMOUNT_COLUMNS]; BOARD_AMOUNT_ROWS],
             gamemode: GameMode::FourtyLines,
@@ -87,7 +88,7 @@ impl Game {
             piece_queue: VecDeque::new(),
             can_hold: true,
             controls: default_keyboard_keybindings(),
-            continue_to_highscore : false,
+            continue_to_highscore: false,
 
             garbage_inbound: VecDeque::new(),
             garbage_outbound: VecDeque::new(),
@@ -114,7 +115,8 @@ impl Game {
             lines: 0,
             level: 1,
             pieces: 0,
-            attack: 0,
+            garbage_sent: 0,
+            garbage_received: 0,
             start_time: Instant::now(),
             final_time: Duration::from_secs(0),
 
@@ -147,7 +149,8 @@ impl Game {
         self.lines = 0;
         self.set_level(1);
         self.pieces = 0;
-        self.attack = 0;
+        self.garbage_sent = 0;
+        self.garbage_received = 0;
         self.start_time = Instant::now();
 
         self.latest_clear_difficult = false;
@@ -205,8 +208,11 @@ impl Game {
         // Reset button. Remove before release
         if self.game_over {
             if ctx.keyboard.is_key_just_pressed(KeyCode::R) {self.reset_game();}
-            if ctx.keyboard.is_key_just_pressed(*self.controls.get(&GameAction::HardDrop).unwrap()){
-                self.continue_to_highscore = true;
+            if ctx.keyboard.is_key_just_pressed(*self.controls.get(&GameAction::HardDrop).unwrap()) {
+                if (self.gamemode == GameMode::FourtyLines
+                && !self.objective_completed)
+                || self.gamemode == GameMode::Versus {}
+                else {self.continue_to_highscore = true}
             }
             return;
         }

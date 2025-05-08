@@ -5,7 +5,7 @@ use ggez::{glam, graphics::{self, Canvas, Color, Image, PxScale, Text, TextFragm
 use crate::animation_state::AnimationState;
 use crate::consts::{WINDOW_HEIGHT, WINDOW_WIDTH};
 
-pub fn render_start_screen(assets : &HashMap<String, Image>, canvas : &mut Canvas, scl : f32, animation_state : &mut AnimationState, drifarkaden : bool) {
+pub fn render_start_screen(assets: &HashMap<String, Image>, canvas: &mut Canvas, scl: f32, animation_state: &mut AnimationState, drifarkaden: bool) {
     let center = (WINDOW_WIDTH / 2., WINDOW_HEIGHT / 2.);
 
     let image = assets.get("start_screen").unwrap();
@@ -20,10 +20,10 @@ pub fn render_start_screen(assets : &HashMap<String, Image>, canvas : &mut Canva
 
     if !drifarkaden {
         let press_to_start = Text::new(TextFragment{
-            text : "Press SPACE to\n     start".to_string(),
-            font : Some("Tetris font".to_string()),
+            text: "Press SPACE to\n     start".to_string(),
+            font: Some("Tetris font".to_string()),
             color: Some(Color::WHITE), 
-            scale : Some(PxScale::from(60.0))
+            scale: Some(PxScale::from(60.0))
     
         });
         canvas.draw(&press_to_start,
@@ -33,10 +33,10 @@ pub fn render_start_screen(assets : &HashMap<String, Image>, canvas : &mut Canva
          );
     }else {
         let press_to_start = Text::new(TextFragment{
-            text : "Press A to\n   start".to_string(),
-            font : Some("Tetris font".to_string()),
+            text: "Press A to\n   start".to_string(),
+            font: Some("Tetris font".to_string()),
             color: Some(Color::WHITE), 
-            scale : Some(PxScale::from(60.0))
+            scale: Some(PxScale::from(60.0))
     
         });
         canvas.draw(&press_to_start,

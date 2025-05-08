@@ -5,7 +5,7 @@ use crate::{board::{BOARD_AMOUNT_COLUMNS, BOARD_AMOUNT_ROWS}, consts::{GARBAGE_C
 
 impl Game {
     pub fn send_garbage(&mut self, mut amount: usize) {
-        self.attack += amount;
+        self.garbage_sent += amount;
 
         amount = self.negate_garbage(amount);
 
@@ -80,7 +80,12 @@ impl Game {
             self.board[i] = self.board[i - 1].clone();
         }
 
+        if self.on_ground {
+            self.active_piece.midpoint.0 += 1;
+        }
+
         // Insert garbage row
         self.board[0] = row;
+        self.garbage_received += 1;
     }
 }

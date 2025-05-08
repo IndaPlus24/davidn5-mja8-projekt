@@ -2,21 +2,26 @@
 pub const WINDOW_WIDTH: f32 = 1920.;
 pub const WINDOW_HEIGHT: f32 = 1080.;
 
-pub const GAME_1_POS: (f32, f32) = (200., 100.);
-pub const GAME_1_SCL: f32 = 1.;
+pub const GAME_1_SOLO_POS: (f32, f32) = (550., 100.);
+pub const GAME_1_SOLO_SCL: f32 = 1.25;
 
-pub const GAME_2_POS: (f32, f32) = (1028., 100.);
-pub const GAME_2_SCL: f32 = 1.;
+pub const GAME_1_VS_POS: (f32, f32) = (200., 200.);
+pub const GAME_1_VS_SCL: f32 = 1.;
+
+pub const GAME_2_VS_POS: (f32, f32) = (1028., 200.);
+pub const GAME_2_VS_SCL: f32 = 1.;
 
 pub const GARBAGE_CAP: usize = 8;
 pub const GARBAGE_DELAY: u128 = 2000; // time in milliseconds before garbage can appear on board
+
+pub const SURVIVAL_TIMER: u64 = 1000; // time in millis between each line spawn
 
 pub const BOARD_AMOUNT_COLUMNS: usize = 10;
 pub const BOARD_AMOUNT_ROWS: usize = 40;
 
 //Delays (seconds)
 pub const DEFAULT_GRAVITY: f32 = 1.; // Cells per second
-pub const BOT_DIFFICULTY_SPEEDS : [f32 ; 3] = [5., 10. ,20.];
+pub const BOT_DIFFICULTY_SPEEDS: [f32 ; 3] = [5., 10. ,20.];
 
 #[derive(PartialEq)]
 pub enum ScreenState {
@@ -24,9 +29,9 @@ pub enum ScreenState {
     MainMenu,
     GameModeSelector,
     SingleplayerSelector,
-    Marathon,
-    FourtyLines,
-    Survival, // Low priority. Might add if we have time
+    Singleplayer,
+    MarathonPrompt,
+    FourtyLinesReset,
     VersusReady,
     Versus,
     VersusRematch,
@@ -41,5 +46,6 @@ pub enum ScreenState {
 pub enum GameMode {
     Marathon,
     FourtyLines,
+    Survival,
     Versus,
 }
