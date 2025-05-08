@@ -327,56 +327,106 @@ pub fn handle_settings_input(
     let screen_state = &mut state.screen_state;
     let menuinputs = &state.menuinputs;
 
+    // Move pointer
     if keyboard.is_key_just_pressed(menuinputs.DOWN) {
-        animation_state.selected_item_settings = (animation_state.selected_item_settings + 1) % 4;
+        animation_state.selected_item_settings.1 = (animation_state.selected_item_settings.1 + 1) % 4;
     }
     if keyboard.is_key_just_pressed(menuinputs.UP) {
-        animation_state.selected_item_settings = (animation_state.selected_item_settings + 3) % 4;
+        animation_state.selected_item_settings.1 = (animation_state.selected_item_settings.1 + 3) % 4;
+    }
+    if animation_state.selected_item_settings.1 == 3 {animation_state.edit_setting_value = false}
+
+    if !animation_state.edit_setting_value 
+    && (keyboard.is_key_just_pressed(menuinputs.LEFT) 
+    || keyboard.is_key_just_pressed(menuinputs.RIGHT)) {
+        animation_state.selected_item_settings.0 = (animation_state.selected_item_settings.0 + 1) % 2;
     }
 
     // Adjust selected setting
-    let game = &mut state.game_one;
-
     if keyboard.is_key_just_released(menuinputs.LEFT)
     || keyboard.is_key_just_released(menuinputs.RIGHT) {
         animation_state.last_setting_tick = None;
     }
 
-    if keyboard.is_key_pressed(menuinputs.LEFT) {
-        if let Some(t) = animation_state.last_setting_tick {
-            if t.elapsed().as_millis() >= SETTINGS_TICK_SPEED {
-                match animation_state.selected_item_settings {
-                    0 => decrement_das(game),
-                    1 => decrement_arr(game),
-                    2 => decrement_sds(game),
-                    _ => ()
+    if keyboard.is_key_just_pressed(menuinputs.SELECT)
+    && animation_state.selected_item_settings.1 < 3 {
+        animation_state.edit_setting_value = true
+    }
+    if keyboard.is_key_just_released(menuinputs.SELECT)
+    && animation_state.selected_item_settings.1 < 3 {
+        animation_state.edit_setting_value = false
+    }
+
+    let game_one = &mut state.game_one;
+    let game_two = &mut state.game_two;
+
+    if keyboard.is_key_pressed(menuinputs.LEFT) && animation_state.edit_setting_value {
+        if animation_state.selected_item_settings.0 == 0 {
+            if let Some(t) = animation_state.last_setting_tick {
+                if t.elapsed().as_millis() >= SETTINGS_TICK_SPEED {
+                    match animation_state.selected_item_settings.1 {
+                        0 => decrement_das(game_one),
+                        1 => decrement_arr(game_one),
+                        2 => decrement_sds(game_one),
+                        _ => ()
+                    }
+                    animation_state.last_setting_tick = Some(t + Duration::from_millis(SETTINGS_TICK_SPEED as u64))
                 }
-                animation_state.last_setting_tick = Some(t + Duration::from_millis(SETTINGS_TICK_SPEED as u64))
+            } else {
+                animation_state.last_setting_tick = Some(Instant::now() - Duration::from_millis(SETTINGS_TICK_SPEED as u64))
             }
         } else {
-            animation_state.last_setting_tick = Some(Instant::now() - Duration::from_millis(SETTINGS_TICK_SPEED as u64))
+            if let Some(t) = animation_state.last_setting_tick {
+                if t.elapsed().as_millis() >= SETTINGS_TICK_SPEED {
+                    match animation_state.selected_item_settings.1 {
+                        0 => decrement_das(game_two),
+                        1 => decrement_arr(game_two),
+                        2 => decrement_sds(game_two),
+                        _ => ()
+                    }
+                    animation_state.last_setting_tick = Some(t + Duration::from_millis(SETTINGS_TICK_SPEED as u64))
+                }
+            } else {
+                animation_state.last_setting_tick = Some(Instant::now() - Duration::from_millis(SETTINGS_TICK_SPEED as u64))
+            }
         }
     }
 
-    if keyboard.is_key_pressed(menuinputs.RIGHT) {
-        if let Some(t) = animation_state.last_setting_tick {
-            if t.elapsed().as_millis() >= SETTINGS_TICK_SPEED {
-                match animation_state.selected_item_settings {
-                    0 => increment_das(game),
-                    1 => increment_arr(game),
-                    2 => increment_sds(game),
-                    _ => ()
+    if keyboard.is_key_pressed(menuinputs.RIGHT) && animation_state.edit_setting_value {
+        if animation_state.selected_item_settings.0 == 0 {
+            if let Some(t) = animation_state.last_setting_tick {
+                if t.elapsed().as_millis() >= SETTINGS_TICK_SPEED {
+                    match animation_state.selected_item_settings.1 {
+                        0 => increment_das(game_one),
+                        1 => increment_arr(game_one),
+                        2 => increment_sds(game_one),
+                        _ => ()
+                    }
+                    animation_state.last_setting_tick = Some(t + Duration::from_millis(SETTINGS_TICK_SPEED as u64))
                 }
-                animation_state.last_setting_tick = Some(t + Duration::from_millis(SETTINGS_TICK_SPEED as u64))
+            } else {
+                animation_state.last_setting_tick = Some(Instant::now() - Duration::from_millis(SETTINGS_TICK_SPEED as u64))
             }
         } else {
-            animation_state.last_setting_tick = Some(Instant::now() - Duration::from_millis(SETTINGS_TICK_SPEED as u64))
+            if let Some(t) = animation_state.last_setting_tick {
+                if t.elapsed().as_millis() >= SETTINGS_TICK_SPEED {
+                    match animation_state.selected_item_settings.1 {
+                        0 => increment_das(game_two),
+                        1 => increment_arr(game_two),
+                        2 => increment_sds(game_two),
+                        _ => ()
+                    }
+                    animation_state.last_setting_tick = Some(t + Duration::from_millis(SETTINGS_TICK_SPEED as u64))
+                }
+            } else {
+                animation_state.last_setting_tick = Some(Instant::now() - Duration::from_millis(SETTINGS_TICK_SPEED as u64))
+            }
         }
     }
 
     // Confirm
     if keyboard.is_key_just_pressed(menuinputs.SELECT)
-    && animation_state.selected_item_settings == 3 {
+    && animation_state.selected_item_settings.1 == 3 {
         *screen_state = ScreenState::MainMenu;
     }
 }
