@@ -389,8 +389,7 @@ impl event::EventHandler<ggez::GameError> for AppState {
                 handle_bot_selector_inputs(ctx,self);
             }
             ScreenState::VsBots => {
-
-                if self.game_one.gamemode != GameMode::Versus{
+                if self.game_one.gamemode != GameMode::Versus {
                     if !self.drifarkaden {
                         self.game_one.controls = default_keyboard_keybindings();
                     }
@@ -406,7 +405,7 @@ impl event::EventHandler<ggez::GameError> for AppState {
                     if ctx.keyboard.is_key_just_pressed(*self.game_one.controls.get(&GameAction::HardDrop).unwrap()) {
                         self.screen_state = ScreenState::MainMenu;
                     }
-                }else {
+                } else {
                     self.game_one.update(ctx);
                     self.bot.render_bot_game(ctx);
                 }

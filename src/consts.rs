@@ -21,7 +21,7 @@ pub const BOARD_AMOUNT_ROWS: usize = 40;
 
 //Delays (seconds)
 pub const DEFAULT_GRAVITY: f32 = 1.; // Cells per second
-pub const BOT_DIFFICULTY_SPEEDS: [f32 ; 3] = [0.5, 3. ,5.];
+pub const BOT_DIFFICULTY_SPEEDS: [f32 ; 3] = [0.5, 3., 5.];
 
 #[derive(PartialEq)]
 pub enum ScreenState {

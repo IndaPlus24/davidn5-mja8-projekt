@@ -40,7 +40,7 @@ pub fn handle_start_screen_inputs(ctx: &ggez::Context, screen_state: &mut Screen
     }
 }
 
-pub fn handle_main_menu_inputs(ctx: &ggez::Context, screen_state: &mut ScreenState, animation_state: &mut AnimationState, menuinputs : &MenuInputs) {
+pub fn handle_main_menu_inputs(ctx: &ggez::Context, screen_state: &mut ScreenState, animation_state: &mut AnimationState, menuinputs: &MenuInputs) {
     let keyboard = &ctx.keyboard;
     if keyboard.is_key_just_pressed(menuinputs.DOWN) {
         animation_state.selected_item_main_menu = (animation_state.selected_item_main_menu + 1) % 3;
@@ -61,7 +61,7 @@ pub fn handle_main_menu_inputs(ctx: &ggez::Context, screen_state: &mut ScreenSta
     }
 }
 
-pub fn handle_gamemode_selector_inputs(ctx: &ggez::Context, screen_state: &mut ScreenState, animation_state: &mut AnimationState, menuinputs : &MenuInputs) {
+pub fn handle_gamemode_selector_inputs(ctx: &ggez::Context, screen_state: &mut ScreenState, animation_state: &mut AnimationState, menuinputs: &MenuInputs) {
     let keyboard = &ctx.keyboard;
     if keyboard.is_key_just_pressed(menuinputs.DOWN) {
         animation_state.selected_item_gamemode_selector = (animation_state.selected_item_gamemode_selector + 1) % 4;
@@ -83,7 +83,7 @@ pub fn handle_gamemode_selector_inputs(ctx: &ggez::Context, screen_state: &mut S
     }
 }
 
-pub fn handle_singleplayer_selector_inputs(ctx: &ggez::Context, screen_state: &mut ScreenState, animation_state: &mut AnimationState, game: &mut Game, menuinputs : &MenuInputs) {
+pub fn handle_singleplayer_selector_inputs(ctx: &ggez::Context, screen_state: &mut ScreenState, animation_state: &mut AnimationState, game: &mut Game, menuinputs: &MenuInputs) {
     let keyboard = &ctx.keyboard;
     if keyboard.is_key_just_pressed(menuinputs.DOWN) {
         animation_state.selected_item_singleplayer_selector = (animation_state.selected_item_singleplayer_selector + 1) % 4;
@@ -109,7 +109,7 @@ pub fn handle_singleplayer_selector_inputs(ctx: &ggez::Context, screen_state: &m
     }
 }
 
-pub fn handle_marathon_prompt_inputs(ctx: &ggez::Context, screen_state: &mut ScreenState, animation_state: &mut AnimationState, game: &mut Game, menuinputs : &MenuInputs) {
+pub fn handle_marathon_prompt_inputs(ctx: &ggez::Context, screen_state: &mut ScreenState, animation_state: &mut AnimationState, game: &mut Game, menuinputs: &MenuInputs) {
     let keyboard = &ctx.keyboard;
     if keyboard.is_key_just_pressed(menuinputs.DOWN)
     || keyboard.is_key_just_pressed(menuinputs.UP) {
@@ -130,7 +130,7 @@ pub fn handle_marathon_prompt_inputs(ctx: &ggez::Context, screen_state: &mut Scr
     }
 }
 
-pub fn handle_reset_screen_inputs(ctx: &ggez::Context, screen_state: &mut ScreenState, animation_state: &mut AnimationState, game: &mut Game, menuinputs : &MenuInputs) {
+pub fn handle_reset_screen_inputs(ctx: &ggez::Context, screen_state: &mut ScreenState, animation_state: &mut AnimationState, game: &mut Game, menuinputs: &MenuInputs) {
     let keyboard = &ctx.keyboard;
     if keyboard.is_key_just_pressed(menuinputs.DOWN)
     || keyboard.is_key_just_pressed(menuinputs.UP) {
@@ -171,8 +171,7 @@ pub fn handle_versus_prepost_inputs(
     }
 }
 
-pub fn handle_bot_selector_inputs(ctx: &ggez::Context, state : &mut AppState) {
-
+pub fn handle_bot_selector_inputs(ctx: &ggez::Context, state: &mut AppState) {
     let animation_state = &mut state.animation_state;
     let screen_state = &mut state.screen_state;
     let bot = &mut state.bot;

@@ -326,6 +326,7 @@ impl Bot {
             return;
         }   
         
+        self.game.update_garbage();
 
         if self.game.last_drop.elapsed() >= Duration::from_millis((1000. / BOT_DIFFICULTY_SPEEDS[self.difficulty]) as u64) {
             self.game.last_drop += Duration::from_millis((1000. / 120.) as u64);
