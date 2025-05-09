@@ -166,6 +166,14 @@ impl AppState {
             "empty_box".to_string(),
             Image::from_path(ctx, "/ui_assets/empty_box.png").unwrap(),
         );
+        image_map.insert(
+            "checkbox_e".to_string(),
+            Image::from_path(ctx, "/ui_assets/checkbox_e.png").unwrap(),
+        );
+        image_map.insert(
+            "checkbox_c".to_string(),
+            Image::from_path(ctx, "/ui_assets/checkbox_c.png").unwrap(),
+        );
 
         image_map
     }
