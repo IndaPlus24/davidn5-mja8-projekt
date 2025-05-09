@@ -20,6 +20,7 @@ pub fn render_settings(canvas: &mut Canvas, scl: f32, state: &mut AppState) {
             .scale(glam::Vec2::new(scl, scl)),
     );
     
+    // Title
     let mut title = Text::new(TextFragment {
         text: "Settings".to_string(),
         font: Some("Tetris font".to_string()),
@@ -37,24 +38,65 @@ pub fn render_settings(canvas: &mut Canvas, scl: f32, state: &mut AppState) {
             .scale(glam::Vec2::new(scl, scl)),
     );
 
-    let labels = ["Arr", "Das", "Sds"];
+    // Instructions
+    let mut title = Text::new(TextFragment {
+        text: "Hold SELECT to edit value".to_string(),
+        font: Some("Tetris font".to_string()),
+        color: Some(Color::WHITE),
+        scale: Some(PxScale::from(30.)),
+    });
+    title.set_layout(TextLayout {
+        h_align: TextAlign::Middle,
+        v_align: TextAlign::Begin,
+    });
+    canvas.draw(
+        &title,
+        graphics::DrawParam::new()
+            .dest(glam::Vec2::new(center.0, center.1 - 280.))
+            .scale(glam::Vec2::new(scl, scl)),
+    );
+
+    // P1 settings
+    let mut title = Text::new(TextFragment {
+        text: "P1".to_string(),
+        font: Some("Tetris font".to_string()),
+        color: Some(Color::WHITE),
+        scale: Some(PxScale::from(80.)),
+    });
+    title.set_layout(TextLayout {
+        h_align: TextAlign::Middle,
+        v_align: TextAlign::End,
+    });
+    canvas.draw(
+        &title,
+        graphics::DrawParam::new()
+            .dest(glam::Vec2::new(center.0 - 230., center.1 - 50.))
+            .scale(glam::Vec2::new(scl, scl)),
+    );
+
     let values = [
-        state.game_one.arr.as_millis(),
         state.game_one.das.as_millis(),
+        state.game_one.arr.as_millis(),
         state.game_one.sds as u128,
     ];
+    for (i, value) in values.iter().enumerate() {
+        let mut selected = true;
+        selected &= state.animation_state.selected_item_settings.0 == 0;
+        selected &= state.animation_state.selected_item_settings.1 == i;
+        let editing = state.animation_state.edit_setting_value;
 
-    let start_y = center.1 - 150.;
-    let spacing = 100.;
+        let y = center.1 + i as f32 * 75.;
 
-    for (i, (label, value)) in labels.iter().zip(values.iter()).enumerate() {
-        let y = start_y + i as f32 * spacing;
-
+        // Label
         let mut text_label = Text::new(TextFragment {
-            text: label.to_string(),
+            text: match i {
+                0 => "DAS:".to_string(),
+                1 => "ARR:".to_string(),
+                _ => "SDS:".to_string(),
+            },
             font: Some("Tetris font".to_string()),
             color: Some(Color::WHITE),
-            scale: Some(PxScale::from(60.)),
+            scale: Some(PxScale::from(40.)),
         });
         text_label.set_layout(TextLayout {
             h_align: TextAlign::Middle,
@@ -63,43 +105,40 @@ pub fn render_settings(canvas: &mut Canvas, scl: f32, state: &mut AppState) {
         canvas.draw(
             &text_label,
             graphics::DrawParam::new()
-                .dest(glam::Vec2::new(center.0 - 250., y))
+                .dest(glam::Vec2::new(center.0 - 320., y))
                 .scale(glam::Vec2::new(scl, scl)),
         );
 
-        let mut text_value = Text::new(TextFragment {
-            text: value.to_string(),
+        // Value
+        let mut value_text = Text::new(TextFragment {
+            text: if *value > 500 {"inf".to_string()} else {value.to_string()},
             font: Some("Tetris font".to_string()),
-            color: Some(Color::WHITE),
-            scale: Some(PxScale::from(60.)),
+            color: Some(if selected && editing {Color::YELLOW} else {Color::WHITE}),
+            scale: Some(PxScale::from(40.)),
         });
-        text_value.set_layout(TextLayout {
+        value_text.set_layout(TextLayout {
             h_align: TextAlign::Middle,
             v_align: TextAlign::Begin,
         });
         canvas.draw(
-            &text_value,
+            &value_text,
             graphics::DrawParam::new()
-                .dest(glam::Vec2::new(center.0, y))
+                .dest(glam::Vec2::new(center.0 - 140., y))
                 .scale(glam::Vec2::new(scl, scl)),
         );
 
-        if state.animation_state.selected_item_settings == i {
-            let one_wide = *value < 10;
-            let three_wide = *value > 99;
-            let arrows_text = if one_wide {
-                "< >"
-            } else if three_wide {
-                "<   >"
-            } else {
-                "<  >"
-            };
+        // Arrows
+        if selected {
+            let arrows_text =
+            if *value < 10 {"< >"}
+            else if *value < 100 {"<  >"}
+            else {"<   >"};
 
             let mut arrows = Text::new(TextFragment {
                 text: arrows_text.to_string(),
                 font: Some("Tetris font".to_string()),
-                color: Some(Color::WHITE),
-                scale: Some(PxScale::from(60.)),
+                color: Some(if selected && editing {Color::YELLOW} else {Color::WHITE}),
+                scale: Some(PxScale::from(40.)),
             });
             arrows.set_layout(TextLayout {
                 h_align: TextAlign::Middle,
@@ -108,12 +147,110 @@ pub fn render_settings(canvas: &mut Canvas, scl: f32, state: &mut AppState) {
             canvas.draw(
                 &arrows,
                 graphics::DrawParam::new()
-                    .dest(glam::Vec2::new(center.0, y))
+                    .dest(glam::Vec2::new(center.0 - 140., y))
                     .scale(glam::Vec2::new(scl, scl)),
             );
         }
     }
 
+    // P2 settings
+    let mut title = Text::new(TextFragment {
+        text: "P2".to_string(),
+        font: Some("Tetris font".to_string()),
+        color: Some(Color::WHITE),
+        scale: Some(PxScale::from(80.)),
+    });
+    title.set_layout(TextLayout {
+        h_align: TextAlign::Middle,
+        v_align: TextAlign::End,
+    });
+    canvas.draw(
+        &title,
+        graphics::DrawParam::new()
+            .dest(glam::Vec2::new(center.0 + 230., center.1 - 50.))
+            .scale(glam::Vec2::new(scl, scl)),
+    );
+
+    let values = [
+        state.game_two.das.as_millis(),
+        state.game_two.arr.as_millis(),
+        state.game_two.sds as u128,
+    ];
+    for (i, value) in values.iter().enumerate() {
+        let mut selected = true;
+        selected &= state.animation_state.selected_item_settings.0 == 1;
+        selected &= state.animation_state.selected_item_settings.1 == i;
+        let editing = state.animation_state.edit_setting_value;
+
+        let y = center.1 + i as f32 * 75.;
+
+        // Label
+        let mut text_label = Text::new(TextFragment {
+            text: match i {
+                0 => "DAS:".to_string(),
+                1 => "ARR:".to_string(),
+                _ => "SDS:".to_string(),
+            },
+            font: Some("Tetris font".to_string()),
+            color: Some(Color::WHITE),
+            scale: Some(PxScale::from(40.)),
+        });
+        text_label.set_layout(TextLayout {
+            h_align: TextAlign::Middle,
+            v_align: TextAlign::Begin,
+        });
+        canvas.draw(
+            &text_label,
+            graphics::DrawParam::new()
+                .dest(glam::Vec2::new(center.0 + 140., y))
+                .scale(glam::Vec2::new(scl, scl)),
+        );
+
+        // Value
+        let mut value_text = Text::new(TextFragment {
+            text: if *value > 500 {"inf".to_string()} else {value.to_string()},
+            font: Some("Tetris font".to_string()),
+            color: Some(if selected && editing {Color::YELLOW} else {Color::WHITE}),
+            scale: Some(PxScale::from(40.)),
+        });
+        value_text.set_layout(TextLayout {
+            h_align: TextAlign::Middle,
+            v_align: TextAlign::Begin,
+        });
+        canvas.draw(
+            &value_text,
+            graphics::DrawParam::new()
+                .dest(glam::Vec2::new(center.0 + 320., y))
+                .scale(glam::Vec2::new(scl, scl)),
+        );
+
+        // Arrows
+        if selected {
+            let arrows_text =
+            if *value < 10 {"< >"}
+            else if *value < 100 {"<  >"}
+            else {"<   >"};
+
+            let mut arrows = Text::new(TextFragment {
+                text: arrows_text.to_string(),
+                font: Some("Tetris font".to_string()),
+                color: Some(if selected && editing {Color::YELLOW} else {Color::WHITE}),
+                scale: Some(PxScale::from(40.)),
+            });
+            arrows.set_layout(TextLayout {
+                h_align: TextAlign::Middle,
+                v_align: TextAlign::Begin,
+            });
+            canvas.draw(
+                &arrows,
+                graphics::DrawParam::new()
+                    .dest(glam::Vec2::new(center.0 + 320., y))
+                    .scale(glam::Vec2::new(scl, scl)),
+            );
+        }
+    }
+
+    // Confirm
     let mut confirm = Text::new(TextFragment {
         text: "CONFIRM".to_string(),
         font: Some("Tetris font".to_string()),
@@ -124,15 +261,14 @@ pub fn render_settings(canvas: &mut Canvas, scl: f32, state: &mut AppState) {
         h_align: TextAlign::Middle,
         v_align: TextAlign::Begin,
     });
-    let confirm_y = start_y + labels.len() as f32 * spacing + 100.;
     canvas.draw(
         &confirm,
         graphics::DrawParam::new()
-            .dest(glam::Vec2::new(center.0, confirm_y))
+            .dest(glam::Vec2::new(center.0, center.1 + 300.))
             .scale(glam::Vec2::new(scl, scl)),
     );
 
-    if state.animation_state.selected_item_settings == labels.len() {
+    if state.animation_state.selected_item_settings.1 == 3 {
         let arrow = Text::new(TextFragment {
             text: ">".to_string(),
             font: Some("Tetris font".to_string()),
@@ -142,7 +278,7 @@ pub fn render_settings(canvas: &mut Canvas, scl: f32, state: &mut AppState) {
         canvas.draw(
             &arrow,
             graphics::DrawParam::new()
-                .dest(glam::Vec2::new(center.0 - 300., confirm_y))
+                .dest(glam::Vec2::new(center.0 - 300., center.1 + 300.))
                 .scale(glam::Vec2::new(scl, scl)),
         );
     }

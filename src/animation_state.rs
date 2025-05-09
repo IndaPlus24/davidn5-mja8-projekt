@@ -1,3 +1,5 @@
+use std::time::Instant;
+
 //Holds various information on the various animations
 pub struct AnimationState {
     pub start_screen_y: f32,
@@ -19,7 +21,9 @@ pub struct AnimationState {
     pub name_input: String,
     pub name_ready: bool,
 
-    pub selected_item_settings : usize,
+    pub selected_item_settings: (usize, usize),
+    pub edit_setting_value: bool,
+    pub last_setting_tick: Option<Instant>,
 }
 
 impl AnimationState {
@@ -62,7 +66,9 @@ impl AnimationState {
             name_ready: false,
 
             //Settings 
-            selected_item_settings : 0,
+            selected_item_settings: (0, 0),
+            edit_setting_value: false,
+            last_setting_tick: None,
         }
     }
 }

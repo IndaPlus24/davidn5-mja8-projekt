@@ -5,7 +5,7 @@ use ggez::Context;
 use rand::Rng;
 
 use crate::board::{BOARD_AMOUNT_COLUMNS, BOARD_AMOUNT_ROWS};
-use crate::consts::{GameMode, DEFAULT_GRAVITY};
+use crate::consts::{GameMode, DEFAULT_ARR, DEFAULT_DAS, DEFAULT_GRAVITY, DEFAULT_SDS};
 use crate::{default_keyboard_keybindings, GameAction, KeyCode, Piece, PieceType};
 
 #[derive(Clone)]
@@ -88,8 +88,8 @@ impl Game {
             board: [[None; BOARD_AMOUNT_COLUMNS]; BOARD_AMOUNT_ROWS],
             gamemode: GameMode::FourtyLines,
 
-            countdown_start : Some(Instant::now()),
-            countdown_duration : Duration::from_millis(3500),
+            countdown_start: Some(Instant::now()),
+            countdown_duration: Duration::from_millis(3500),
 
             game_over: false,
             objective_completed: false,
@@ -107,12 +107,12 @@ impl Game {
             moving_left: false,
             soft_dropping: false,
 
-            das: Duration::from_millis(85),
+            das: Duration::from_millis(DEFAULT_DAS),
             das_start: None,
             das_charged: false,
-            arr: Duration::from_millis(0),
+            arr: Duration::from_millis(DEFAULT_ARR),
             arr_start: None,
-            sds: 999.,
+            sds: DEFAULT_SDS,
             gravity: DEFAULT_GRAVITY,
             last_drop: Instant::now(),
             fall_timing: Duration::from_millis((1000. / DEFAULT_GRAVITY) as u64),
@@ -269,21 +269,21 @@ impl Game {
             // Check if DAS is charged
             if !self.das_charged && das_start.elapsed() >= self.das {
                 self.das_charged = true;
-                self.arr_start = Some(das_start + self.das);
+                self.arr_start = Some(das_start + self.das - self.arr);
             }
 
-            if let Some(mut arr_start) = self.arr_start {
+            if self.das_charged {
                 // Move if ARR allows
-                while arr_start.elapsed() >= self.arr {
+                while self.arr_start.unwrap().elapsed() >= self.arr {
                     if self.moving_left {
-                        if !self.move_piece(-1, 0) {break}
+                        if !self.move_piece(-1, 0) && self.arr.is_zero() {break}
                         else {self.add_action()}
                     }
                     else if self.moving_right {
-                        if !self.move_piece(1, 0) {break}
+                        if !self.move_piece(1, 0) && self.arr.is_zero() {break}
                         else {self.add_action()}
                     }
-                    arr_start += self.arr;
+                    self.arr_start = Some(self.arr_start.unwrap() + self.arr);
                 }
             }
         }

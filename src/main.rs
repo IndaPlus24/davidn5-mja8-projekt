@@ -166,6 +166,14 @@ impl AppState {
             "empty_box".to_string(),
             Image::from_path(ctx, "/ui_assets/empty_box.png").unwrap(),
         );
+        image_map.insert(
+            "checkbox_e".to_string(),
+            Image::from_path(ctx, "/ui_assets/checkbox_e.png").unwrap(),
+        );
+        image_map.insert(
+            "checkbox_c".to_string(),
+            Image::from_path(ctx, "/ui_assets/checkbox_c.png").unwrap(),
+        );
 
         image_map
     }
@@ -332,6 +340,22 @@ impl event::EventHandler<ggez::GameError> for AppState {
                     self.game_two.gamemode = GameMode::Versus;
                 }
 
+                if let Some(t) = self.timer {
+                    if t.elapsed() >= Duration::from_secs(10) {
+                        if !self.drifarkaden {
+                            self.game_one.controls = default_keyboard_keybindings();
+                        }
+
+                        self.game_one.canvas_pos = GAME_1_SOLO_POS;
+                        self.game_one.canvas_scl = GAME_1_SOLO_SCL;
+
+                        self.screen_state = ScreenState::MainMenu;
+                        self.timer = None;
+                    }
+                } else {
+                    self.timer = Some(Instant::now());
+                }
+
                 handle_versus_prepost_inputs(
                     ctx,
                     &mut self.screen_state,
@@ -389,8 +413,7 @@ impl event::EventHandler<ggez::GameError> for AppState {
                 handle_bot_selector_inputs(ctx,self);
             }
             ScreenState::VsBots => {
-
-                if self.game_one.gamemode != GameMode::Versus{
+                if self.game_one.gamemode != GameMode::Versus {
                     if !self.drifarkaden {
                         self.game_one.controls = default_keyboard_keybindings();
                     }
@@ -404,9 +427,12 @@ impl event::EventHandler<ggez::GameError> for AppState {
 
                 if self.game_one.game_over || self.bot.game.game_over {
                     if ctx.keyboard.is_key_just_pressed(*self.game_one.controls.get(&GameAction::HardDrop).unwrap()) {
+                        self.game_one.canvas_pos = GAME_1_SOLO_POS;
+                        self.game_one.canvas_scl = GAME_1_SOLO_SCL;
+
                         self.screen_state = ScreenState::MainMenu;
                     }
-                }else {
+                } else {
                     self.game_one.update(ctx);
                     self.bot.render_bot_game(ctx);
                 }
@@ -437,7 +463,7 @@ impl event::EventHandler<ggez::GameError> for AppState {
 
     fn draw(&mut self, ctx: &mut Context) -> GameResult {
         let mut canvas =
-            graphics::Canvas::from_frame(ctx, graphics::Color::from([0.1, 0.2, 0.3, 1.0]));
+            graphics::Canvas::from_frame(ctx, graphics::Color::from_rgb(232, 61, 132));
 
         match &self.screen_state {
             ScreenState::Singleplayer => {
@@ -512,6 +538,7 @@ impl event::EventHandler<ggez::GameError> for AppState {
                     &mut canvas,
                     1.,
                     &mut self.animation_state,
+                    self.timer,
                 );
             }
             ScreenState::Versus => {
