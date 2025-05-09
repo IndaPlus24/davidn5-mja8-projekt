@@ -276,11 +276,11 @@ impl Game {
                 // Move if ARR allows
                 while self.arr_start.unwrap().elapsed() >= self.arr {
                     if self.moving_left {
-                        if !self.move_piece(-1, 0) {}
+                        if !self.move_piece(-1, 0) && self.arr.is_zero() {break}
                         else {self.add_action()}
                     }
                     else if self.moving_right {
-                        if !self.move_piece(1, 0) {}
+                        if !self.move_piece(1, 0) && self.arr.is_zero() {break}
                         else {self.add_action()}
                     }
                     self.arr_start = Some(self.arr_start.unwrap() + self.arr);
