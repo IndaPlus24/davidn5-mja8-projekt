@@ -1,5 +1,6 @@
 use std::time::Instant;
 
+use crate::consts::GameMode;
 use crate::{Game, ROTATION_180, ROTATION_CCW, ROTATION_CW};
 
 use crate::config::input_config::*;
@@ -91,7 +92,9 @@ impl Game {
 
         // Reset
         if keyboard.is_key_just_pressed(ggez::input::keyboard::KeyCode::R) {
-            self.reset_game(None);
+            if self.gamemode != GameMode::Versus {
+                self.reset_game(None);
+            }
         }
     }
 }
