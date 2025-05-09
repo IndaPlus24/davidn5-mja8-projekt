@@ -142,17 +142,17 @@ impl Game {
 
     pub fn reset_game(&mut self, id : Option<u64>) {
         self.board = [[None; BOARD_AMOUNT_COLUMNS]; BOARD_AMOUNT_ROWS];
-        self.game_over = false;
-        self.held_piece = None;
-        self.piece_queue = VecDeque::new();
-        self.spawn_piece_from_queue();
-        self.continue_to_highscore  = false;
         if let Some(i) = id {
             self.id = i;
         }else {
             let mut rng = rand::rng();
             self.id = rng.random();
         }
+        self.game_over = false;
+        self.held_piece = None;
+        self.piece_queue = VecDeque::new();
+        self.spawn_piece_from_queue();
+        self.continue_to_highscore  = false;
 
         self.garbage_inbound = VecDeque::new();
         self.garbage_outbound = VecDeque::new();
